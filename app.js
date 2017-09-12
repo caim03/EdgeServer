@@ -1,5 +1,5 @@
 // This application uses express as its web server
-// for more info, see: http://expressjs.com
+
 var express = require('express');
 var bodyParser = require('body-parser');
 
@@ -11,7 +11,6 @@ app.use(express.static(__dirname + '/public'));
 
 // get the port from environment
 var port = process.env.PORT || 6601;
-
 
 // TODO Differenziare il master da slave
 
