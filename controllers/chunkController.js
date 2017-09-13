@@ -2,6 +2,7 @@
  * Created by Caim03 on 12/09/17.
  */
 var request = require('request');
+var syncRequest = require('sync-request');
 var config = require('../config/config');
 var master = require('../model/masterServer');
 var chunkServers = require('../model/chunkServer');
@@ -37,14 +38,9 @@ function findMasterFn() {
         method: 'GET'
     };
 
-    request(obj, function (err, res) {
-        if (err) {
-            console.log(err);
-            return;
-        }
-        master.ip = res.body;
-        console.log(master.ip)
-    });
+    var res = syncRequest('GET', obj.url);
+    master.ip = res.getBody();
+    console.log(master.ip);
 }
 
 function genTopologyFn(req, res) {
@@ -56,10 +52,11 @@ function subscribeToMasterFn() {
     var obj = {
         url: 'http://' + master.ip + ':6601/api/master/subscribe',
         method: 'POST',
-        json: {}
+        json: {type: "SUBSCRIBE"}
     };
 
     request(obj, function (err, res) {
+        if (err)
         console.log(res);
     })
 }

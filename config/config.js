@@ -4,7 +4,7 @@
 var config = {
     port: 6601,
     ip: '0.0.0.0',
-    master: true,
+    master: false,
     balancerIp: '10.220.209.211',
     balancerPort: 6602,
     balancerSubPath: '/api/lb/edge/subscribe'

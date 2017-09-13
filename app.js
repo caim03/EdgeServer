@@ -6,6 +6,7 @@ var config = require('./config/config');
 var info = require('./model/serverInfo');
 var masterController = require('./controllers/masterController');
 var chunkController = require('./controllers/chunkController');
+var masterServer = require('./model/masterServer');
 
 var master = true;
 
@@ -36,5 +37,6 @@ if (config.master) {
 }
 else {
     chunkController.findMaster();
-    chunkController.subscribeToMaster();
+    console.log(masterServer.ip);
+    //chunkController.subscribeToMaster();
 }
