@@ -1,4 +1,6 @@
 var chunkServer = require('../model/chunkServer');
+var request = require('request');
+var config = require('../config/config');
 
 exports.readFile = readFileFn;
 exports.writeFile = writeFileFn;
@@ -6,6 +8,8 @@ exports.deleteFile = deleteFileFn;
 exports.updateFile = updateFileFn;
 
 exports.subscribe = subscribeFn;
+
+exports.subscribeToBalancer = subscribeToBalancerFn;
 
 function readFileFn(req, res) {
     res.send("HTTP GET");
@@ -24,6 +28,7 @@ function updateFileFn(req, res) {
 }
 
 function subscribeFn(req, res) {
+    console.log("SUBSCRIBE");
     var serverObj = {};
     var found = false;
 
@@ -35,13 +40,39 @@ function subscribeFn(req, res) {
        if (element.ip === serverObj.ip){
            res.send({status: 'NACK'});
            found = true;
-           return true;
+           return found;
        }
     });
 
     if (!found) {
         chunkServer.push(serverObj);
-        res.send({status: 'ACK'});
+
+        chunkServer.forEach(function (server) {
+            var obj = {
+                url: 'http://' + server.ip + ':' + config.port + '/api/chunk/topology',
+                method: 'POST',
+                json: {chunkServers: chunkServer}
+            };
+            request(obj, function (err, res) {
+                if (err){
+                    console.log(err);
+                    return;
+                }
+                console.log(res);
+            })
+        })
     }
     console.log(chunkServer);
+}
+
+function subscribeToBalancerFn(){
+    var obj = {
+        url: 'http://' + config.balancerIp + ':' + config.balancerPort + config.balancerSubPath,
+        method: 'POST',
+        json: {type: 'MASTER'}
+    };
+
+    request(obj, function (err, res) {
+        console.log(res);
+    })
 }

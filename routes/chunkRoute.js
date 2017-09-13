@@ -10,4 +10,6 @@ module.exports = function (app) {
     app.delete('/api/chunk/delete', chunkController.deleteFile);
     app.put('/api/chunk/update', chunkController.updateFile);
 
+    app.post('/api/chunk/topology', chunkController.genTopology);
+
 };
