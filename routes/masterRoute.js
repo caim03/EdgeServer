@@ -5,6 +5,8 @@ module.exports = function (app) {
 
     var masterController = require('../controllers/masterController');
 
+    /* REST API */
+
     app.get('/api/master/read', masterController.readFile);
     app.post('/api/master/write', masterController.writeFile);
     app.delete('/api/master/delete', masterController.deleteFile);
