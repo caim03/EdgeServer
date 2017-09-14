@@ -40,4 +40,5 @@ if (config.master) {
 else {
     chunkController.findMaster();
     chunkController.subscribeToMaster();
+    chunkController.waitHeartbeat();
 }

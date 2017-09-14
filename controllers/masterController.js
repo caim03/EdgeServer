@@ -94,17 +94,17 @@ function heartbeatMessageFn() {
                     server.ageingTime--;
 
                     if (server.ageingTime === 0){
-                        console.log("AMMAZZAMOLO");
+                        chunkServer.splice(chunkServer.indexOf(server), 1);
                     }
                 }
 
                 else{
-                    server.freeSpace = res.body;
+                    server.freeSpace = res.body.freeSpace;
                     server.alive = true;
                     server.ageingTime = config.ageingTime;
                     console.log(server);
                 }
             })
         })
-    }, 10000);
+    }, config.heartbeatTime);
 }

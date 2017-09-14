@@ -8,7 +8,10 @@ var config = {
     balancerIp: '10.220.209.211',
     balancerPort: 6602,
     balancerSubPath: '/api/lb/edge/subscribe',
-    ageingTime: 3
+    ageingTime: 3,
+    heartbeatTime: 10000,
+    waitHeartbeat: 60000
+
 };
 
 module.exports = config;

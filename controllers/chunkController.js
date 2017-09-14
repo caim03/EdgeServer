@@ -7,6 +7,8 @@ var config = require('../config/config');
 var master = require('../model/masterServer');
 var chunkServers = require('../model/chunkServer');
 
+var timer;
+
 exports.readFile = readFileFn;
 exports.writeFile = writeFileFn;
 exports.deleteFile = deleteFileFn;
@@ -17,6 +19,7 @@ exports.genTopology = genTopologyFn;
 exports.subscribeToMaster = subscribeToMasterFn;
 
 exports.receiveHeartbeat = receiveHeartbeatFn;
+exports.waitHeartbeat = waitHeartbeatFn;
 
 function readFileFn(req, res) {
     res.send("HTTP GET");
@@ -68,7 +71,15 @@ function subscribeToMasterFn() {
 
 function receiveHeartbeatFn(req, res) {
     console.log(req.body);
+    clearTimeout(timer);
     res.send({
         freeSpace: 620
     });
+    waitHeartbeatFn()
+}
+
+function waitHeartbeatFn(){
+    timer = setTimeout(function(){
+        console.log("ELEZIONE");
+    }, config.waitHeartbeat);
 }
