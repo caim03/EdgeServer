@@ -16,6 +16,8 @@ exports.findMaster = findMasterFn;
 exports.genTopology = genTopologyFn;
 exports.subscribeToMaster = subscribeToMasterFn;
 
+exports.receiveHeartbeat = receiveHeartbeatFn;
+
 function readFileFn(req, res) {
     res.send("HTTP GET");
 }
@@ -39,8 +41,7 @@ function findMasterFn() {
     };
 
     var res = syncRequest('GET', obj.url);
-    master.ip = res.getBody();
-    console.log(master.ip);
+    master.ip = res.getBody('utf8');  // utf8 convert body from buffer to string
 }
 
 function genTopologyFn(req, res) {
@@ -56,7 +57,15 @@ function subscribeToMasterFn() {
     };
 
     request(obj, function (err, res) {
-        if (err)
-        console.log(res);
+        if (err) {
+            console.log(err);
+        }
+        else {
+            console.log(res.body);
+        }
     })
+}
+
+function receiveHeartbeatFn(req, res) {
+    console.log(res.body);
 }

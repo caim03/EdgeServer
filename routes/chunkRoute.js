@@ -12,4 +12,6 @@ module.exports = function (app) {
 
     app.post('/api/chunk/topology', chunkController.genTopology);
 
+    app.post('/api/chunk/heartbeat', chunkController.receiveHeartbeat);
+
 };

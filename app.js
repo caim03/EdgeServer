@@ -34,9 +34,10 @@ app.listen(port, ipAddr, function() {
 
 if (config.master) {
     masterController.subscribeToBalancer();
+    masterController.heartbeatMessage();
+    console.log("PIPPO");
 }
 else {
     chunkController.findMaster();
-    console.log(masterServer.ip);
-    //chunkController.subscribeToMaster();
+    chunkController.subscribeToMaster();
 }

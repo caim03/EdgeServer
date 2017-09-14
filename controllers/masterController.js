@@ -10,6 +10,7 @@ exports.updateFile = updateFileFn;
 exports.subscribe = subscribeFn;
 
 exports.subscribeToBalancer = subscribeToBalancerFn;
+exports.heartbeatMessage = heartbeatMessageFn;
 
 function readFileFn(req, res) {
     res.send("HTTP GET");
@@ -75,4 +76,25 @@ function subscribeToBalancerFn(){
     request(obj, function (err, res) {
         console.log(res);
     })
+}
+
+function heartbeatMessageFn() {
+    var obj = {
+        url: 'http://' + server.ip + ':' + config.port + '/api/chunk/heartbeat',
+        method: 'POST',
+        json: {type: "HEARTBEAT"}
+    };
+
+    setInterval(function (obj) {
+        chunkServer.forEach(function (server) {
+            request(obj, function (err, res) {
+                if (err) {
+                    console.log(err);
+                }
+                else{
+                    console.log(res);
+                }
+            })
+        })
+    }, 10000, obj);
 }
