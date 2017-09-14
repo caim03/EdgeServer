@@ -67,5 +67,8 @@ function subscribeToMasterFn() {
 }
 
 function receiveHeartbeatFn(req, res) {
-    console.log(res.body);
+    console.log(req.body);
+    res.send({
+        freeSpace: 620
+    });
 }

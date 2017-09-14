@@ -36,6 +36,7 @@ function subscribeFn(req, res) {
     serverObj.ip = (req.headers['x-forwarded-for'] || '').split(',')[0] || req.connection.remoteAddress;
     serverObj.freeSpace = req.body.freeSpace;
     serverObj.alive = true;
+    serverObj.ageingTime = config.ageingTime;
 
     chunkServer.some(function (element) {
        if (element.ip === serverObj.ip){
@@ -79,22 +80,31 @@ function subscribeToBalancerFn(){
 }
 
 function heartbeatMessageFn() {
-    var obj = {
-        url: 'http://' + server.ip + ':' + config.port + '/api/chunk/heartbeat',
-        method: 'POST',
-        json: {type: "HEARTBEAT"}
-    };
-
-    setInterval(function (obj) {
+    setInterval(function () {
         chunkServer.forEach(function (server) {
+            var obj = {
+                url: 'http://' + server.ip + ':' + config.port + '/api/chunk/heartbeat',
+                method: 'POST',
+                json: {type: "HEARTBEAT"}
+            };
+
             request(obj, function (err, res) {
                 if (err) {
                     console.log(err);
+                    server.ageingTime--;
+
+                    if (server.ageingTime === 0){
+                        console.log("AMMAZZAMOLO");
+                    }
                 }
+
                 else{
-                    console.log(res);
+                    server.freeSpace = res.body;
+                    server.alive = true;
+                    server.ageingTime = config.ageingTime;
+                    console.log(server);
                 }
             })
         })
-    }, 10000, obj);
+    }, 10000);
 }
