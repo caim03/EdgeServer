@@ -16,4 +16,6 @@ module.exports = function (app) {
 
     app.post('/api/chunk/heartbeat', chunkController.receiveHeartbeat);
 
+    app.post('/api/chunk/proclamation', chunkController.receiveProclamation);
+
 };

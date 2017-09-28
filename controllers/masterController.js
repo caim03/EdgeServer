@@ -39,7 +39,14 @@ function subscribeFn(req, res) {
     console.log("SUBSCRIBE");
     var serverObj = {};
     var found = false;
+    var len = chunkServer.length;
 
+    if (len === 0) {
+        serverObj.id = 1;
+    }
+    else {
+        serverObj.id = chunkServer[len - 1].id + 1;
+    }
     serverObj.ip = (req.headers['x-forwarded-for'] || '').split(',')[0] || req.connection.remoteAddress;
     serverObj.freeSpace = req.body.freeSpace;
     serverObj.alive = true;
@@ -60,7 +67,7 @@ function subscribeFn(req, res) {
             var obj = {
                 url: 'http://' + server.ip + ':' + config.port + '/api/chunk/topology',
                 method: 'POST',
-                json: {chunkServers: chunkServer}
+                json: {chunkServers: chunkServer, yourId: server.id}
             };
             request(obj, function (err, res) {
                 if (err){
@@ -83,7 +90,7 @@ function subscribeToBalancerFn(){
     };
 
     request(obj, function (err, res) {
-        console.log(res);
+        console.log(res.body);
     })
 }
 

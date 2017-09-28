@@ -7,8 +7,8 @@
 var config = {
     port: 6601, // Porta di ascolto del server
     ip: '0.0.0.0', // Preleva l'indirizzo ip della macchina
-    master: false, // Un server è dichiarato master se true quando la rete viene inizializzata
-    balancerIp: '10.220.209.211', // Ip statico del load balancer
+    master: true, // Un server è dichiarato master se true quando la rete viene inizializzata
+    balancerIp: '10.220.215.244', // Ip statico del load balancer
     balancerPort: 6602, // Porta di ascolto del load balancer
     balancerSubPath: '/api/lb/edge/subscribe', // Path di sottoscrizione del master al load balancer
     ageingTime: 3, // Scadenza dei chunkServer quando non rispondono al messaggio di heartbeat

@@ -6,6 +6,8 @@ var syncRequest = require('sync-request');
 var config = require('../config/config');
 var master = require('../model/masterServer');
 var chunkServers = require('../model/chunkServer');
+var serverInfo = require('../model/serverInfo');
+var masterController = require('../controllers/masterController');
 
 /* Variabile timer per la gestione dei fallimenti del master e avvio di un elezione */
 var timer;
@@ -23,6 +25,8 @@ exports.subscribeToMaster = subscribeToMasterFn;
 
 exports.receiveHeartbeat = receiveHeartbeatFn;
 exports.waitHeartbeat = waitHeartbeatFn;
+
+exports.receiveProclamation = receiveProclamationFn;
 
 /* TODO Funzione adibita alla lettura di un chunk */
 function readFileFn(req, res) {
@@ -60,7 +64,9 @@ function findMasterFn() {
  * un nuovo chunkServer si connette alla rete o TODO quando un chunkServer esce dalla rete */
 function genTopologyFn(req, res) {
     chunkServers = req.body.chunkServers;
+    serverInfo.id = req.body.yourId;
     console.log(chunkServers);
+    console.log(serverInfo);
 }
 
 /* Questa funzione permette ad un chunkServer di sottoscriversi al master */
@@ -94,9 +100,76 @@ function receiveHeartbeatFn(req, res) {
 
 /* Questa funzione permette al chunkServer di rilevare il fallimento del master, impostando un timer che viene
  * riazzerato ogni volta che si riceve un heartbeat.
- * TODO In caso di timeout il chunkServer avvierà un algoritmo di elezione */
+ */
 function waitHeartbeatFn(){
     timer = setTimeout(function(){
-        console.log("ELEZIONE");
+        startElection();
     }, config.waitHeartbeat);
+}
+
+function receiveProclamationFn(req, res) {
+    var ip = (req.headers['x-forwarded-for'] || '').split(',')[0] || req.connection.remoteAddress;
+    var masterServer;
+
+    if(req.body.type === "PROCLAMATION") {
+        master.ip = ip;
+        chunkServers.some(function (server) {
+            if(server.ip === ip) {
+                masterServer = server;
+                return true;
+            }
+        });
+
+        chunkServers.splice(chunkServers.indexOf(masterServer), 1);
+        waitHeartbeatFn();
+    }
+
+    console.log(master);
+}
+
+function startElection() {
+    console.log("START ELECTION");
+
+    var myself;
+
+    if (!serverInfo.id) {
+        console.log("CANNOT PARTICIPATE");
+    }
+    else {
+        chunkServers.forEach(function (server) {
+            if (server.id > serverInfo.id) {
+                console.log("I'M NOT THE NEW MASTER");
+                return;
+            }
+        });
+        console.log("I'M THE NEW MASTER");
+
+        chunkServers.forEach(function (server) {
+            if (server.id === serverInfo.id) {
+                myself = server;
+            }
+            console.log("SEND PROCLAMATION");
+
+            var obj = {
+                url: 'http://' + server.ip + ':' + config.port + '/api/chunk/proclamation',
+                method: 'POST',
+                json: {type: "PROCLAMATION"}
+            };
+
+            request(obj, function (err, res) {
+                if(err) {
+                    console.log(err);
+                }
+            });
+        });
+
+        console.log("END PROCLAMATION");
+
+        chunkServers.splice(chunkServers.indexOf(myself), 1);
+        config.master = true;
+        masterController.subscribeToBalancer();
+        masterController.heartbeatMessage();
+
+        // TODO distribuire i chunk tra i vari slave server
+    }
 }

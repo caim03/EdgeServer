@@ -12,23 +12,21 @@ app.use(bodyParser.json());
 // serve the files out of ./public as our main files
 app.use(express.static(__dirname + '/public'));
 
-// TODO Elezione imposta la variabile master a true o false
-
 require('./routes/masterRoute')(app);
 require('./routes/chunkRoute')(app);
 
 // start server on the specified port and binding host
 app.listen(config.port, config.ip, function() {
   // print a message when the server starts listening
-  console.log("server starting on localhost");
+  console.log("server starting on" + config.ip + ':' + config.port);
 });
 
-/* Se il server è master */
+/* If master */
 if (config.master) {
     masterController.subscribeToBalancer();
     masterController.heartbeatMessage();
 }
-/* Se il server è slave */
+/* If slave */
 else {
     chunkController.findMaster();
     chunkController.subscribeToMaster();
