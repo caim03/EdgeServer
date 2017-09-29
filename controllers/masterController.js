@@ -39,20 +39,20 @@ function subscribeFn(req, res) {
     console.log("SUBSCRIBE");
     var serverObj = {};
     var found = false;
-    var len = chunkServer.length;
+    var len = chunkServer.getChunk().length;
 
     if (len === 0) {
         serverObj.id = 1;
     }
     else {
-        serverObj.id = chunkServer[len - 1].id + 1;
+        serverObj.id = (chunkServer.getChunk())[len - 1].id + 1;
     }
     serverObj.ip = (req.headers['x-forwarded-for'] || '').split(',')[0] || req.connection.remoteAddress;
     serverObj.freeSpace = req.body.freeSpace;
     serverObj.alive = true;
     serverObj.ageingTime = config.ageingTime;
 
-    chunkServer.some(function (element) {
+    chunkServer.getChunk().some(function (element) {
        if (element.ip === serverObj.ip){
            res.send({status: 'NACK'});
            found = true;
@@ -61,13 +61,13 @@ function subscribeFn(req, res) {
     });
 
     if (!found) {
-        chunkServer.push(serverObj);
+        chunkServer.pushServer(serverObj);
 
-        chunkServer.forEach(function (server) {
+        chunkServer.getChunk().forEach(function (server) {
             var obj = {
                 url: 'http://' + server.ip + ':' + config.port + '/api/chunk/topology',
                 method: 'POST',
-                json: {chunkServers: chunkServer, yourId: server.id}
+                json: {chunkServers: chunkServer.getChunk(), yourId: server.id}
             };
             request(obj, function (err, res) {
                 if (err){
@@ -78,7 +78,7 @@ function subscribeFn(req, res) {
             })
         })
     }
-    console.log(chunkServer);
+    console.log(chunkServer.getChunk());
 }
 
 /* Questa funzione permette al master di sottoscriversi al load balancer */
@@ -90,7 +90,9 @@ function subscribeToBalancerFn(){
     };
 
     request(obj, function (err, res) {
-        console.log(res.body);
+        if(err) {
+            console.log(err);
+        }
     })
 }
 
@@ -98,7 +100,8 @@ function subscribeToBalancerFn(){
 function heartbeatMessageFn() {
     /* setInterval(callback, timeout, [args...]) chiama la funzione di callback ogni timeout millisecondi */
     setInterval(function () {
-        chunkServer.forEach(function (server) {
+        console.log(chunkServer.getChunk());
+        chunkServer.getChunk().forEach(function (server) {
             var obj = {
                 url: 'http://' + server.ip + ':' + config.port + '/api/chunk/heartbeat',
                 method: 'POST',
@@ -111,7 +114,7 @@ function heartbeatMessageFn() {
                     server.ageingTime--;
 
                     if (server.ageingTime === 0){
-                        chunkServer.splice(chunkServer.indexOf(server), 1);
+                        chunkServer.popServer(server);
                     }
                 }
 
