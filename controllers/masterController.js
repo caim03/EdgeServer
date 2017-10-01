@@ -13,6 +13,8 @@ exports.subscribe = subscribeFn;
 
 exports.subscribeToBalancer = subscribeToBalancerFn;
 exports.heartbeatMessage = heartbeatMessageFn;
+exports.newMasterRebalancment = newMasterRebalancmentFn;
+exports.crushedSlaveRebalancment = crushedSlaveRebalancmentFn;
 
 /* TODO Read File Meatadata */
 function readFileFn(req, res) {
@@ -117,4 +119,59 @@ function heartbeatMessageFn() {
             })
         })
     }, config.heartbeatTime);
+}
+
+/**
+ *  Hey sono un nuovo master!
+ *  1) Scrivo a tutti nella rete, e gli chiedo tutti i metadati dei chunk in loro possesso
+ *  2) Aggiorno mano mano la tabella master
+ *  3) Infine distribuisco i miei chunks a chi ha il carico minore
+ *
+ *  TODO NB Durante tutto ciò, il loadbalancer deve BUFFERIZZARE le richieste fino a ribilanciamento completato
+ */
+function newMasterRebalancmentFn()
+{
+    chunkServer.forEach(function (server) {
+        var obj = {
+            url: 'http://' + server.ip + ':' + config.port + '/api/chunk/metadata',
+            method: 'GET'
+        };
+
+        request(obj, function (err, res) {
+            if (err) {
+                console.log(err);
+            }
+
+            else{
+
+                //TODO BuildList(res.body) serve la tabella di Deb ;
+            }
+        })
+    })
+
+
+    //TODO SendMyChunks():
+    //Per ogni elemento nella mia chunklist:
+        //Cerco uno slave nella tabella che 1) non abbia quel chunk 2)sia ordinato in base alla disponibilità
+        //Estraggo il file da spedire e lo spedisco a quel server
+
+    //TODO fine metamorfosi a master
+
+
+}
+
+
+/**
+ *  Dopo che uno slave crasha
+ *
+ *  1) Cerca tutti i chunk relativi a quello slave nella tabella
+ *  2) Ribilancia quei chunk ad altri slave
+ *  3) Aggiorna la tabella
+ */
+function crushedSlaveRebalancmentFn(slave)
+{
+
+
+
+
 }

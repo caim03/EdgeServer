@@ -6,6 +6,7 @@ var syncRequest = require('sync-request');
 var config = require('../config/config');
 var master = require('../model/masterServer');
 var chunkServers = require('../model/chunkServer');
+var chunkList = require('../model/chunkList');
 
 /* Variabile timer per la gestione dei fallimenti del master e avvio di un elezione */
 var timer;
@@ -23,6 +24,7 @@ exports.subscribeToMaster = subscribeToMasterFn;
 
 exports.receiveHeartbeat = receiveHeartbeatFn;
 exports.waitHeartbeat = waitHeartbeatFn;
+exports.getAllMetaData = getAllMetaDataFn;
 
 /* TODO Funzione adibita alla lettura di un chunk */
 function readFileFn(req, res) {
@@ -99,4 +101,10 @@ function waitHeartbeatFn(){
     timer = setTimeout(function(){
         console.log("ELEZIONE");
     }, config.waitHeartbeat);
+}
+
+function getAllMetaDataFn(req, res){
+
+    res.send(chunkList);
+
 }
