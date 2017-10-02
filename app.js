@@ -5,6 +5,7 @@ var bodyParser = require('body-parser');
 var config = require('./config/config');
 var masterController = require('./controllers/masterController');
 var chunkController = require('./controllers/chunkController');
+var info = require('./model/serverInfo');
 
 // create a new express server
 var app = express();
@@ -21,13 +22,15 @@ app.listen(config.port, config.ip, function() {
   console.log("server starting on" + config.ip + ':' + config.port);
 });
 
-/* If master */
-if (config.master) {
+if (process.argv[2] === "master") {
+    info.setInfoMaster(true);
+
     masterController.subscribeToBalancer();
     masterController.heartbeatMessage();
 }
-/* If slave */
 else {
+    info.setInfoMaster(false);
+
     chunkController.findMaster();
     chunkController.subscribeToMaster();
     chunkController.waitHeartbeat();

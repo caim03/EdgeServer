@@ -7,6 +7,8 @@ exports.getInfo = getInfoFn;
 exports.setInfo = setInfoFn;
 exports.setInfoId = setInfoIdFn;
 exports.getInfoId = getInfoIdFn;
+exports.setInfoMaster = setInfoMasterFn;
+exports.getInfoMaster = getInfoMasterFn;
 
 function getInfoFn() {
     return info;
@@ -22,4 +24,12 @@ function setInfoIdFn(id) {
 
 function getInfoIdFn() {
     return info.id;
+}
+
+function setInfoMasterFn(bool) {
+    info.master = bool;
+}
+
+function getInfoMasterFn() {
+    return info.master;
 }

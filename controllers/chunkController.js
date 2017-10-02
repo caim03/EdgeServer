@@ -174,7 +174,7 @@ function startElection() {
         console.log("END PROCLAMATION");
 
         chunkServers.popServer(myself);
-        config.master = true;
+        serverInfo.setInfoMaster(true);
         masterController.subscribeToBalancer();
         console.log(chunkServers.getChunk());
         masterController.heartbeatMessage();
