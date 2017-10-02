@@ -44,6 +44,8 @@ function writeFileFn(req, res) {
 
     chunkList.pushChunk(chunkMetaData);
 
+    res.send("OK");
+
     //TODO salva il chunk
 
 }
@@ -185,11 +187,12 @@ function startElection() {
 
         chunkServers.popServer(myself);
         serverInfo.setInfoMaster(true);
+
+        masterController.newMasterRebalancment();
+
         masterController.subscribeToBalancer();
         console.log(chunkServers.getChunk());
         masterController.heartbeatMessage();
-
-        // TODO distribuire i chunk tra i vari slave server
     }
 }
 

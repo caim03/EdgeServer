@@ -1,6 +1,7 @@
 var chunkServer = require('../model/chunkServer');
 var request = require('request');
 var config = require('../config/config');
+var ip = require("ip");
 
 /* Export delle funzionalità del masterServer */
 
@@ -141,23 +142,26 @@ function heartbeatMessageFn() {
  */
 function newMasterRebalancmentFn()
 {
-    chunkServer.forEach(function (server) {
-        var obj = {
-            url: 'http://' + server.ip + ':' + config.port + '/api/chunk/metadata',
-            method: 'GET'
-        };
+    chunkServer.getChunk().forEach(function (server) {
+        if(server.ip !== ip.address()) {
+                var obj = {
+                url: 'http://' + server.ip + ':' + config.port + '/api/chunk/metadata',
+                method: 'GET'
+            };
 
-        request(obj, function (err, res) {
-            if (err) {
-                console.log(err);
-            }
+            request(obj, function (err, res) {
+                if (err) {
+                    console.log(err);
+                }
 
-            else{
-                console.log(res.body);
-                //TODO BuildList(res.body) serve la tabella di Deb ;
+                else{
+                    console.log("RECEIVED FROM: " + server.ip);
+                    console.log(res.body);
+                    //TODO BuildList(res.body) serve la tabella di Deb ;
+                }
+            })
             }
         })
-    })
 
 
     //TODO SendMyChunks():
