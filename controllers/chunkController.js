@@ -57,22 +57,22 @@ function findMasterFn() {
     };
 
     var res = syncRequest('GET', obj.url);
-    master.ip = res.getBody('utf8');  // utf8 convert body from buffer to string
+    master.setMasterServerIp(res.getBody('utf8'));  // utf8 convert body from buffer to string
 }
 
 /* Questa funzione preleva la lista di tutti i chunkServer connessi, inviata dal masterServer ogni volta che
  * un nuovo chunkServer si connette alla rete o TODO quando un chunkServer esce dalla rete */
 function genTopologyFn(req, res) {
-    chunkServers.overrideChunk(req.body.chunkServers);
-    serverInfo.id = req.body.yourId;
+    chunkServers.setChunk(req.body.chunkServers);
+    serverInfo.setInfoId(req.body.yourId);
     console.log(chunkServers.getChunk());
-    console.log(serverInfo);
+    console.log(serverInfo.getInfo());
 }
 
 /* Questa funzione permette ad un chunkServer di sottoscriversi al master */
 function subscribeToMasterFn() {
     var obj = {
-        url: 'http://' + master.ip + ':6601/api/master/subscribe',
+        url: 'http://' + master.getMasterServerIp() + ':6601/api/master/subscribe',
         method: 'POST',
         json: {type: "SUBSCRIBE"}
     };
@@ -112,7 +112,7 @@ function receiveProclamationFn(req, res) {
     var masterServer;
 
     if(req.body.type === "PROCLAMATION") {
-        master.ip = ip;
+        master.setMasterServerIp(ip);
         chunkServers.getChunk().some(function (server) {
             if(server.ip === ip) {
                 masterServer = server;
@@ -124,7 +124,7 @@ function receiveProclamationFn(req, res) {
         waitHeartbeatFn();
     }
 
-    console.log(master);
+    console.log(master.getMasterServer());
 }
 
 function startElection() {
@@ -133,12 +133,12 @@ function startElection() {
     var myself;
     var not_master;
 
-    if (!serverInfo.id) {
+    if (!serverInfo.getInfoId()) {
         console.log("CANNOT PARTICIPATE");
     }
     else {
         chunkServers.getChunk().forEach(function (server) {
-            if (server.id > serverInfo.id) {
+            if (server.id > serverInfo.getInfoId()) {
                 console.log("I'M NOT THE NEW MASTER");
                 not_master = true;
             }
@@ -151,7 +151,7 @@ function startElection() {
         console.log("I'M THE NEW MASTER");
 
         chunkServers.getChunk().forEach(function (server) {
-            if (server.id === serverInfo.id) {
+            if (server.id === serverInfo.getInfoId()) {
                 myself = server;
             }
             else {

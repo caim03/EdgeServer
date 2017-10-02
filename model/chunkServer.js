@@ -8,7 +8,7 @@ var chunkServer = [];
 exports.pushServer = pushServerFn;
 exports.popServer = popServerFn;
 exports.getChunk = getChunkFn;
-exports.overrideChunk = overrideChunkFn;
+exports.setChunk = setChunkFn;
 
 function pushServerFn(server) {
     chunkServer.push(server);
@@ -22,6 +22,6 @@ function getChunkFn() {
     return chunkServer;
 }
 
-function overrideChunkFn(chunks) {
+function setChunkFn(chunks) {
     chunkServer = chunks;
 }
