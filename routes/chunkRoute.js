@@ -18,4 +18,6 @@ module.exports = function (app) {
 
     app.post('/api/chunk/proclamation', chunkController.receiveProclamation);
 
+    app.get('/api/chunk/metadata',chunkController.getAllMetaData);
+
 };

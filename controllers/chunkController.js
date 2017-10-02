@@ -8,6 +8,7 @@ var master = require('../model/masterServer');
 var chunkServers = require('../model/chunkServer');
 var serverInfo = require('../model/serverInfo');
 var masterController = require('../controllers/masterController');
+var chunkList = require('../model/chunkList');
 
 /* Variabile timer per la gestione dei fallimenti del master e avvio di un elezione */
 var timer;
@@ -18,13 +19,12 @@ exports.readFile = readFileFn;
 exports.writeFile = writeFileFn;
 exports.deleteFile = deleteFileFn;
 exports.updateFile = updateFileFn;
-
 exports.findMaster = findMasterFn;
 exports.genTopology = genTopologyFn;
 exports.subscribeToMaster = subscribeToMasterFn;
-
 exports.receiveHeartbeat = receiveHeartbeatFn;
 exports.waitHeartbeat = waitHeartbeatFn;
+exports.getAllMetaData = getAllMetaDataFn;
 
 exports.receiveProclamation = receiveProclamationFn;
 
@@ -35,7 +35,17 @@ function readFileFn(req, res) {
 
 /* TODO Funzione adibita alla scrittura di un chunk */
 function writeFileFn(req, res) {
-    res.send("HTTP POST");
+
+    var chunkMetaData = {};
+
+    chunkMetaData.dim = req.body.dim;
+    chunkMetaData.id = req.body.id;
+    chunkMetaData.location = req.body.location;
+
+    chunkList.pushChunk(chunkMetaData);
+
+    //TODO salva il chunk
+
 }
 
 /* TODO Funzione adibita alla cancellazione di un chunk */
@@ -181,4 +191,10 @@ function startElection() {
 
         // TODO distribuire i chunk tra i vari slave server
     }
+}
+
+function getAllMetaDataFn(req, res){
+
+    res.send(chunkList.getChunkList());
+
 }
