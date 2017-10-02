@@ -6,4 +6,14 @@ Lista dei metadata dei chunk in possesso del relativo slave
  */
 var chunkList = [];
 
-module.exports = chunkList;
+exports.pushChunk = pushChunkFn;
+exports.getChunkList = getChunkListFn;
+
+function pushChunkFn(chunk) {
+    chunkList.push(chunk);
+}
+
+function getChunkListFn() {
+    return chunkList;
+}
+

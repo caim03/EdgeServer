@@ -143,7 +143,7 @@ function newMasterRebalancmentFn()
             }
 
             else{
-
+                console.log(res.body);
                 //TODO BuildList(res.body) serve la tabella di Deb ;
             }
         })

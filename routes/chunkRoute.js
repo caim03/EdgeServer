@@ -16,6 +16,6 @@ module.exports = function (app) {
 
     app.post('/api/chunk/heartbeat', chunkController.receiveHeartbeat);
 
-    app.get('/api/chunk/metadata',chunkController.getAllMetaData());
+    app.get('/api/chunk/metadata',chunkController.getAllMetaData);
 
 };

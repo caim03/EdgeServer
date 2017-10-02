@@ -17,11 +17,9 @@ exports.readFile = readFileFn;
 exports.writeFile = writeFileFn;
 exports.deleteFile = deleteFileFn;
 exports.updateFile = updateFileFn;
-
 exports.findMaster = findMasterFn;
 exports.genTopology = genTopologyFn;
 exports.subscribeToMaster = subscribeToMasterFn;
-
 exports.receiveHeartbeat = receiveHeartbeatFn;
 exports.waitHeartbeat = waitHeartbeatFn;
 exports.getAllMetaData = getAllMetaDataFn;
@@ -33,7 +31,17 @@ function readFileFn(req, res) {
 
 /* TODO Funzione adibita alla scrittura di un chunk */
 function writeFileFn(req, res) {
-    res.send("HTTP POST");
+
+    var chunkMetaData = {};
+
+    chunkMetaData.dim = req.body.dim;
+    chunkMetaData.id = req.body.id;
+    chunkMetaData.location = req.body.location;
+
+    chunkList.pushChunk(chunkMetaData);
+
+    //TODO salva il chunk
+
 }
 
 /* TODO Funzione adibita alla cancellazione di un chunk */
@@ -105,6 +113,6 @@ function waitHeartbeatFn(){
 
 function getAllMetaDataFn(req, res){
 
-    res.send(chunkList);
+    res.send(chunkList.getChunkList());
 
 }
