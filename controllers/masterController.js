@@ -1,7 +1,10 @@
 var chunkServer = require('../model/chunkServer');
+var masterTable = require('../model/masterTable');
 var request = require('request');
 var config = require('../config/config');
 var ip = require("ip");
+
+//var drawTable = require('console.table');
 
 /* Export delle funzionalità del masterServer */
 
@@ -16,6 +19,11 @@ exports.subscribeToBalancer = subscribeToBalancerFn;
 exports.heartbeatMessage = heartbeatMessageFn;
 exports.newMasterRebalancment = newMasterRebalancmentFn;
 exports.crushedSlaveRebalancment = crushedSlaveRebalancmentFn;
+
+
+exports.sendChunkGuidToSlaves = sendChunkGuidToSlavesFn;
+exports.addChunkGuidInTable = addChunkGuidInTableFn;
+
 
 /* TODO Read File Meatadata */
 function readFileFn(req, res) {
@@ -39,7 +47,7 @@ function updateFileFn(req, res) {
 
 /* Questa funzione permette ad un chunkServer di sottoscriversi al master tramite una chiamata POST */
 function subscribeFn(req, res) {
-    console.log("SUBSCRIBE");
+    console.log("SUBSCRIBE-------");
     var serverObj = {};
     var found = false;
     var len = chunkServer.getChunk().length;
@@ -84,6 +92,8 @@ function subscribeFn(req, res) {
     console.log(chunkServer.getChunk());
 }
 
+
+
 /* Questa funzione permette al master di sottoscriversi al load balancer */
 function subscribeToBalancerFn(){
     var obj = {
@@ -98,6 +108,7 @@ function subscribeToBalancerFn(){
         }
     })
 }
+
 
 /* Questa funzione è adibita all'invio periodico dei messaggi di heartbeat ai chunkServer nella rete */
 function heartbeatMessageFn() {
@@ -188,4 +199,42 @@ function crushedSlaveRebalancmentFn(slave)
 
 
 
+}
+
+//Il master invia il Chank GUID ricevuto dal client a tutti i chunk server.
+function sendChunkGuidToSlavesFn(req, res)
+{
+    console.log("A new chunk is arrived, I'm sending chunk to slaves");
+
+    if(req.body.type == "CHUNK")
+    {
+        chunkServer.getChunk().forEach(function (server) {
+            var obj = {
+                url: 'http://' + server.ip + ':' + config.port + '/api/chunk/sendToSlave',
+                method: 'POST',
+                json: {
+                    type: "CHUNK",
+                    guid: req.body.guid,
+                    ipServer: server.ip}
+            };
+            request(obj, function (err, res) {
+                if (err){
+                    console.log(err);
+                    return;
+                }
+             addChunkGuidInTableFn(server.ip, res.body.guid);
+            })
+        })
+    }
+}
+
+
+//Aggiunge in tabella il chank guid e l'ip dello slave che lo possiede.
+function addChunkGuidInTableFn(slaveIp, chankGuid)
+{
+    console.log("Ack arrived. TABLE:");
+
+    masterTable.addChunkRef(chankGuid, slaveIp);
+
+    console.log(masterTable.getTable());
 }

@@ -14,4 +14,10 @@ module.exports = function (app) {
 
     app.post('/api/master/subscribe', masterController.subscribe);
 
+    app.post('/api/master/newChunk', masterController.sendChunkGuidToSlaves);
+
+//    app.post('api/master/sendAck', masterController.addChunkGuidInTable);
+
+ //   app.listen('http://172.17.0.3:6601', masterController.addChunkGuidInTable);
+
 };

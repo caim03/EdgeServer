@@ -10,6 +10,8 @@ var serverInfo = require('../model/serverInfo');
 var masterController = require('../controllers/masterController');
 var chunkList = require('../model/chunkList');
 
+var masterTable = require('../model/masterTable');
+
 /* Variabile timer per la gestione dei fallimenti del master e avvio di un elezione */
 var timer;
 
@@ -27,6 +29,10 @@ exports.waitHeartbeat = waitHeartbeatFn;
 exports.getAllMetaData = getAllMetaDataFn;
 
 exports.receiveProclamation = receiveProclamationFn;
+
+exports.sendChunkGuidToMaster = sendChunkGuidToMasterFn;
+exports.sendAckToMaster = sendAckToMasterFn;
+
 
 /* TODO Funzione adibita alla lettura di un chunk */
 function readFileFn(req, res) {
@@ -200,4 +206,43 @@ function getAllMetaDataFn(req, res){
 
     res.send(chunkList.getChunkList());
 
+}
+
+//DA MODIFICARE IN PRESENZA DI CLIENT
+//Simula l'invio dei chunk GUID. Attualmente lo fanno gli slave ma in futuro sarà un compito che spetterà ai client.
+function sendChunkGuidToMasterFn()
+{
+    setInterval(function () {
+
+        var obj = {
+            url: 'http://' + master.getMasterServerIp() + ':6601/api/master/newChunk',
+            method: 'POST',
+            json: {
+                type: "CHUNK",
+                guid: masterTable.guidGenerator()
+            }
+        };
+        request(obj, function (err, res) {
+            console.log("guid creato: " + obj.json.guid);
+            if (err) {
+                console.log(err);
+            }
+            else {
+                console.log(res.body);
+            }
+        })
+    }, config.randomGuidTime);
+}
+
+function sendAckToMasterFn(req, res)
+{
+    console.log("il server "+req.body.ipServer+" ha ricevuto il guid "+req.body.guid);
+
+    var obj = {
+         type: "ACK",
+        guid: req.body.guid,
+        ipServer: req.body.ipServer
+    };
+
+    res.send(obj);
 }

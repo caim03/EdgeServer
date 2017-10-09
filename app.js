@@ -8,6 +8,9 @@ var chunkController = require('./controllers/chunkController');
 var info = require('./model/serverInfo');
 var ip = require('ip');
 
+//var masterTable = require('./model/masterTable');
+
+
 // create a new express server
 var app = express();
 app.use(bodyParser.json());
@@ -27,13 +30,34 @@ app.listen(config.port, config.ip, function() {
 if (process.argv[2] === "master") {
     info.setInfoMaster(true);
 
+    console.log('I am the master.');
+
+ //   masterTable.addChunkRef(1234,123);
+//    console.log("Tabella: "+masterTable.getObjectForChunkId(1234));
+
+ /*   for(var i=0; i<masterTable.getTable().length; i++)
+    {
+        console.log("i: "+i);
+        console.log(masterTable.getTable().chunkId+" - "+masterTable.getTable().slaveIp);
+    }
+*/
+
+
     masterController.subscribeToBalancer();
     masterController.heartbeatMessage();
 }
 else {
     info.setInfoMaster(false);
 
+    console.log('I am a slave.');
+
+//    masterController.sendChunkToMaster();
+
     chunkController.findMaster();
     chunkController.subscribeToMaster();
+
+    //Questa funzione dovrebbe essere eseguita da un client. Non avendo un client ho momentaneamente attribuito agli slave l'invio dei chunk guid al master.
+    chunkController.sendChunkGuidToMaster();
+
     chunkController.waitHeartbeat();
 }

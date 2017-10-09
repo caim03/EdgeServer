@@ -20,4 +20,9 @@ module.exports = function (app) {
 
     app.get('/api/chunk/metadata',chunkController.getAllMetaData);
 
+    app.post('/api/chunk/sendToSlave', chunkController.sendAckToMaster);
+
+
+
+
 };
