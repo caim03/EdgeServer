@@ -3,6 +3,9 @@ var masterTable = require('../model/masterTable');
 var request = require('request');
 var config = require('../config/config');
 var ip = require("ip");
+var chunkList = require('../model/chunkList');
+var syncRequest = require('sync-request');
+
 
 //var drawTable = require('console.table');
 
@@ -114,7 +117,7 @@ function subscribeToBalancerFn(){
 function heartbeatMessageFn() {
     /* setInterval(callback, timeout, [args...]) chiama la funzione di callback ogni timeout millisecondi */
     setInterval(function () {
-        console.log(chunkServer.getChunk());
+        // console.log(chunkServer.getChunk());
         chunkServer.getChunk().forEach(function (server) {
             var obj = {
                 url: 'http://' + server.ip + ':' + config.port + '/api/chunk/heartbeat',
@@ -136,7 +139,8 @@ function heartbeatMessageFn() {
                     server.freeSpace = res.body.freeSpace;
                     server.alive = true;
                     server.ageingTime = config.ageingTime;
-                    console.log(server);
+                    // console.log(server);
+
                 }
             })
         })
@@ -149,10 +153,12 @@ function heartbeatMessageFn() {
  *  2) Aggiorno mano mano la tabella master
  *  3) Infine distribuisco i miei chunks a chi ha il carico minore
  *
- *  TODO NB Durante tutto ciò, il loadbalancer deve BUFFERIZZARE le richieste fino a ribilanciamento completato
+ *  TODO NB LOCKARE STO PROCESSO + BUFFERIZZARE (Load Balancer?) le richieste fino a ribilanciamento completato
  */
 function newMasterRebalancmentFn()
 {
+    console.log("STARTING REBALANCMENT");
+    masterTable.cleanTable();
     chunkServer.getChunk().forEach(function (server) {
         if(server.ip !== ip.address()) {
                 var obj = {
@@ -160,28 +166,52 @@ function newMasterRebalancmentFn()
                 method: 'GET'
             };
 
-            request(obj, function (err, res) {
-                if (err) {
-                    console.log(err);
-                }
+            var res = syncRequest('GET', obj.url);
 
-                else{
-                    console.log("RECEIVED FROM: " + server.ip);
-                    console.log(res.body);
-                    //TODO BuildList(res.body) serve la tabella di Deb ;
-                }
+            var receivedChunks = JSON.parse(res.getBody('utf8'));
+            receivedChunks.forEach(function (chunk) {
+                masterTable.addChunkRef(chunk.guid, server.ip);
             })
             }
         })
 
-
-    //TODO SendMyChunks():
     //Per ogni elemento nella mia chunklist:
-        //Cerco uno slave nella tabella che 1) non abbia quel chunk 2)sia ordinato in base alla disponibilità
-        //Estraggo il file da spedire e lo spedisco a quel server
-
-    //TODO fine metamorfosi a master
-
+    //Creo la tabella di disponibilità ordinata della master table
+    //Invio il chunk al primo della tabella che non abbia gia quel chunk
+    var sended = false;
+    var slaveServers = buildSlavesList();
+    chunkList.getChunkList().forEach(function (chunk) {
+        sended = false;
+        var guid = chunk.guid;
+        slaveServers.forEach(function (server) {
+            if(!sended)
+                if(!masterTable.checkGuid(server,guid)) {
+                    console.log("SPEDISCO " + guid + " A " + server);
+                    var obj = {
+                        url: 'http://' + server + ':' + config.port + '/api/chunk/sendToSlave',
+                        method: 'POST',
+                        json: {
+                            type: "CHUNK",
+                            guid: guid,
+                            ipServer: server
+                        }
+                    };
+                    request(obj, function (err, res) {
+                        if (err) {
+                            console.log(err);
+                            return;
+                        }
+                        addChunkGuidInTableFn(server, guid);
+                        //TODO Invio fisico del chunk!
+                        sended = true;
+                    })
+                }
+        })
+        if(!sended)
+            console.log("NON HO TROVATO VALIDI SLAVES PER " + guid);
+    })
+    chunkList.cleanList();
+    console.log("REBALANCMENT COMPLETED");
 
 }
 
@@ -201,40 +231,96 @@ function crushedSlaveRebalancmentFn(slave)
 
 }
 
-//Il master invia il Chank GUID ricevuto dal client a tutti i chunk server.
+
+
+/**
+ *Il master invia il Chank GUID ricevuto dal client a replicationNumber server slaves.
+ *Prima costruisce la lista di slaves (buildSlavesList)
+ *Poi invia, ed aggiunge alla propria master table l'informazione.
+ *
+ */
 function sendChunkGuidToSlavesFn(req, res)
 {
     console.log("A new chunk is arrived, I'm sending chunk to slaves");
 
+
+
+    var slaveServers = buildSlavesList();
+
+    console.log("SLAVES SCELTI " + slaveServers);
+
     if(req.body.type == "CHUNK")
     {
-        chunkServer.getChunk().forEach(function (server) {
+        slaveServers.forEach(function (server) {
             var obj = {
-                url: 'http://' + server.ip + ':' + config.port + '/api/chunk/sendToSlave',
+                url: 'http://' + server + ':' + config.port + '/api/chunk/sendToSlave',
                 method: 'POST',
                 json: {
                     type: "CHUNK",
                     guid: req.body.guid,
-                    ipServer: server.ip}
+                    ipServer: server}
             };
             request(obj, function (err, res) {
                 if (err){
                     console.log(err);
                     return;
                 }
-             addChunkGuidInTableFn(server.ip, res.body.guid);
+             addChunkGuidInTableFn(server, res.body.guid);
             })
         })
     }
 }
 
 
+/**
+ *  Crea una lista di replicationNumber ip, che corrispondono agli slaves più vuoti:
+ *  Come prima cosa inserisce nella lista gli slaves completamente vuoti(nuovi arrivati),
+ *  in seguito ci aggiunge gli slaves ordinati per occupazione nella tabella
+ *
+ */
+function buildSlavesList() {
+
+    var slaveList = [];
+
+    var numberOfSlaves = config.replicationNumber;
+
+    var ipOccupation = masterTable.masterTableOccupation();
+
+    chunkServer.getChunk().forEach(function (server) {
+
+        var found = false;
+
+        ipOccupation.forEach(function (table) {
+            if(server.ip === table.slaveIp)
+                found= true;
+        });
+
+        if(!found)
+        {
+            slaveList.push(server.ip);
+            numberOfSlaves--;
+        }
+    });
+
+    //Si gira comunque tutta la tabella quando in realtà sarebbe corretto fermare il ciclo una volta completata la slaveList
+    //ma, non si può uscire bruscamente da un forEach, e con il for sembra non funzionare.
+    ipOccupation.forEach(function (table) {
+       if(numberOfSlaves>0) {
+           slaveList.push(table.slaveIp);
+           numberOfSlaves--;
+       }
+    });
+
+    return slaveList;
+}
+
+
 //Aggiunge in tabella il chank guid e l'ip dello slave che lo possiede.
 function addChunkGuidInTableFn(slaveIp, chankGuid)
 {
-    console.log("Ack arrived. TABLE:");
+    // console.log("Ack arrived. TABLE:");
 
     masterTable.addChunkRef(chankGuid, slaveIp);
 
-    console.log(masterTable.getTable());
+    masterTable.printTable();
 }

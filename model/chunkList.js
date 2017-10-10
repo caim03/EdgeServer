@@ -8,6 +8,8 @@ var chunkList = [];
 
 exports.pushChunk = pushChunkFn;
 exports.getChunkList = getChunkListFn;
+exports.cleanList = cleanListFn;
+
 
 function pushChunkFn(chunk) {
     chunkList.push(chunk);
@@ -15,5 +17,11 @@ function pushChunkFn(chunk) {
 
 function getChunkListFn() {
     return chunkList;
+}
+
+function cleanListFn()
+{
+    chunkList = [];
+
 }
 

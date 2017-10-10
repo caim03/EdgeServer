@@ -208,7 +208,7 @@ function getAllMetaDataFn(req, res){
 
 }
 
-//DA MODIFICARE IN PRESENZA DI CLIENT
+//TODO DA MODIFICARE IN PRESENZA DI CLIENT
 //Simula l'invio dei chunk GUID. Attualmente lo fanno gli slave ma in futuro sarà un compito che spetterà ai client.
 function sendChunkGuidToMasterFn()
 {
@@ -237,6 +237,14 @@ function sendChunkGuidToMasterFn()
 function sendAckToMasterFn(req, res)
 {
     console.log("il server "+req.body.ipServer+" ha ricevuto il guid "+req.body.guid);
+
+
+    var chunkMetaData = {};
+
+    chunkMetaData.dim = 50;
+    chunkMetaData.guid= req.body.guid;
+    chunkMetaData.location = req.body.location;
+    chunkList.pushChunk(chunkMetaData);
 
     var obj = {
          type: "ACK",
