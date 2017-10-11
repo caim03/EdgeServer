@@ -15,15 +15,11 @@ exports.readFile = readFileFn;
 exports.writeFile = writeFileFn;
 exports.deleteFile = deleteFileFn;
 exports.updateFile = updateFileFn;
-
 exports.subscribe = subscribeFn;
-
 exports.subscribeToBalancer = subscribeToBalancerFn;
 exports.heartbeatMessage = heartbeatMessageFn;
 exports.newMasterRebalancment = newMasterRebalancmentFn;
 exports.crushedSlaveRebalancment = crushedSlaveRebalancmentFn;
-
-
 exports.sendChunkGuidToSlaves = sendChunkGuidToSlavesFn;
 exports.addChunkGuidInTable = addChunkGuidInTableFn;
 
@@ -127,11 +123,13 @@ function heartbeatMessageFn() {
 
             request(obj, function (err, res) {
                 if (err) {
-                    console.log(err);
+                    // console.log(err);
                     server.ageingTime--;
 
                     if (server.ageingTime === 0){
                         chunkServer.popServer(server);
+                        console.log(server.ip + " CRUSHED");
+                        crushedSlaveRebalancmentFn(server);
                     }
                 }
 
@@ -179,7 +177,7 @@ function newMasterRebalancmentFn()
     //Creo la tabella di disponibilità ordinata della master table
     //Invio il chunk al primo della tabella che non abbia gia quel chunk
     var sended = false;
-    var slaveServers = buildSlavesList();
+    var slaveServers = buildSlavesList(); //TODO Tabella fissata prima del ribilanciamento - si potrebbe aggiornarla mano mano ad ogni invio, ma ovviamente operazione + costosa
     chunkList.getChunkList().forEach(function (chunk) {
         sended = false;
         var guid = chunk.guid;
@@ -225,8 +223,49 @@ function newMasterRebalancmentFn()
  */
 function crushedSlaveRebalancmentFn(slave)
 {
+    //Per ogni elemento nella chunklist di quello slave:
+    //Creo la tabella di disponibilità ordinata della master table
+    //Invio il chunk al primo della tabella che non abbia gia quel chunk
 
+    var chunkGuids = masterTable.getAllChunksBySlave(slave.ip);
 
+    console.log(chunkGuids);
+
+    var slaveServers = buildSlavesList(); //TODO Tabella fissata prima del ribilanciamento - si potrebbe aggiornarla mano mano ad ogni invio, ma ovviamente operazione + costosa
+    var sended = false;
+    chunkGuids.forEach(function (chunks) {
+        sended = false;
+        var chunkguid = chunks.chunkguid;
+        console.log(chunkguid);
+        slaveServers.forEach(function (server) {
+            if (!sended)
+                if (!masterTable.checkGuid(server, chunkguid)) {
+                    console.log("SPEDISCO " + chunkguid + " A " + server);
+                    var obj = {
+                        url: 'http://' + server + ':' + config.port + '/api/chunk/sendToSlave',
+                        method: 'POST',
+                        json: {
+                            type: "CHUNK",
+                            guid: chunkguid,
+                            ipServer: server
+                        }
+                    };
+                    request(obj, function (err, res) {
+                        if (err) {
+                            console.log(err);
+                            return;
+                        }
+                        addChunkGuidInTableFn(server, chunkguid);
+                        //TODO Invio fisico del chunk! 2 OPZIONI: 1)Master manda (ip nuovo slave,guid) al vecchio slave che a sua volta invierà il file
+                        sended = true;
+                        //TODO pulire la masterTable dallo slave morto
+                    })
+                }
+
+        })
+        if(!sended)
+            console.log("NON HO TROVATO VALIDI SLAVES PER " + chunkguid);
+    })
 
 
 }
@@ -260,13 +299,20 @@ function sendChunkGuidToSlavesFn(req, res)
                     guid: req.body.guid,
                     ipServer: server}
             };
-            request(obj, function (err, res) {
-                if (err){
-                    console.log(err);
-                    return;
-                }
-             addChunkGuidInTableFn(server, res.body.guid);
-            })
+
+            //TODO NON FUNZIA!
+            var res = syncRequest(obj.method, obj.url,{json: obj.json, timeout: config.waitHeartbeat });
+            var guid = JSON.parse(res.getBody('utf8'));
+            addChunkGuidInTableFn(server,req.body.guid);
+
+            // request(obj, function (err, res) {
+            //     addChunkGuidInTableFn(server, res.body.guid);
+            //     if (err){
+            //         console.log(err);
+            //         return;
+            //     }
+             //TODO invio fisico del chunk 1) Il master o il client  -> post (slaveServers)
+            // })
         })
     }
 }
@@ -285,6 +331,8 @@ function buildSlavesList() {
     var numberOfSlaves = config.replicationNumber;
 
     var ipOccupation = masterTable.masterTableOccupation();
+
+    console.log(ipOccupation);
 
     chunkServer.getChunk().forEach(function (server) {
 

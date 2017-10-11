@@ -1,6 +1,7 @@
 
 var masterTable = [];
-
+var ipOccupation = [];
+var totalChunk = 0;
 exports.addChunkRef = addChunkRefFn;
 exports.removeChunkRef = removeChunkRefByGuidFn;
 exports.getTable = getTableFn;
@@ -9,36 +10,57 @@ exports.printTable = printTableFn;
 exports.masterTableOccupation = masterTableOccupationFn;
 exports.cleanTable = cleanTableFn;
 exports.checkGuid = checkGuidFn;
+exports.getAllChunksBySlave = getAllChunksBySlaveFn;
 
 function addChunkRefFn(chunkGuid, slaveIp)
 {
 
     var found = false;
     masterTable.forEach(function (table) {
-            if(table.slaveIp === slaveIp) {
-                table.chunkGuids.push({
-                    chunkguid: chunkGuid
-                })
-                found = true;
-            }
-        })
-
+        if(table.chunkguid === chunkGuid) {
+            table.slavesIp.push({
+                slaveIp: slaveIp
+            })
+            found = true;
+        }
+    });
     if(!found)
     {
-        var chunkGuids = [];
-        chunkGuids.push({
-            chunkguid : chunkGuid
-        })
+        var slavesIp = [];
 
-        masterTable.push({
-            chunkGuids: chunkGuids,
-            slaveIp: slaveIp
+        slavesIp.push({
+            slaveIp : slaveIp
         });
 
+
+        masterTable.push({
+            chunkguid: chunkGuid,
+            slavesIp: slavesIp
+        });
     }
+
+    buildSlaveOccupation(slaveIp);
 }
 
+function buildSlaveOccupation(slaveIp)
+{
+    totalChunk++;
+    var found = false;
+    ipOccupation.forEach(function (table) {
+        if(table.slaveIp === slaveIp) {
+            table.occupation++;
+            found = true;
+        }
+    });
 
+    if(!found)
+        ipOccupation.push({
+            slaveIp: slaveIp,
+            occupation: 1
+        });
+
+
+}
 
 function removeByKeyFn(array, params){
     array.some(function(item, index) {
@@ -72,12 +94,14 @@ function printTableFn()
 {
     masterTable.forEach(function (table) {
         console.log("---------------------------");
-        console.log(table.slaveIp);
-        console.log(table.chunkGuids);
+        console.log(table.chunkguid);
+        console.log(table.slavesIp);
         console.log("---------------------------\n");
     })
 
 }
+
+
 
 
 /**
@@ -86,28 +110,21 @@ function printTableFn()
  */
 function masterTableOccupationFn() {
 
-    var ipOccupation = [];
-
-    var tot = 0;
-
-    masterTable.forEach(function (table) {
-        tot+= table.chunkGuids.length;
-    });
-
-    masterTable.forEach(function (table) {
-        ipOccupation.push({
+    var percentOccupation = [];
+    ipOccupation.forEach(function (table) {
+        percentOccupation.push({
             slaveIp: table.slaveIp,
-            occupation : table.chunkGuids.length/tot
+            occupation : table.occupation/totalChunk
         })
     });
 
-    ipOccupation.sort(function(a, b) {
+    percentOccupation.sort(function(a, b) {
         return parseFloat(a.occupation) - parseFloat(b.occupation);
     });
 
 
-    console.log(ipOccupation + "\n");
-    return ipOccupation;
+    console.log(percentOccupation + "\n");
+    return percentOccupation;
 }
 
 function cleanTableFn(){
@@ -119,12 +136,27 @@ function checkGuidFn(IpServer, guid)
     var found = false;
     masterTable.forEach(function (table) {
 
-        if(IpServer === table.slaveIp)
-            table.chunkGuids.forEach(function (chunk){
-                if(chunk.chunkguid === guid)
-                     found = true;
+        if(table.chunkguid === guid)
+            table.slavesIp.forEach(function (slave) {
+                if(slave.slaveIp === IpServer)
+                    found = true;
             })
     });
-
     return found;
+}
+
+function getAllChunksBySlaveFn(IpServer)
+{
+    var chunkguids = [];
+    masterTable.forEach(function (table){
+        var ips = table.slavesIp;
+        ips.forEach(function (slave) {
+            if (slave.slaveIp === IpServer)
+                chunkguids.push({
+                    chunkguid: table.chunkguid
+                });
+        });
+    });
+
+    return chunkguids;
 }
