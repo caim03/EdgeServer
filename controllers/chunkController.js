@@ -85,6 +85,8 @@ function genTopologyFn(req, res) {
     serverInfo.setInfoId(req.body.yourId);
     console.log(chunkServers.getChunk());
     console.log(serverInfo.getInfo());
+
+    res.send({status: 'ACK'});
 }
 
 /* Questa funzione permette ad un chunkServer di sottoscriversi al master */
@@ -97,7 +99,7 @@ function subscribeToMasterFn() {
 
     request(obj, function (err, res) {
         if (err) {
-            console.log(err);
+            // console.log(err);
         }
         else {
             console.log(res.body);
@@ -183,7 +185,7 @@ function startElection() {
 
                 request(obj, function (err, res) {
                     if (err) {
-                        console.log(err);
+                        // console.log(err);
                     }
                 });
             }
@@ -225,7 +227,7 @@ function sendChunkGuidToMasterFn()
         request(obj, function (err, res) {
             console.log("guid creato: " + obj.json.guid);
             if (err) {
-                console.log(err);
+                // console.log(err);
             }
             else {
                 console.log(res.body);

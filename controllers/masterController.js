@@ -84,7 +84,6 @@ function subscribeFn(req, res) {
                     console.log(err);
                     return;
                 }
-                console.log(res);
             })
         })
     }
@@ -103,7 +102,7 @@ function subscribeToBalancerFn(){
 
     request(obj, function (err, res) {
         if(err) {
-            console.log(err);
+            // console.log(err);
         }
     })
 }
@@ -113,17 +112,22 @@ function subscribeToBalancerFn(){
 function heartbeatMessageFn() {
     /* setInterval(callback, timeout, [args...]) chiama la funzione di callback ogni timeout millisecondi */
     setInterval(function () {
-        // console.log(chunkServer.getChunk());
         chunkServer.getChunk().forEach(function (server) {
             var obj = {
                 url: 'http://' + server.ip + ':' + config.port + '/api/chunk/heartbeat',
                 method: 'POST',
-                json: {type: "HEARTBEAT"}
+                json: {type: "HEARTBEAT"},
+                timeout: config.heartbeatTime/2
             };
+
+            console.log("MANDO HB: " + server.ip);
+
+
 
             request(obj, function (err, res) {
                 if (err) {
-                    // console.log(err);
+                    console.log("HEARTBEAT DI " + server.ip + " NON RICEVUTO");
+                    console.log(err.code === 'ETIMEDOUT');
                     server.ageingTime--;
 
                     if (server.ageingTime === 0){
@@ -137,8 +141,8 @@ function heartbeatMessageFn() {
                     server.freeSpace = res.body.freeSpace;
                     server.alive = true;
                     server.ageingTime = config.ageingTime;
+                    console.log("HEARTBEAT DI " + server.ip + " RICEVUTO");
                     // console.log(server);
-
                 }
             })
         })
@@ -155,7 +159,7 @@ function heartbeatMessageFn() {
  */
 function newMasterRebalancmentFn()
 {
-    console.log("STARTING REBALANCMENT");
+    // console.log("STARTING REBALANCMENT");
     masterTable.cleanTable();
     chunkServer.getChunk().forEach(function (server) {
         if(server.ip !== ip.address()) {
@@ -184,7 +188,7 @@ function newMasterRebalancmentFn()
         slaveServers.forEach(function (server) {
             if(!sended)
                 if(!masterTable.checkGuid(server,guid)) {
-                    console.log("SPEDISCO " + guid + " A " + server);
+                    // console.log("SPEDISCO " + guid + " A " + server);
                     var obj = {
                         url: 'http://' + server + ':' + config.port + '/api/chunk/sendToSlave',
                         method: 'POST',
@@ -194,6 +198,7 @@ function newMasterRebalancmentFn()
                             ipServer: server
                         }
                     };
+
                     request(obj, function (err, res) {
                         if (err) {
                             console.log(err);
@@ -209,7 +214,7 @@ function newMasterRebalancmentFn()
             console.log("NON HO TROVATO VALIDI SLAVES PER " + guid);
     })
     chunkList.cleanList();
-    console.log("REBALANCMENT COMPLETED");
+    // console.log("REBALANCMENT COMPLETED");
 
 }
 
@@ -227,16 +232,14 @@ function crushedSlaveRebalancmentFn(slave)
     //Creo la tabella di disponibilità ordinata della master table
     //Invio il chunk al primo della tabella che non abbia gia quel chunk
 
+
     var chunkGuids = masterTable.getAllChunksBySlave(slave.ip);
-
-    console.log(chunkGuids);
-
+    masterTable.removeFromOccupationTable(slave.ip);
     var slaveServers = buildSlavesList(); //TODO Tabella fissata prima del ribilanciamento - si potrebbe aggiornarla mano mano ad ogni invio, ma ovviamente operazione + costosa
     var sended = false;
     chunkGuids.forEach(function (chunks) {
         sended = false;
         var chunkguid = chunks.chunkguid;
-        console.log(chunkguid);
         slaveServers.forEach(function (server) {
             if (!sended)
                 if (!masterTable.checkGuid(server, chunkguid)) {
@@ -252,14 +255,14 @@ function crushedSlaveRebalancmentFn(slave)
                     };
                     request(obj, function (err, res) {
                         if (err) {
-                            console.log(err);
+                            // console.log(err);
                             return;
                         }
-                        addChunkGuidInTableFn(server, chunkguid);
-                        //TODO Invio fisico del chunk! 2 OPZIONI: 1)Master manda (ip nuovo slave,guid) al vecchio slave che a sua volta invierà il file
-                        sended = true;
-                        //TODO pulire la masterTable dallo slave morto
-                    })
+                    });
+                    addChunkGuidInTableFn(server, chunkguid);
+                    //TODO Invio fisico del chunk! 2 OPZIONI: 1)Master manda (ip nuovo slave,guid) al vecchio slave che a sua volta invierà il file
+                    sended = true;
+                    //TODO pulire la masterTable dallo slave morto
                 }
 
         })
@@ -280,14 +283,8 @@ function crushedSlaveRebalancmentFn(slave)
  */
 function sendChunkGuidToSlavesFn(req, res)
 {
-    console.log("A new chunk is arrived, I'm sending chunk to slaves");
-
-
-
     var slaveServers = buildSlavesList();
-
-    console.log("SLAVES SCELTI " + slaveServers);
-
+    // console.log("SLAVES SCELTI " + slaveServers);
     if(req.body.type == "CHUNK")
     {
         slaveServers.forEach(function (server) {
@@ -300,19 +297,14 @@ function sendChunkGuidToSlavesFn(req, res)
                     ipServer: server}
             };
 
-            //TODO NON FUNZIA!
-            var res = syncRequest(obj.method, obj.url,{json: obj.json, timeout: config.waitHeartbeat });
-            var guid = JSON.parse(res.getBody('utf8'));
-            addChunkGuidInTableFn(server,req.body.guid);
-
-            // request(obj, function (err, res) {
-            //     addChunkGuidInTableFn(server, res.body.guid);
-            //     if (err){
-            //         console.log(err);
-            //         return;
-            //     }
+            request(obj, function (err, res) {
+                addChunkGuidInTableFn(server, res.body.guid);
+                if (err){
+                    // console.log(err);
+                    return;
+                }
              //TODO invio fisico del chunk 1) Il master o il client  -> post (slaveServers)
-            // })
+            })
         })
     }
 }
@@ -343,7 +335,7 @@ function buildSlavesList() {
                 found= true;
         });
 
-        if(!found)
+        if(!found && numberOfSlaves>0)
         {
             slaveList.push(server.ip);
             numberOfSlaves--;
@@ -352,12 +344,13 @@ function buildSlavesList() {
 
     //Si gira comunque tutta la tabella quando in realtà sarebbe corretto fermare il ciclo una volta completata la slaveList
     //ma, non si può uscire bruscamente da un forEach, e con il for sembra non funzionare.
-    ipOccupation.forEach(function (table) {
-       if(numberOfSlaves>0) {
-           slaveList.push(table.slaveIp);
-           numberOfSlaves--;
-       }
-    });
+    if(numberOfSlaves>0)
+        ipOccupation.forEach(function (table) {
+           if(numberOfSlaves>0) {
+               slaveList.push(table.slaveIp);
+               numberOfSlaves--;
+           }
+        });
 
     return slaveList;
 }
@@ -366,9 +359,6 @@ function buildSlavesList() {
 //Aggiunge in tabella il chank guid e l'ip dello slave che lo possiede.
 function addChunkGuidInTableFn(slaveIp, chankGuid)
 {
-    // console.log("Ack arrived. TABLE:");
-
     masterTable.addChunkRef(chankGuid, slaveIp);
-
-    masterTable.printTable();
+    // masterTable.printTable();
 }

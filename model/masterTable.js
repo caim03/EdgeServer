@@ -11,6 +11,7 @@ exports.masterTableOccupation = masterTableOccupationFn;
 exports.cleanTable = cleanTableFn;
 exports.checkGuid = checkGuidFn;
 exports.getAllChunksBySlave = getAllChunksBySlaveFn;
+exports.removeFromOccupationTable = removeFromOccupationTableFn;
 
 function addChunkRefFn(chunkGuid, slaveIp)
 {
@@ -123,7 +124,7 @@ function masterTableOccupationFn() {
     });
 
 
-    console.log(percentOccupation + "\n");
+    // console.log(percentOccupation + "\n");
     return percentOccupation;
 }
 
@@ -135,12 +136,12 @@ function checkGuidFn(IpServer, guid)
 {
     var found = false;
     masterTable.forEach(function (table) {
-
-        if(table.chunkguid === guid)
+        if(table.chunkguid === guid) {
             table.slavesIp.forEach(function (slave) {
-                if(slave.slaveIp === IpServer)
+                if (slave.slaveIp === IpServer)
                     found = true;
             })
+        }
     });
     return found;
 }
@@ -159,4 +160,19 @@ function getAllChunksBySlaveFn(IpServer)
     });
 
     return chunkguids;
+}
+
+function removeFromOccupationTableFn(slaveIp)
+{
+
+    ipOccupation.forEach(function (table) {
+        if(table.slaveIp === slaveIp) {
+            totalChunk -= table.occupation;
+            ipOccupation.splice(ipOccupation.indexOf(table), 1);
+        }
+    });
+
+
+    console.log(ipOccupation);
+
 }
