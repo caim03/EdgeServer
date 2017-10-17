@@ -55,9 +55,6 @@ else {
 
     chunkController.findMaster();
     chunkController.subscribeToMaster();
-
-    //Questa funzione dovrebbe essere eseguita da un client. Non avendo un client ho momentaneamente attribuito agli slave l'invio dei chunk guid al master.
-    chunkController.sendChunkGuidToMaster();
-
+    
     chunkController.waitHeartbeat();
 }
