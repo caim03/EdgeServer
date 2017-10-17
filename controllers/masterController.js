@@ -287,6 +287,7 @@ function sendChunkGuidToSlavesFn(req, res)
     // console.log("SLAVES SCELTI " + slaveServers);
     if(req.body.type == "CHUNK")
     {
+        res.send({status: 'ACK'});
         slaveServers.forEach(function (server) {
             var obj = {
                 url: 'http://' + server + ':' + config.port + '/api/chunk/sendToSlave',
