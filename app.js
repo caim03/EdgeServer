@@ -55,6 +55,6 @@ else {
 
     chunkController.findMaster();
     chunkController.subscribeToMaster();
-    
+
     chunkController.waitHeartbeat();
 }
