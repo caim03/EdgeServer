@@ -30,7 +30,6 @@ exports.getAllMetaData = getAllMetaDataFn;
 
 exports.receiveProclamation = receiveProclamationFn;
 
-exports.sendChunkGuidToMaster = sendChunkGuidToMasterFn;
 exports.sendAckToMaster = sendAckToMasterFn;
 
 
