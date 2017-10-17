@@ -210,32 +210,6 @@ function getAllMetaDataFn(req, res){
 
 }
 
-//TODO DA MODIFICARE IN PRESENZA DI CLIENT
-//Simula l'invio dei chunk GUID. Attualmente lo fanno gli slave ma in futuro sarà un compito che spetterà ai client.
-function sendChunkGuidToMasterFn()
-{
-    setInterval(function () {
-
-        var obj = {
-            url: 'http://' + master.getMasterServerIp() + ':6601/api/master/newChunk',
-            method: 'POST',
-            json: {
-                type: "CHUNK",
-                guid: masterTable.guidGenerator()
-            }
-        };
-        request(obj, function (err, res) {
-            console.log("guid creato: " + obj.json.guid);
-            if (err) {
-                // console.log(err);
-            }
-            else {
-                console.log(res.body);
-            }
-        })
-    }, config.randomGuidTime);
-}
-
 function sendAckToMasterFn(req, res)
 {
 
