@@ -1,5 +1,5 @@
 var chunkServer = require('../model/chunkServer');
-var masterTable = require('../model/masterTable');
+var masterTable = require('../model/masterTableDb');
 var request = require('request');
 var config = require('../config/config');
 var ip = require("ip");
@@ -188,7 +188,6 @@ function newMasterRebalancmentFn()
         slaveServers.forEach(function (server) {
             if(!sended)
                 if(!masterTable.checkGuid(server,guid)) {
-                    // console.log("SPEDISCO " + guid + " A " + server);
                     var obj = {
                         url: 'http://' + server + ':' + config.port + '/api/chunk/sendToSlave',
                         method: 'POST',
@@ -204,10 +203,11 @@ function newMasterRebalancmentFn()
                             console.log(err);
                             return;
                         }
-                        addChunkGuidInTableFn(server, guid);
-                        //TODO Invio fisico del chunk!
-                        sended = true;
+
                     })
+                    addChunkGuidInTableFn(server, guid);
+                    //TODO Invio fisico del chunk!
+                    sended = true;
                 }
         })
         if(!sended)
@@ -234,7 +234,7 @@ function crushedSlaveRebalancmentFn(slave)
 
 
     var chunkGuids = masterTable.getAllChunksBySlave(slave.ip);
-    masterTable.removeFromOccupationTable(slave.ip);
+    masterTable.removeFromOccupationTable(slave.ip, chunkGuids);
     var slaveServers = buildSlavesList(); //TODO Tabella fissata prima del ribilanciamento - si potrebbe aggiornarla mano mano ad ogni invio, ma ovviamente operazione + costosa
     var sended = false;
     chunkGuids.forEach(function (chunks) {
@@ -243,7 +243,6 @@ function crushedSlaveRebalancmentFn(slave)
         slaveServers.forEach(function (server) {
             if (!sended)
                 if (!masterTable.checkGuid(server, chunkguid)) {
-                    console.log("SPEDISCO " + chunkguid + " A " + server);
                     var obj = {
                         url: 'http://' + server + ':' + config.port + '/api/chunk/sendToSlave',
                         method: 'POST',
@@ -361,5 +360,5 @@ function buildSlavesList() {
 function addChunkGuidInTableFn(slaveIp, chankGuid)
 {
     masterTable.addChunkRef(chankGuid, slaveIp);
-    // masterTable.printTable();
+    masterTable.printTable();
 }

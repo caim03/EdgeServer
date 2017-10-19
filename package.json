@@ -9,6 +9,7 @@
     "body-parser": "^1.17.2",
     "express": "4.13.x",
     "ip": "^1.1.5",
+    "lokijs": "^1.5.1",
     "request": "^2.81.0",
     "sync-request": "^4.1.0"
   },
