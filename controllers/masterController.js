@@ -84,6 +84,7 @@ function subscribeFn(req, res) {
                     console.log(err);
                     return;
                 }
+                console.log(res);
             })
         })
     }
@@ -124,6 +125,8 @@ function heartbeatMessageFn() {
 
 
 
+            console.log(server);
+
             request(obj, function (err, res) {
                 if (err) {
                     console.log("HEARTBEAT DI " + server.ip + " NON RICEVUTO");
@@ -131,9 +134,26 @@ function heartbeatMessageFn() {
                     server.ageingTime--;
 
                     if (server.ageingTime === 0){
-                        chunkServer.popServer(server);
                         console.log(server.ip + " CRUSHED");
                         crushedSlaveRebalancmentFn(server);
+                        chunkServer.popServer(server);
+                        // TODO aggiornare la lista di ogni slave
+
+                        console.log("UPDATE SLAVE TABLE")
+
+                        chunkServer.getChunk().forEach(function (server) {
+                            var updateChunk = {
+                                url: 'http://' + server.ip + ':' + config.port + '/api/chunk/topology',
+                                method: POST,
+                                json: chunkServer.getChunk()
+                            };
+
+                            request(updateChunk, function (err, res) {
+                                if(err) {
+                                    console.log(err);
+                                }
+                            })
+                        })
                     }
                 }
 
@@ -143,6 +163,7 @@ function heartbeatMessageFn() {
                     server.ageingTime = config.ageingTime;
                     console.log("HEARTBEAT DI " + server.ip + " RICEVUTO");
                     // console.log(server);
+
                 }
             })
         })
@@ -188,6 +209,7 @@ function newMasterRebalancmentFn()
         slaveServers.forEach(function (server) {
             if(!sended)
                 if(!masterTable.checkGuid(server,guid)) {
+                    console.log("SPEDISCO " + guid + " A " + server);
                     var obj = {
                         url: 'http://' + server + ':' + config.port + '/api/chunk/sendToSlave',
                         method: 'POST',
@@ -197,7 +219,6 @@ function newMasterRebalancmentFn()
                             ipServer: server
                         }
                     };
-
                     request(obj, function (err, res) {
                         if (err) {
                             console.log(err);
@@ -240,9 +261,11 @@ function crushedSlaveRebalancmentFn(slave)
     chunkGuids.forEach(function (chunks) {
         sended = false;
         var chunkguid = chunks.chunkguid;
+        console.log(chunkguid);
         slaveServers.forEach(function (server) {
             if (!sended)
                 if (!masterTable.checkGuid(server, chunkguid)) {
+                    console.log("SPEDISCO " + chunkguid + " A " + server);
                     var obj = {
                         url: 'http://' + server + ':' + config.port + '/api/chunk/sendToSlave',
                         method: 'POST',
