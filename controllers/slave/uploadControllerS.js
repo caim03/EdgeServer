@@ -6,7 +6,9 @@ var chunkServers = require('../../model/chunkServer');
 var serverInfo = require('../../model/serverInfo');
 var masterController = require('../master/masterController');
 var chunkList = require('../../model/chunkList');
+var pendingReq = require('../../model/slave/pendingRequests');
 
+var formidable = require('formidable');
 
 var multiparty = require('multiparty');
 var util = require('util');
@@ -24,6 +26,8 @@ exports.savePendingRequest = savePendingRequest;
 
 exports.uploadFile = uploadFileFn;
 
+exports.checkIfPending = checkIfPendingFn;
+
 /**
  * Lo slave riceve una coppia (guid, ipClient) dal master.
  *
@@ -31,9 +35,27 @@ exports.uploadFile = uploadFileFn;
  * @param res
  */
 function savePendingRequest(req, res) {
-    //TODO Quando lo slave riceve (guid, ipClient) dal master, metti la richiesta in attesa in una tabella.
 
-    console.log("Nuova richiesta arrivata dal master.");
+    console.log("New authorization from master: "+req.body.guid+", "+req.body.idClient);
+
+    if(req.body.type == "GUID_MASTER")
+    {
+        pendingReq.addNewReq(req.body.guid, req.body.idClient);
+    }
+}
+
+function checkIfPendingFn(req, res) {
+
+    if(pendingReq.checkIfPending(req.body.guid, req.body.idClient))
+    {
+        var obj = {
+            type: "ACK",
+            guid: req.body.guid,
+            ipServer: ip.address()
+        }
+        res.send(obj);
+    }
+    else console.log("You have not been authorized by server to upload "+req.body.guid+" in "+ip.address());
 }
 
 
@@ -62,46 +84,43 @@ function saveFileFn(req, res) {
     console.log("sono il server "+ip.address());
 }
 
+/**/
 
-/**
- * This function upload files received from client
- *
- * @param req
- * @param res
- */
 function uploadFileFn(req, res) {
-    console.log("File uploading.");
+    var form = new formidable.IncomingForm(),
+        files = [],
+        fields = [];
 
-//console.log("!!!!!"+req.write(data));
-
-    var dataArr = [];
-
-    var i = 0;
-
-    //FUNZIONAAAAAAAAA
-
-    var writeStream = new Writable();
-    req.on('data', function (data) {
-
-        dataArr.push(data);
-        if(i==4)
-        {
-            if(!fs.existsSync(dataArr[1]))
-                fs.mkdirSync(dataArr[1]);
-            writeStream = fs.createWriteStream(dataArr[1]+'/'+dataArr[4]);
-        }
-        if(i==7)
-            writeStream.write(dataArr[7]);
-        i++;
+    form
+        .on('field', function (field, value) {
+            fields.push([field, value]);
+        })
+        .on('file', function (field, file) {
+            files.push([field, file]);
+        })
+        .on('fileBegin', function (name, file) {
+            if (!fs.existsSync(fields[1][1]))
+                fs.mkdirSync(fields[1][1]);
+            file.path = fields[1][1] + '/' + file.name;
+            console.log(file.path);
+        })
+        .on('end', function () {
+            console.log('-> upload done'+'\n');
+            res.writeHead(200, {'content-type': 'text/plain'});
+            res.statusCode = 200;
     });
+    form.parse(req);
     req.on('end', function() {
-        writeStream.end();
+        //    writeStream.end();
         res.statusCode = 200;
-        res.end(dataArr[1]+'/'+dataArr[4]);
+   //     res.end("file.txt");
     });
+}
+
+
+
 
 
     //TODO Slave invia al master GUID, ip dello slave stesso e idClient
 
     //TODO (NEL LATO MASTER) Il master salva in tabella quanto ricevuto e invia ack sia al server che al client (???Tipo avviso "File saved").
-}

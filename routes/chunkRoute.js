@@ -26,8 +26,8 @@ module.exports = function (app) {
 
     //upload file
   //  app.post('/api/chunk/newChunk', uploadControllerS.saveFile);
-    app.post('/api/chunk/newChunkGuid', uploadControllerS.savePendingRequest);
-
+    app.post('/api/chunk/newChunkGuidMaster', uploadControllerS.savePendingRequest);
+    app.post('/api/chunk/newChunkGuidClient', uploadControllerS.checkIfPending);
 
 
     //upload file
