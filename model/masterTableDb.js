@@ -7,6 +7,7 @@ var lokiDb = new loki();
 
 var userTable = lokiDb.addCollection('userTable');
 var masterTable = lokiDb.addCollection('masterTable');
+var metadataTable = lokiDb.addCollection('metadataTable');
 var ipOccupation = [];
 var totalChunk = 0;
 
@@ -19,7 +20,11 @@ exports.checkGuid = checkGuidFn;
 exports.getAllChunksBySlave = getAllChunksBySlaveFn;
 exports.removeFromOccupationTable = removeFromOccupationTableFn;
 
-function addChunkRefFn(chunkGuid, slaveIp, idUser)
+exports.getAllMetadataByUser = getAllMetadataByUserFn;
+
+exports.createMetadataTable = createMetadataTableFn;
+
+function addChunkRefFn(chunkGuid, metadata, slaveIp, idUser)
 {
 
     var foundGuid = masterTable.findOne({'chunkguid': chunkGuid});
@@ -32,7 +37,7 @@ function addChunkRefFn(chunkGuid, slaveIp, idUser)
             slaveIp : slaveIp
         });
 
-        masterTable.insert({chunkguid: chunkGuid , slavesIp: slavesIp , userTable : idUser});
+        masterTable.insert({chunkguid: chunkGuid , metadataTable: metadata, slavesIp: slavesIp , userTable : idUser});
 
     }
     else
@@ -179,3 +184,27 @@ function removeFromOccupationTableFn(slaveIp, chunkGuids)
     console.log(ipOccupation);
 
 }
+
+function createMetadataTableFn(name, absPath, fileSize, extension, date) {
+    var table = new metadataTable;
+    table.insert({name: name, absPAth: absPath, size: fileSize, extension: extension, date:date });
+    return table;
+}
+
+
+function getAllMetadataByUserFn(userId) {
+
+    masterTable.chain().data().forEach(function (table){
+        var obj = {'userId': userId};
+        var foundUser = table.findObject(obj);
+
+        if(foundUser)
+        {
+
+        }
+
+        var metadataT = table.metadataTable;
+        console.log("TABLE: "+metadataT);
+    });
+}
+

@@ -1,5 +1,5 @@
 /**
- * Created by Debora on 19/10/17.
+ * Created by Debora on 23/10/17.
  */
 
 var loki = require('lokijs');
@@ -12,7 +12,7 @@ exports.checkIfPending = checkIfPendingFn;
 exports.printTable = printTableFn;
 
 //Per ogni richiesta in attesa dopo un timeout vengono cancellate se non richiesti i guid dal client.
-//Ha senso questo passaggio??????? CHIEDERE...
+//Ha senso questo passaggio???????
 
 //Richieste di scrittura file autorizzate dal master e in attesa di file dal client.
 var pendingReqTable = lokiDb.addCollection('pendingReqTable');

@@ -21,7 +21,6 @@ var mkdirp = require('mkdirp');
 
 const Writable = require('stream');
 
-exports.saveFile = saveFileFn;
 exports.savePendingRequest = savePendingRequest;
 
 exports.uploadFile = uploadFileFn;
@@ -65,6 +64,8 @@ function checkIfPendingFn(req, res) {
  * @param req
  * @param res
  */
+
+/*
 function saveFileFn(req, res) {
 
     //TODO Fare match tra richieste pendenti in tabella e (guid, ipClient) ricevuti dal client.
@@ -83,8 +84,7 @@ function saveFileFn(req, res) {
     res.send(obj);
     console.log("sono il server "+ip.address());
 }
-
-/**/
+*/
 
 function uploadFileFn(req, res) {
     var form = new formidable.IncomingForm(),
@@ -103,26 +103,61 @@ function uploadFileFn(req, res) {
                 fs.mkdirSync(fields[1][1]);
             file.path = fields[1][1] + '/' + file.name;
             console.log(file.path);
-        })
-        .on('end', function () {
-            console.log('-> upload done'+'\n');
-            res.writeHead(200, {'content-type': 'text/plain'});
-            res.statusCode = 200;
-    });
-    form.parse(req);
-    req.on('end', function() {
-        //    writeStream.end();
-        res.statusCode = 200;
-   //     res.end("file.txt");
-    });
+
+            //INVIO GUID-USER AL MASTER DA CONFRONTARE NELLA PENDING METADATA TABLE.
+
+               var objFileSaved = {
+                   url: 'http://' + master.getMasterServerIp() + ':6601/api/master/checkMetadata',
+                   method: 'POST',
+                   json: {
+                       type: "UPLOADING_SUCCESS",
+                       ipServer: ip.address(),
+                       chunkGuid: fields[0][1],
+                       userId: fields[1][1]
+                   }
+               };
+               request(objFileSaved, function (err, res) {
+
+                   if (err) {
+                       console.log(err);
+                   }
+               });
 
 
+                   })
+                   .on('end', function () {
+                       console.log('-> upload done'+'\n');
+                       res.writeHead(200, {'content-type': 'text/plain'});
+                       res.statusCode = 200;
+               });
+               form.parse(req);
+               req.on('end', function() {
+                   //    writeStream.end();
+                   res.statusCode = 200;
+              //     res.end("file.txt");
+               });
+
+               console.log("FILE INVIATO...... ");
+
+           //INVIARE UN ACK_UPLOADING AL MASTER
+
+            /*   var objFileSaved = {
+                   url: 'http://' + master.getMasterServerIp() + ':6601/api/master/newFileData',
+                   method: 'POST',
+                   json: {
+                       type: "UPLOADING_SUCCESS",
+                       ipServer: ip.address(),
+                       chunkGuid:
+
+                   }
+               };
+               request(objFileSaved, function (err, res) {
+
+                   if (err) {
+                       console.log(err);
+                   }
+               });
+           */
 }
 
-
-
-
-
-    //TODO Slave invia al master GUID, ip dello slave stesso e idClient
-
-    //TODO (NEL LATO MASTER) Il master salva in tabella quanto ricevuto e invia ack sia al server che al client (???Tipo avviso "File saved").
+//TODO (NEL LATO MASTER) Il master salva in tabella quanto ricevuto e invia ack sia al server che al client (???Tipo avviso "File saved").

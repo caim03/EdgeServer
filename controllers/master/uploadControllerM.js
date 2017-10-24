@@ -6,11 +6,15 @@ var ip = require("ip");
 var chunkList = require('../../model/chunkList');
 var syncRequest = require('sync-request');
 var masterController = require('./masterController');
+var pendingMetadata = require('../../model/master/pendingMetadata');
+
 
 
 exports.sendSlaveListAndGuid = sendSlaveListAndGuidFn;
 
 exports.guidGenerator = guidGeneratorFn;
+
+exports.checkAndSaveMetadata = checkAndSaveMetadataFn;
 
 function guidGeneratorFn() {
     var S4 = function() {
@@ -29,14 +33,31 @@ function guidGeneratorFn() {
 function sendSlaveListAndGuidFn(req, res) {
 //    console.log("----------------"+req.body.extension);
 
+    /*
+    *
+    * fileName: chosenFileData.name,
+            absPath: chosenFileData.absPath,
+            extension: chosenFileData.extension,
+            sizeFile: chosenFileData.sizeFile,
+            idClient: chosenFileData.idClient,
+            lastModified: chosenFileData.lastModified*/
+
     if(req.body.type == "METADATA"){
+
 
         //Genera GUID
         var guid = guidGeneratorFn();
         console.log("GUID: "+guid);
+
+        //save metadata
+        pendingMetadata.addFileMetadata(guid, req.body.fileName, req.body.absPAth, req.body.extension, req.body.sizeFile, req.body.idClient, req.body.lastModified);
+   //     console.log("TABELLA METADATI: ");
+   //     pendingMetadata.printTable();
+   //     console.log('\n');
+
         //genera slaveList
         var slaveServers = masterController.buildSlaveList();
-        console.log("Slaves list: ")
+        console.log("Slaves list: ");
         slaveServers.forEach(function (server) {
             console.log(server);
         });
@@ -56,8 +77,6 @@ function sendSlaveListAndGuidFn(req, res) {
             console.log("Sto per inviare "+objToSlave.json.guid+"..."+objToSlave.json.idClient+" agli slaves.");
             request(objToSlave, function (err, res) {
 
-                //TODO RICEVERE ACK DAGLI SLAVES E AGGIUNGERE IN TABELLA.
-
                 if (err) {
                     console.log(err);
                 }
@@ -72,6 +91,16 @@ function sendSlaveListAndGuidFn(req, res) {
 
         res.send(obj);
 
-
     }
+
+}
+
+function checkAndSaveMetadataFn(req, res) {
+
+    console.log("UPLOAD COMPLETATOOOOOOOOOOOO......");
+
+    console.log(req.body.chunkGuid+"..."+req.body.userId+"..."+req.body.ipServer+'\n')
+
+    //TODO verificare la presenza di chunkGuid e idUser di req nella pending metadata table.
+    //TODO se presente in table, salva metadati in master table e cancella dalla metadata table.
 }

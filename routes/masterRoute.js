@@ -27,5 +27,7 @@ module.exports = function (app) {
 
     //upload controller
     app.post('/api/master/newFileData', uploadControllerM.sendSlaveListAndGuid);
+    app.post('/api/master/checkMetadata', uploadControllerM.checkAndSaveMetadata);
+
 
 };
