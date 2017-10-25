@@ -8,6 +8,8 @@ var master = require('../../model/masterServer');
 var chunkServers = require('../../model/chunkServer');
 var serverInfo = require('../../model/serverInfo');
 var masterController = require('../master/masterController');
+var rebalancingController = require('../master/rebalancingController');
+
 var chunkList = require('../../model/chunkList');
 
 var masterTable = require('../../model/masterTable');
@@ -195,7 +197,7 @@ function startElection() {
         chunkServers.popServer(myself);
         serverInfo.setInfoMaster(true);
 
-        masterController.newMasterRebalancment();
+        rebalancingController.newMasterRebalancment();
 
         masterController.subscribeToBalancer();
         console.log(chunkServers.getChunk());

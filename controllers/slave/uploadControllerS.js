@@ -16,7 +16,7 @@ var process = require('process');
 
 var ip = require('ip');
 var fs=require('fs');
-
+var chunkList = require('../../model/chunkList');
 var mkdirp = require('mkdirp');
 
 const Writable = require('stream');
@@ -91,6 +91,8 @@ function uploadFileFn(req, res) {
         files = [],
         fields = [];
 
+    var chunkMetaData = {};
+
     form
         .on('field', function (field, value) {
             fields.push([field, value]);
@@ -102,7 +104,6 @@ function uploadFileFn(req, res) {
             if (!fs.existsSync(fields[1][1]))
                 fs.mkdirSync(fields[1][1]);
             file.path = fields[1][1] + '/' + file.name;
-            console.log(file.path);
 
             //INVIO GUID-USER AL MASTER DA CONFRONTARE NELLA PENDING METADATA TABLE.
 
@@ -116,7 +117,11 @@ function uploadFileFn(req, res) {
                        userId: fields[1][1]
                    }
                };
-               request(objFileSaved, function (err, res) {
+
+            chunkMetaData.guid= fields[0][1];
+
+            console.log(chunkMetaData);
+            request(objFileSaved, function (err, res) {
 
                    if (err) {
                        console.log(err);
@@ -137,7 +142,14 @@ function uploadFileFn(req, res) {
               //     res.end("file.txt");
                });
 
-               console.log("FILE INVIATO...... ");
+
+
+
+    chunkList.pushChunk(chunkMetaData);
+
+    console.log(chunkList.getChunkList());
+
+    console.log("FILE INVIATO...... ");
 
            //INVIARE UN ACK_UPLOADING AL MASTER
 

@@ -24,6 +24,7 @@ exports.getAllMetadataByUser = getAllMetadataByUserFn;
 function addChunkRefFn(chunkGuid, metadata, slaveIp, idUser)
 {
 
+
     var foundGuid = masterTable.findOne({'chunkguid': chunkGuid});
 
     if(!foundGuid)
@@ -68,6 +69,7 @@ function buildSlaveOccupation(slaveIp)
         });
 
 
+
 }
 
 function guidGeneratorFn() {
@@ -83,6 +85,8 @@ function printTableFn()
         console.log(table)
     });
 
+
+    console.log(masterTableOccupationFn());
 }
 
 /**
@@ -103,8 +107,6 @@ function masterTableOccupationFn() {
         return parseFloat(a.occupation) - parseFloat(b.occupation);
     });
 
-
-    // console.log(percentOccupation + "\n");
     return percentOccupation;
 }
 
@@ -169,16 +171,12 @@ function removeFromOccupationTableFn(slaveIp, chunkGuids)
         masterTable.update(foundGuid);
     });
 
-
     ipOccupation.forEach(function (table) {
         if(table.slaveIp === slaveIp) {
             totalChunk -= table.occupation;
             ipOccupation.splice(ipOccupation.indexOf(table), 1);
         }
     });
-
-
-    console.log(ipOccupation);
 
 }
 
