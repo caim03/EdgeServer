@@ -3,7 +3,8 @@
  */
 module.exports = function (app) {
 
-    var chunkController = require('../controllers/chunkController');
+    var chunkController = require('../controllers/slave/chunkController');
+    var uploadControllerS = require('../controllers/slave/uploadControllerS');
 
     /* REST API */
 
@@ -23,6 +24,13 @@ module.exports = function (app) {
     app.post('/api/chunk/sendToSlave', chunkController.sendAckToMaster);
 
 
+    //upload file
+  //  app.post('/api/chunk/newChunk', uploadControllerS.saveFile);
+    app.post('/api/chunk/newChunkGuidMaster', uploadControllerS.savePendingRequest);
+    app.post('/api/chunk/newChunkGuidClient', uploadControllerS.checkIfPending);
 
 
+    //upload file
+    app.post('/api/chunk/newChunk', uploadControllerS.uploadFile);
+  //  app.post('/api/chunk/newChunkGuid', uploadControllerS.uploadFile);
 };

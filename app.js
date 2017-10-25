@@ -3,8 +3,8 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var config = require('./config/config');
-var masterController = require('./controllers/masterController');
-var chunkController = require('./controllers/chunkController');
+var masterController = require('./controllers/master/masterController');
+var chunkController = require('./controllers/slave/chunkController');
 var info = require('./model/serverInfo');
 var ip = require('ip');
 
@@ -41,7 +41,6 @@ if (process.argv[2] === "master") {
         console.log(masterTable.getTable().chunkId+" - "+masterTable.getTable().slaveIp);
     }
 */
-
 
     masterController.subscribeToBalancer();
     masterController.heartbeatMessage();
