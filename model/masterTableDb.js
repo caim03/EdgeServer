@@ -191,7 +191,7 @@ function createMetadataTableFn(name, absPath, fileSize, extension, date) {
     return table;
 }
 
-
+//TO COMPLETE
 function getAllMetadataByUserFn(userId) {
 
     masterTable.chain().data().forEach(function (table){
