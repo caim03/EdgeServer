@@ -185,11 +185,6 @@ function removeFromOccupationTableFn(slaveIp, chunkGuids)
 
 }
 
-function createMetadataTableFn(name, absPath, fileSize, extension, date) {
-    var table = new metadataTable;
-    table.insert({name: name, absPAth: absPath, size: fileSize, extension: extension, date:date });
-    return table;
-}
 
 //TO COMPLETE
 function getAllMetadataByUserFn(userId) {

@@ -24,13 +24,10 @@ function addFileMetadataFn(chunkGuid, name, absPath, extension, size, idUser, la
 
 function checkIfPendingFn(chunkGuid, idUser) {
 
-    var pending = false;
     var obj = {'chunkguid': chunkGuid, 'idUser': idUser};
     var foundGuid_User = pendingMetadataTable.findObject(obj);
 
-    if(foundGuid_User)
-        pending = true;
-    return pending;
+    return foundGuid_User;
 }
 
 
@@ -42,10 +39,3 @@ function printTableFn()
 
 }
 
-/*
-fileName: chosenFileData.name,
-    absPath: chosenFileData.absPath,
-    extension: chosenFileData.extension,
-    sizeFile: chosenFileData.sizeFile,
-    idClient: chosenFileData.idClient,
-    lastModified: chosenFileData.lastModified*/

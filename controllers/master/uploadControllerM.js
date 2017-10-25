@@ -50,7 +50,7 @@ function sendSlaveListAndGuidFn(req, res) {
         console.log("GUID: "+guid);
 
         //save metadata
-        pendingMetadata.addFileMetadata(guid, req.body.fileName, req.body.absPAth, req.body.extension, req.body.sizeFile, req.body.idClient, req.body.lastModified);
+        pendingMetadata.addFileMetadata(guid, req.body.fileName, req.body.absPath, req.body.extension, req.body.sizeFile, req.body.idClient, req.body.lastModified);
    //     console.log("TABELLA METADATI: ");
    //     pendingMetadata.printTable();
    //     console.log('\n');
@@ -95,12 +95,33 @@ function sendSlaveListAndGuidFn(req, res) {
 
 }
 
+//{name: name, absPAth: absPath, size: fileSize, extension: extension, date:date }
+
+//{'chunkguid': chunkGuid, 'name': name, 'absPAth': absPath, 'extension': extension, 'size': size, 'idUser': idUser, 'lastModified': lastModified}
+
 function checkAndSaveMetadataFn(req, res) {
 
-    console.log("UPLOAD COMPLETATOOOOOOOOOOOO......");
+    console.log("UPLOAD COMPLETATO, SALVO IN MASTER TABLE.");
 
-    console.log(req.body.chunkGuid+"..."+req.body.userId+"..."+req.body.ipServer+'\n')
+//    console.log(req.body.chunkGuid+"..."+req.body.userId+"..."+req.body.ipServer+'\n');
 
-    //TODO verificare la presenza di chunkGuid e idUser di req nella pending metadata table.
-    //TODO se presente in table, salva metadati in master table e cancella dalla metadata table.
+    var metadata = [];
+
+    var foundMetaD = pendingMetadata.checkIfPending(req.body.chunkGuid, req.body.userId);
+    if(foundMetaD)
+    {
+        metadata.push({
+            name: foundMetaD.name,
+            absPath: foundMetaD.absPath,
+            size: foundMetaD.size,
+            extension: foundMetaD.extension,
+            lastModified: foundMetaD.lastModified
+        });
+        masterTable.addChunkRef(req.body.chunkGuid, metadata, req.body.ipServer, req.body.userId);
+    }
+    else console.log("Error adding metadata file to table.");
+//    console.log("TABELLA.....");
+//    masterTable.printTable();
+
+    //TODO cancella dalla metadata table.
 }
