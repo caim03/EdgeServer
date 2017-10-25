@@ -21,9 +21,6 @@ exports.getAllChunksBySlave = getAllChunksBySlaveFn;
 exports.removeFromOccupationTable = removeFromOccupationTableFn;
 
 exports.getAllMetadataByUser = getAllMetadataByUserFn;
-
-exports.createMetadataTable = createMetadataTableFn;
-
 function addChunkRefFn(chunkGuid, metadata, slaveIp, idUser)
 {
 
