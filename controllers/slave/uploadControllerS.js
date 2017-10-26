@@ -41,17 +41,22 @@ function savePendingRequest(req, res) {
     {
         pendingReq.addNewReq(req.body.guid, req.body.idClient);
     }
+    res.send({status: 'OK'});
 }
 
 function checkIfPendingFn(req, res) {
 
+    console.log("TABELLA PENDING:");
+    pendingReq.printTable();
+    console.log("\n");
     if(pendingReq.checkIfPending(req.body.guid, req.body.idClient))
     {
+        console.log(req.body.guid+" - "+req.body.idClient+" è tra le richieste pendenti, invio ack al client affinchè esso invii il file.");
         var obj = {
-            type: "ACK",
+            type: "ACK_PENDING",
             guid: req.body.guid,
             ipServer: ip.address()
-        }
+        };
         res.send(obj);
     }
     else console.log("You have not been authorized by server to upload "+req.body.guid+" in "+ip.address());
@@ -91,6 +96,8 @@ function uploadFileFn(req, res) {
         files = [],
         fields = [];
 
+    console.log("UPLOADING FILE...........................");
+
     var chunkMetaData = {};
 
     form
@@ -120,7 +127,7 @@ function uploadFileFn(req, res) {
 
             chunkMetaData.guid= fields[0][1];
 
-            console.log(chunkMetaData);
+//            console.log("Chunk metadata: "+chunkMetaData);
             request(objFileSaved, function (err, res) {
 
                    if (err) {
@@ -142,34 +149,13 @@ function uploadFileFn(req, res) {
               //     res.end("file.txt");
                });
 
-
-
-
     chunkList.pushChunk(chunkMetaData);
 
+    console.log("Chunk list: ");
     console.log(chunkList.getChunkList());
 
-    console.log("FILE INVIATO...... ");
+    res.send({status: 'ACK'});
 
-           //INVIARE UN ACK_UPLOADING AL MASTER
 
-            /*   var objFileSaved = {
-                   url: 'http://' + master.getMasterServerIp() + ':6601/api/master/newFileData',
-                   method: 'POST',
-                   json: {
-                       type: "UPLOADING_SUCCESS",
-                       ipServer: ip.address(),
-                       chunkGuid:
-
-                   }
-               };
-               request(objFileSaved, function (err, res) {
-
-                   if (err) {
-                       console.log(err);
-                   }
-               });
-           */
+    // TODO Inviare ack al client. Come??? L'ip di un client è statico o dinamico????????
 }
-
-//TODO (NEL LATO MASTER) Il master salva in tabella quanto ricevuto e invia ack sia al server che al client (???Tipo avviso "File saved").
