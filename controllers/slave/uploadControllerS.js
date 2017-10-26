@@ -41,7 +41,7 @@ function savePendingRequest(req, res) {
     {
         pendingReq.addNewReq(req.body.guid, req.body.idClient);
     }
-    res.send({status: 'OK'});
+    res.send({ ipSlave: ip.address(), status: 'OK'});
 }
 
 function checkIfPendingFn(req, res) {
@@ -139,7 +139,7 @@ function uploadFileFn(req, res) {
                    })
                    .on('end', function () {
                        console.log('-> upload done'+'\n');
-                       res.writeHead(200, {'content-type': 'text/plain'});
+   //                    res.writeHead(200, {'content-type': 'text/plain'});
                        res.statusCode = 200;
                });
                form.parse(req);

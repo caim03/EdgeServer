@@ -31,19 +31,8 @@ function guidGeneratorFn() {
  * @param res
  */
 function sendSlaveListAndGuidFn(req, res) {
-//    console.log("----------------"+req.body.extension);
-
-    /*
-    *
-    * fileName: chosenFileData.name,
-            absPath: chosenFileData.absPath,
-            extension: chosenFileData.extension,
-            sizeFile: chosenFileData.sizeFile,
-            idClient: chosenFileData.idClient,
-            lastModified: chosenFileData.lastModified*/
 
     if(req.body.type == "METADATA"){
-
 
         //Genera GUID
         var guid = guidGeneratorFn();
@@ -51,9 +40,6 @@ function sendSlaveListAndGuidFn(req, res) {
 
         //save metadata
         pendingMetadata.addFileMetadata(guid, req.body.fileName, req.body.absPath, req.body.extension, req.body.sizeFile, req.body.idClient, req.body.lastModified);
-   //     console.log("TABELLA METADATI: ");
-   //     pendingMetadata.printTable();
-   //     console.log('\n');
 
         //genera slaveList
         var slaveServers = masterController.buildSlaveList();
@@ -74,23 +60,48 @@ function sendSlaveListAndGuidFn(req, res) {
                     idClient: idClient
                 }
             };
-            console.log("Sto per inviare "+objToSlave.json.guid+"..."+objToSlave.json.idClient+" agli slaves.");
+            console.log("Sto per inviare "+objToSlave.json.guid+"..."+objToSlave.json.idClient+" allo slave "+server);
             request(objToSlave, function (err, res) {
-
                 if (err) {
                     console.log(err);
+                }
+                if(res.body.status == 'OK')
+                {
+                    console.log("slave ha risposto, sto inviando guid e slaves al client");
+                    //SEND TO CLIENT THE AUTHORIZATION TO SEND REQUEST TO SLAVES.
+                    var objGuidSlaves = {
+                        url: 'http://' + req.body.ipClient  + ':6603/api/client/sendRequest',
+                        method: 'POST',
+                        json: {
+                            type: "UPINFO",     //info the customer needs from master to update a file
+                            guid: guid,
+//                            slaveList: slaveServers,
+                            path: req.body.absPath,
+                            ipSlave: res.body.ipSlave
+                        }
+                    };
+
+                    console.log("absPath: "+req.body.absPath);
+                    console.log("url: "+objGuidSlaves.url);
+
+                    request(objGuidSlaves, function (err, res) {
+                        if (err) {
+                            console.log(err);
+                        }
+                    });
                 }
             });
         });
 
-        var obj = {
+     /*   var obj = {
             type: "UPINFO",     //info the customer needs from master to update a file
             guid: guid,
             slaveList: slaveServers
         };
 
-        res.send(obj);
+        res.send(obj);*/
 
+     res.send({status: 'OK'});
     }
 
 }
