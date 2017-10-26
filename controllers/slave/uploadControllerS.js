@@ -35,31 +35,32 @@ exports.checkIfPending = checkIfPendingFn;
  */
 function savePendingRequest(req, res) {
 
-    console.log("New authorization from master: "+req.body.guid+", "+req.body.idClient);
-
     if(req.body.type == "GUID_MASTER")
     {
         pendingReq.addNewReq(req.body.guid, req.body.idClient);
+        console.log("("+req.body.guid+" - "+req.body.idClient+") saved as pending request!");
+        console.log("Sending ack to master...\n");
     }
     res.send({ ipSlave: ip.address(), status: 'OK'});
 }
 
 function checkIfPendingFn(req, res) {
 
-    console.log("TABELLA PENDING:");
-    pendingReq.printTable();
-    console.log("\n");
-    if(pendingReq.checkIfPending(req.body.guid, req.body.idClient))
-    {
-        console.log(req.body.guid+" - "+req.body.idClient+" è tra le richieste pendenti, invio ack al client affinchè esso invii il file.");
-        var obj = {
-            type: "ACK_PENDING",
-            guid: req.body.guid,
-            ipServer: ip.address()
-        };
-        res.send(obj);
+  //  console.log("PENDING REQUESTS:");
+  //  pendingReq.printTable();
+  //  console.log("\n");
+    if(req.body.type == 'GUID_CLIENT') {
+        if (pendingReq.checkIfPending(req.body.guid, req.body.idClient)) {
+            console.log("("+req.body.guid + " - " + req.body.idClient + ") founded as pending, authorizing client to send file.\n");
+            var obj = {
+                type: "ACK_PENDING",
+                guid: req.body.guid,
+                ipServer: ip.address()
+            };
+            res.send(obj);
+        }
+        else console.log("You have not been authorized by server to upload " + req.body.guid + " in " + ip.address());
     }
-    else console.log("You have not been authorized by server to upload "+req.body.guid+" in "+ip.address());
 }
 
 
@@ -96,7 +97,7 @@ function uploadFileFn(req, res) {
         files = [],
         fields = [];
 
-    console.log("UPLOADING FILE...........................");
+    console.log("...UPLOADING FILE...\n");
 
     var chunkMetaData = {};
 
@@ -113,6 +114,7 @@ function uploadFileFn(req, res) {
             file.path = fields[1][1] + '/' + file.name;
 
             //INVIO GUID-USER AL MASTER DA CONFRONTARE NELLA PENDING METADATA TABLE.
+            console.log("Sending ("+fields[0][1]+" - "+fields[1][1]+") to master.\n");
 
                var objFileSaved = {
                    url: 'http://' + master.getMasterServerIp() + ':6601/api/master/checkMetadata',

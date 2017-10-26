@@ -9,6 +9,7 @@ var lokiDb = new loki();
 exports.addFileMetadata = addFileMetadataFn;
 exports.checkIfPending = checkIfPendingFn;
 exports.printTable = printTableFn;
+exports.removeMetaD = removeMetaDFn;
 
 var pendingMetadataTable = lokiDb.addCollection('pendingMetadataTable');
 
@@ -39,3 +40,14 @@ function printTableFn()
 
 }
 
+function removeMetaDFn(chunkGuid, idUser) {
+    var obj = {'chunkguid': chunkGuid, 'idUser': idUser};
+    var foundGuid_User = pendingMetadataTable.findObject(obj);
+    if(foundGuid_User)
+    {
+        pendingMetadataTable.chain().find(obj).remove();
+    }
+/*    else {
+        console.log("Error: ("+chunkGuid+" - "+idUser+") not found in pending metadata.\n");
+    }*/
+}

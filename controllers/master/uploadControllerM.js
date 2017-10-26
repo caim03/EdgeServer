@@ -36,17 +36,21 @@ function sendSlaveListAndGuidFn(req, res) {
 
         //Genera GUID
         var guid = guidGeneratorFn();
-        console.log("GUID: "+guid);
+        console.log("Received metadata for file "+req.body.fileName+'\n');
+
+        console.log("Generated GUID: "+guid);
 
         //save metadata
         pendingMetadata.addFileMetadata(guid, req.body.fileName, req.body.absPath, req.body.extension, req.body.sizeFile, req.body.idClient, req.body.lastModified);
 
         //genera slaveList
         var slaveServers = masterController.buildSlaveList();
-        console.log("Slaves list: ");
+        console.log("Slaves list:");
         slaveServers.forEach(function (server) {
             console.log(server);
         });
+
+        console.log('\n');
 
         //Master sends (GUID, IdClient) to slaves
         var idClient = req.body.idClient;
@@ -60,14 +64,14 @@ function sendSlaveListAndGuidFn(req, res) {
                     idClient: idClient
                 }
             };
-            console.log("Sto per inviare "+objToSlave.json.guid+"..."+objToSlave.json.idClient+" allo slave "+server);
+            console.log("Sending ("+guid+" - "+idClient+") to slave "+server+'\n');
             request(objToSlave, function (err, res) {
                 if (err) {
                     console.log(err);
                 }
                 if(res.body.status == 'OK')
                 {
-                    console.log("slave ha risposto, sto inviando guid e slaves al client");
+                    console.log("Authorizing client "+req.body.ipClient+" to contact the server "+server+'\n');
                     //SEND TO CLIENT THE AUTHORIZATION TO SEND REQUEST TO SLAVES.
                     var objGuidSlaves = {
                         url: 'http://' + req.body.ipClient  + ':6603/api/client/sendRequest',
@@ -80,9 +84,6 @@ function sendSlaveListAndGuidFn(req, res) {
                             ipSlave: res.body.ipSlave
                         }
                     };
-
-                    console.log("absPath: "+req.body.absPath);
-                    console.log("url: "+objGuidSlaves.url);
 
                     request(objGuidSlaves, function (err, res) {
                         if (err) {
@@ -112,27 +113,30 @@ function sendSlaveListAndGuidFn(req, res) {
 
 function checkAndSaveMetadataFn(req, res) {
 
-    console.log("UPLOAD COMPLETATO, SALVO IN MASTER TABLE.");
 
-//    console.log(req.body.chunkGuid+"..."+req.body.userId+"..."+req.body.ipServer+'\n');
+    if(req.body.type == 'UPLOADING_SUCCESS') {
+        console.log(req.body.ipServer+"-> upload completed, saving (" + req.body.chunkGuid + " - " + req.body.userId + " to master table.\n");
 
-    var metadata = [];
+        //    console.log(req.body.chunkGuid+"..."+req.body.userId+"..."+req.body.ipServer+'\n');
 
-    var foundMetaD = pendingMetadata.checkIfPending(req.body.chunkGuid, req.body.userId);
-    if(foundMetaD)
-    {
-        metadata.push({
-            name: foundMetaD.name,
-            absPath: foundMetaD.absPath,
-            size: foundMetaD.size,
-            extension: foundMetaD.extension,
-            lastModified: foundMetaD.lastModified
-        });
-        masterTable.addChunkRef(req.body.chunkGuid, metadata, req.body.ipServer, req.body.userId);
+        var metadata = [];
+
+        var foundMetaD = pendingMetadata.checkIfPending(req.body.chunkGuid, req.body.userId);
+        if (foundMetaD) {
+            metadata.push({
+                name: foundMetaD.name,
+                absPath: foundMetaD.absPath,
+                size: foundMetaD.size,
+                extension: foundMetaD.extension,
+                lastModified: foundMetaD.lastModified
+            });
+            masterTable.addChunkRef(req.body.chunkGuid, metadata, req.body.ipServer, req.body.userId);
+            pendingMetadata.removeMetaD(req.body.chunkGuid, req.body.userId)
+        }
+        else console.log("Error adding metadata file to table.");
+        //    console.log("TABELLA.....");
+        //    masterTable.printTable();
+
+        //TODO send ACK to client and slave!!!
     }
-    else console.log("Error adding metadata file to table.");
-//    console.log("TABELLA.....");
-//    masterTable.printTable();
-
-    //TODO cancella dalla metadata table.
 }
