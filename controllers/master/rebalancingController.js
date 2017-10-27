@@ -131,6 +131,8 @@ function crushedSlaveRebalancmentFn(slave)
                         });
                         addChunkGuidInTableFn(server, chunkguid);
                         //TODO X DEBORA Invio fisico del chunk! 2 OPZIONI: 1)Master manda (ip nuovo slave,guid) al vecchio slave che a sua volta invierà il file
+                        //Mi serve: path del file nello slave, ip del server a cui inviare il file e il guid del file e id del client che ha accesso al file.
+
                         sended = true;
                     }
 

@@ -7,6 +7,7 @@ var chunkList = require('../../model/chunkList');
 var syncRequest = require('sync-request');
 var masterController = require('./masterController');
 var pendingMetadata = require('../../model/master/pendingMetadata');
+var path = require("path");
 
 
 

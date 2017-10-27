@@ -8,11 +8,19 @@ var masterController = require('../master/masterController');
 var chunkList = require('../../model/chunkList');
 var pendingReq = require('../../model/slave/pendingRequests');
 
+var shell = require('shelljs');
+
 var formidable = require('formidable');
 
 var multiparty = require('multiparty');
 var util = require('util');
 var process = require('process');
+
+var fse = require('fs-extra');
+
+
+//var shell = require('shelljs');
+
 
 var ip = require('ip');
 var fs=require('fs');
@@ -20,6 +28,7 @@ var chunkList = require('../../model/chunkList');
 var mkdirp = require('mkdirp');
 
 const Writable = require('stream');
+var path = require("path");
 
 exports.savePendingRequest = savePendingRequest;
 
@@ -95,12 +104,13 @@ function uploadFileFn(req, res) {
             files.push([field, file]);
         })
         .on('fileBegin', function (name, file) {
-            if (!fs.existsSync(fields[1][1]))
-                fs.mkdirSync(fields[1][1]);
-            file.path = fields[1][1] + '/' + file.name;
+         /*   if (!fs.existsSync(fields[1][1]))
+                fs.mkdirSync(fields[1][1]);*/
 
+            shell.mkdir('-p', path.dirname(fields[1][1] + '/' + fields[2][1]));
+
+            file.path = fields[1][1] + '/' + fields[2][1];
             pendingReq.removeReq(fields[0][1], fields[1][1]);
-
 
             //INVIO GUID-USER AL MASTER DA CONFRONTARE NELLA PENDING METADATA TABLE.
             console.log("->  Sending ("+fields[0][1]+" - "+fields[1][1]+") to master.");
