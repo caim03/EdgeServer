@@ -39,7 +39,7 @@ function savePendingRequest(req, res) {
     {
         pendingReq.addNewReq(req.body.guid, req.body.idClient);
         console.log("("+req.body.guid+" - "+req.body.idClient+") saved as pending request!");
-        console.log("Sending ack to master...\n");
+        console.log("->  Sending ack to master...\n");
     }
     res.send({ ipSlave: ip.address(), status: 'OK'});
 }
@@ -55,6 +55,7 @@ function checkIfPendingFn(req, res) {
   //  pendingReq.printTable();
   //  console.log("\n");
     if(req.body.type == 'GUID_CLIENT') {
+        console.log("<-  Received ("+req.body.guid+" - "+req.body.idClient+") from client.");
         if (pendingReq.checkIfPending(req.body.guid, req.body.idClient)) {
             console.log("("+req.body.guid + " - " + req.body.idClient + ") founded as pending, authorizing client to send file.\n");
             var obj = {
@@ -79,7 +80,7 @@ function uploadFileFn(req, res) {
         files = [],
         fields = [];
 
-    console.log("...UPLOADING FILE...\n");
+    console.log("...UPLOADING FILE...");
 
     var chunkMetaData = {};
 
@@ -99,7 +100,7 @@ function uploadFileFn(req, res) {
 
 
             //INVIO GUID-USER AL MASTER DA CONFRONTARE NELLA PENDING METADATA TABLE.
-            console.log("Sending ("+fields[0][1]+" - "+fields[1][1]+") to master.\n");
+            console.log("->  Sending ("+fields[0][1]+" - "+fields[1][1]+") to master.");
 
                var objFileSaved = {
                    url: 'http://' + master.getMasterServerIp() + ':6601/api/master/checkMetadata',
@@ -125,24 +126,23 @@ function uploadFileFn(req, res) {
 
                    })
                    .on('end', function () {
-                       console.log('-> upload done'+'\n');
+                       console.log('-> upload done!'+'\n');
    //                    res.writeHead(200, {'content-type': 'text/plain'});
-                       res.statusCode = 200;
+              //         res.statusCode = 200;
                });
                form.parse(req);
                req.on('end', function() {
                    //    writeStream.end();
+                   res.send({status: 'ACK'});
                    res.statusCode = 200;
-              //     res.end("file.txt");
+
+                   //     res.end("file.txt");
                });
 
     chunkList.pushChunk(chunkMetaData);
 
-    console.log("Chunk list: ");
-    console.log(chunkList.getChunkList());
+  //  console.log("Chunk list: ");
+  //  console.log(chunkList.getChunkList());
 
-    res.send({status: 'ACK'});
-
-
-    // TODO Inviare ack al client. Come??? L'ip di un client è statico o dinamico????????
+    // TODO Inviare ack al client.
 }

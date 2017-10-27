@@ -103,7 +103,7 @@ function subscribeToBalancerFn(){
         json: {type: 'MASTER'}
     };
 
-    console.log("Mi sto sottoscrivendo all'url "+obj.url);
+    console.log("-> Subscribing to load balancer.");
 
     request(obj, function (err, res) {
         if(err) {
