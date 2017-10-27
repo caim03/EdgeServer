@@ -76,6 +76,9 @@ function checkIfPendingFn(req, res) {
  * @param res
  */
 function uploadFileFn(req, res) {
+
+    //TODO Da verificare: il caricamento effettivo del file avviene dopo aver comunicato al master di averlo salvato???
+
     var form = new formidable.IncomingForm(),
         files = [],
         fields = [];
@@ -118,9 +121,25 @@ function uploadFileFn(req, res) {
 //            console.log("Chunk metadata: "+chunkMetaData);
             request(objFileSaved, function (err, res) {
 
-                   if (err) {
-                       console.log(err);
-                   }
+                    if (err) {
+                           console.log(err);
+                       }
+                    if(res.body.status == 'OK')
+                    {
+                        var obj = {
+                            url: 'http://' + req.connection.remoteAddress + ':6603/api/client/fileSavedSuccess',
+                            method: 'POST',
+                            json: {
+                                type: "FILE_SAVED_SUCC",
+                                nameFile: file.name
+                            }
+                        };
+                        request(obj, function (err, res) {
+                            if(err)
+                                console.log(err);
+                        })
+
+                    }
                });
 
 
@@ -129,14 +148,13 @@ function uploadFileFn(req, res) {
                        console.log('-> upload done!'+'\n');
    //                    res.writeHead(200, {'content-type': 'text/plain'});
               //         res.statusCode = 200;
+                       res.send({status: 'ACK'});
                });
                form.parse(req);
                req.on('end', function() {
                    //    writeStream.end();
-                   res.send({status: 'ACK'});
-                   res.statusCode = 200;
-
-                   //     res.end("file.txt");
+                   //    res.statusCode = 200;
+                   //    res.end("file.txt");
                });
 
     chunkList.pushChunk(chunkMetaData);
@@ -144,5 +162,4 @@ function uploadFileFn(req, res) {
   //  console.log("Chunk list: ");
   //  console.log(chunkList.getChunkList());
 
-    // TODO Inviare ack al client.
 }

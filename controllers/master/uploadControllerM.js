@@ -104,6 +104,8 @@ function checkAndSaveMetadataFn(req, res) {
     if(req.body.type == 'UPLOADING_SUCCESS') {
         console.log(req.body.ipServer+"-> upload completed, saving (" + req.body.chunkGuid + " - " + req.body.userId + ") to master table.\n");
 
+        var ipSlave = req.connection.remoteAddress;
+
         //    console.log(req.body.chunkGuid+"..."+req.body.userId+"..."+req.body.ipServer+'\n');
 
         var metadata = [];
@@ -125,6 +127,17 @@ function checkAndSaveMetadataFn(req, res) {
         //    console.log("TABELLA.....");
         //    masterTable.printTable();
 
+
+    /*    var objMetadataSaved = {
+            url: 'http://' + ipSlave + ':6601/api/chunk/metadataSaved',
+            method: 'POST',
+            json: {
+                type: "METADATA_SAVED",
+                name: metadata[0].name
+            }
+        };*/
+
+        res.send({status: 'OK'});
         //TODO send ACK to client and slave!!!
     }
 }
