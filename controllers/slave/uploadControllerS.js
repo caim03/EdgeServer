@@ -28,7 +28,7 @@ exports.uploadFile = uploadFileFn;
 exports.checkIfPending = checkIfPendingFn;
 
 /**
- * Lo slave riceve una coppia (guid, ipClient) dal master.
+ * A slave receives (guid, ipClient) authorized from master and saves temporally the pending request.
  *
  * @param req
  * @param res
@@ -44,6 +44,11 @@ function savePendingRequest(req, res) {
     res.send({ ipSlave: ip.address(), status: 'OK'});
 }
 
+/**
+ *The slave checks if the request from the client was previously authorized by the master.
+ * @param req
+ * @param res
+ */
 function checkIfPendingFn(req, res) {
 
   //  console.log("PENDING REQUESTS:");
@@ -63,35 +68,12 @@ function checkIfPendingFn(req, res) {
     }
 }
 
-
 /**
- * Lo slave riceve un file dal client.
+ * The slave saves the file received by the client.
  *
  * @param req
  * @param res
  */
-
-/*
-function saveFileFn(req, res) {
-
-    //TODO Fare match tra richieste pendenti in tabella e (guid, ipClient) ricevuti dal client.
-
-    //TODO Se c'è corrispondenza, salva il file nello slave, elimina (guid, ipClient) dalle richieste pendenti e invia un ack al master (l'invio dell'ack è come nel codice seguente).
-
-    console.log("FILE ARRIVATO: "+res);
-
-    var obj = {
-        type: "ACK",
-        guid: req.body.guid,
-        idClient: req.body.idClient,
-        ipServer: ip.address()
-    };
-
-    res.send(obj);
-    console.log("sono il server "+ip.address());
-}
-*/
-
 function uploadFileFn(req, res) {
     var form = new formidable.IncomingForm(),
         files = [],
@@ -112,6 +94,9 @@ function uploadFileFn(req, res) {
             if (!fs.existsSync(fields[1][1]))
                 fs.mkdirSync(fields[1][1]);
             file.path = fields[1][1] + '/' + file.name;
+
+            pendingReq.removeReq(fields[0][1], fields[1][1]);
+
 
             //INVIO GUID-USER AL MASTER DA CONFRONTARE NELLA PENDING METADATA TABLE.
             console.log("Sending ("+fields[0][1]+" - "+fields[1][1]+") to master.\n");

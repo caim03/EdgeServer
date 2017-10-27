@@ -31,7 +31,7 @@ function addNewReqFn(chunkGuid, idUser)
 function removeReqFn(chunkGuid, idUser) {
     var obj = {'chunkguid': chunkGuid, 'idUser': idUser};
     var foundGuid_User = pendingReqTable.findObject(obj);
-    console.log("var: "+foundGuid_User);
+  //  console.log("var: "+foundGuid_User);
     if(foundGuid_User)
     {
         pendingReqTable.chain().find(obj).remove();
