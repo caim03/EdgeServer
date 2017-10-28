@@ -5,7 +5,7 @@ var loki = require('lokijs');
 
 var lokiDb = new loki();
 
-var userTable = lokiDb.addCollection('userTable');
+//var userTable = lokiDb.addCollection('userTable');
 var masterTable = lokiDb.addCollection('masterTable');
 var metadataTable = lokiDb.addCollection('metadataTable');
 var ipOccupation = [];
@@ -19,33 +19,38 @@ exports.cleanTable = cleanTableFn;
 exports.checkGuid = checkGuidFn;
 exports.getAllChunksBySlave = getAllChunksBySlaveFn;
 exports.removeFromOccupationTable = removeFromOccupationTableFn;
-
+exports.getTable = getTableFn;
 exports.getAllMetadataByUser = getAllMetadataByUserFn;
+
+
 function addChunkRefFn(chunkGuid, metadata, slaveIp, idUser)
 {
-
-
     var foundGuid = masterTable.findOne({'chunkguid': chunkGuid});
 
     if(!foundGuid)
     {
         var slavesIp = [];
+        var usersId = [];
 
         slavesIp.push({
             slaveIp : slaveIp
         });
 
-        masterTable.insert({chunkguid: chunkGuid , metadataTable: metadata, slavesIp: slavesIp , userTable : idUser});
+        usersId.push({
+            userId: idUser
+        });
+
+        masterTable.insert({chunkGuid: chunkGuid , metadataTable: metadata, slavesIp: slavesIp , usersId : usersId});
 
     }
     else
     {
+        //TODO Controllare anche che l'idUser corrisponda? Dipende se facciamo la condivisione dei file tra più utenti.
         foundGuid.slavesIp.push({
             slaveIp: slaveIp
         });
 
         masterTable.update(foundGuid);
-
     }
 
     buildSlaveOccupation(slaveIp);
@@ -180,21 +185,30 @@ function removeFromOccupationTableFn(slaveIp, chunkGuids)
 
 }
 
-
-//TO COMPLETE
-function getAllMetadataByUserFn(userId) {
-
-    masterTable.chain().data().forEach(function (table){
-        var obj = {'userId': userId};
-        var foundUser = table.findObject(obj);
-
-        if(foundUser)
-        {
-
-        }
-
-        var metadataT = table.metadataTable;
-        console.log("TABLE: "+metadataT);
-    });
+function getTableFn() {
+    return masterTable;
 }
 
+function getAllMetadataByUserFn(userId) {
+
+ //   console.log("tabella master...................");
+ //   masterTable.printTable();
+
+    var matchedTables = [];
+
+    masterTable.chain().data().forEach(function (table){
+
+        console.log("FOR EACH: ***********");
+        console.log(table);
+
+        var users = table.usersId;
+        users.forEach(function (idUser){
+            if(idUser.userId == userId)
+            {
+                matchedTables.push(table);
+            }
+        });
+    });
+
+    return matchedTables;
+}

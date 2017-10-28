@@ -10,7 +10,6 @@ var pendingMetadata = require('../../model/master/pendingMetadata');
 var path = require("path");
 
 
-
 exports.sendSlaveListAndGuid = sendSlaveListAndGuidFn;
 
 exports.guidGenerator = guidGeneratorFn;
@@ -43,7 +42,7 @@ function sendSlaveListAndGuidFn(req, res) {
         console.log("Generated GUID: "+guid);
 
         //save metadata
-        pendingMetadata.addFileMetadata(guid, req.body.fileName, req.body.absPath, req.body.extension, req.body.sizeFile, req.body.idClient, req.body.lastModified);
+        pendingMetadata.addFileMetadata(guid, req.body.fileName, req.body.destRelPath, req.body.extension, req.body.sizeFile, req.body.idClient, req.body.lastModified);
 
         //genera slaveList
         var slaveServers = masterController.buildSlaveList();
@@ -81,7 +80,8 @@ function sendSlaveListAndGuidFn(req, res) {
                             type: "UPINFO",     //info the customer needs from master to update a file
                             guid: guid,
 //                            slaveList: slaveServers,
-                            path: req.body.absPath,
+                            origPath: req.body.origAbsPath,
+                            destPath: req.body.destRelPath,
                             ipSlave: res.body.ipSlave
                         }
                     };
@@ -109,19 +109,33 @@ function checkAndSaveMetadataFn(req, res) {
 
         //    console.log(req.body.chunkGuid+"..."+req.body.userId+"..."+req.body.ipServer+'\n');
 
-        var metadata = [];
+        var metadata = '';
 
         var foundMetaD = pendingMetadata.checkIfPending(req.body.chunkGuid, req.body.userId);
         if (foundMetaD) {
-            metadata.push({
+            metadata = {
                 name: foundMetaD.name,
                 absPath: foundMetaD.absPath,
                 size: foundMetaD.size,
                 extension: foundMetaD.extension,
                 lastModified: foundMetaD.lastModified
-            });
+            };
             masterTable.addChunkRef(req.body.chunkGuid, metadata, req.body.ipServer, req.body.userId);
             console.log("Added "+req.body.chunkGuid+" in master table with metadata\n!");
+
+
+
+
+            //E' una prova!!!!!!!!!!!!!!!!!!!!!!!!!!!
+         /*   var matchTable = masterTable.getAllMetadataByUser('Debora');
+            console.log("^^^^^^^^^^^^^^^^^^^^^^");
+            console.log("GUID con Debora: ");
+            matchTable.forEach(function (t) {
+
+                console.log(t.metadataTable.absPath);
+            });
+            console.log("^^^^^^^^^^^^^^^^^^^^^^");*/
+
             pendingMetadata.removeMetaD(req.body.chunkGuid, req.body.userId)
         }
         else console.log("Error adding metadata file to table.");
@@ -137,8 +151,6 @@ function checkAndSaveMetadataFn(req, res) {
                 name: metadata[0].name
             }
         };*/
-
         res.send({status: 'OK'});
-        //TODO send ACK to client and slave!!!
     }
 }

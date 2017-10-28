@@ -18,10 +18,6 @@ var process = require('process');
 
 var fse = require('fs-extra');
 
-
-//var shell = require('shelljs');
-
-
 var ip = require('ip');
 var fs=require('fs');
 var chunkList = require('../../model/chunkList');
@@ -130,7 +126,6 @@ function uploadFileFn(req, res) {
 
 //            console.log("Chunk metadata: "+chunkMetaData);
             request(objFileSaved, function (err, res) {
-
                     if (err) {
                            console.log(err);
                        }
