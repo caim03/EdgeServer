@@ -40,7 +40,7 @@ function addChunkRefFn(chunkGuid, metadata, slaveIp, idUser)
             userId: idUser
         });
 
-        masterTable.insert({chunkGuid: chunkGuid , metadataTable: metadata, slavesIp: slavesIp , usersId : usersId});
+        masterTable.insert({chunkguid: chunkGuid , metadataTable: metadata, slavesIp: slavesIp , usersId : usersId});
 
     }
     else
@@ -141,6 +141,7 @@ function checkGuidFn(IpServer, guid)
 
 function getAllChunksBySlaveFn(IpServer)
 {
+
     var chunkguids = [];
     masterTable.chain().data().forEach(function (table){
         var ips = table.slavesIp;

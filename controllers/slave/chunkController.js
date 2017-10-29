@@ -12,6 +12,7 @@ var rebalancingController = require('../master/rebalancingController');
 
 var chunkList = require('../../model/chunkList');
 
+var slaveTable = require('../../model/slave/slaveTable');
 var masterTable = require('../../model/masterTable');
 
 /* Variabile timer per la gestione dei fallimenti del master e avvio di un elezione */
@@ -28,7 +29,7 @@ exports.genTopology = genTopologyFn;
 exports.subscribeToMaster = subscribeToMasterFn;
 exports.receiveHeartbeat = receiveHeartbeatFn;
 exports.waitHeartbeat = waitHeartbeatFn;
-exports.getAllMetaData = getAllMetaDataFn;
+exports.getAllChunkData = getAllChunkDataFn;
 
 exports.receiveProclamation = receiveProclamationFn;
 
@@ -205,9 +206,9 @@ function startElection() {
     }
 }
 
-function getAllMetaDataFn(req, res){
+function getAllChunkDataFn(req, res){
 
-    res.send(chunkList.getChunkList());
+    res.send(slaveTable.getAllChunk());
 
 }
 

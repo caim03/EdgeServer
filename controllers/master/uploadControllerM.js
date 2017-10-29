@@ -151,6 +151,6 @@ function checkAndSaveMetadataFn(req, res) {
                 name: metadata[0].name
             }
         };*/
-        res.send({status: 'OK'});
+        res.send({status: 'OK',metadata : metadata});
     }
 }

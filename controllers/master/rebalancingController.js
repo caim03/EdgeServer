@@ -5,6 +5,7 @@
 var masterTable = require('../../model/masterTableDb');
 var chunkServer = require('../../model/chunkServer');
 var chunkList = require('../../model/chunkList');
+var slaveTable = require('../../model/slave/slaveTable');
 var syncRequest = require('sync-request');
 var masterController = require('./masterController');
 var ip = require("ip");
@@ -34,7 +35,7 @@ function newMasterRebalancmentFn()
     chunkServer.getChunk().forEach(function (server) {
         if(server.ip !== ip.address()) {
             var obj = {
-                url: 'http://' + server.ip + ':' + config.port + '/api/chunk/metadata',
+                url: 'http://' + server.ip + ':' + config.port + '/api/chunk/getAllChunkData',
                 method: 'GET'
             };
 
@@ -42,18 +43,20 @@ function newMasterRebalancmentFn()
 
             var receivedChunks = JSON.parse(res.getBody('utf8'));
             receivedChunks.forEach(function (chunk) {
-                masterTable.addChunkRef(chunk.guid, server.ip);
+
+                masterTable.addChunkRef(chunk.chunkGuid,chunk.metadata, server.ip,chunk.userId);
             })
         }
-    })
+    });
+
     //Per ogni elemento nella mia chunklist:
     //Creo la tabella di disponibilità ordinata della master table
     //Invio il chunk al primo della tabella che non abbia gia quel chunk
     var sended = false;
     var slaveServers = masterController.buildSlaveList(); //TODO Tabella fissata prima del ribilanciamento - si potrebbe aggiornarla mano mano ad ogni invio, ma ovviamente operazione + costosa
-    chunkList.getChunkList().forEach(function (chunk) {
+    slaveTable.getAllChunk().forEach(function (chunk) {
         sended = false;
-        var guid = chunk.guid;
+        var guid = chunk.chunkGuid;
         slaveServers.forEach(function (server) {
             if(!sended)
                 if(!masterTable.checkGuid(server,guid)) {
@@ -74,8 +77,8 @@ function newMasterRebalancmentFn()
                         }
 
                     })
-                    addChunkGuidInTableFn(server, guid);
-                    //TODO Invio fisico del chunk!
+                    masterTable.addChunkRef(guid,chunk.metadata, server,chunk.userId);
+                    //TODO X DEB Invio fisico del chunk! guid - chunk.metadata - server - chunk.userId
                     sended = true;
                 }
         })
@@ -107,6 +110,7 @@ function crushedSlaveRebalancmentFn(slave)
     var slaveServers = masterController.buildSlaveList();//TODO Tabella fissata prima del ribilanciamento - si potrebbe aggiornarla mano mano ad ogni invio, ma ovviamente operazione + costosa
     var sended = false;
     chunkGuids.forEach(function (chunks) {
+
         sended = false;
         var chunkguid = chunks.chunkguid;
         if(slaveServers.length!=0)
@@ -129,10 +133,9 @@ function crushedSlaveRebalancmentFn(slave)
                                 return;
                             }
                         });
-                        addChunkGuidInTableFn(server, chunkguid);
-                        //TODO X DEBORA Invio fisico del chunk! 2 OPZIONI: 1)Master manda (ip nuovo slave,guid) al vecchio slave che a sua volta invierà il file
-                        //Mi serve: path del file nello slave, ip del server a cui inviare il file e il guid del file e id del client che ha accesso al file.
-
+                        masterTable.addChunkRef(chunks.chunkGuid,chunks.metadata, server,chunks.userId);    //add idClient
+                        //TODO X DEBORA Invio fisico del chunk! Master manda (ip nuovo slave,guid) al vecchio slave che a sua volta invierà il file
+                        //TODO chunks.chunkguid - chunks.metadata - chunks.userId - server(è proprio l'ip del server!)
                         sended = true;
                     }
 
@@ -141,6 +144,7 @@ function crushedSlaveRebalancmentFn(slave)
             console.log("NON HO TROVATO VALIDI SLAVES PER " + chunkguid);
     })
 
+    masterTable.printTable();
 
 }
 
