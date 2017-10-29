@@ -6,6 +6,8 @@ var ip = require("ip");
 var chunkList = require('../../model/chunkList');
 var syncRequest = require('sync-request');
 var masterController = require('./masterController');
+var readFileControllerM = require('./readFileControllerM');
+
 var pendingMetadata = require('../../model/master/pendingMetadata');
 var path = require("path");
 
@@ -124,17 +126,9 @@ function checkAndSaveMetadataFn(req, res) {
             console.log("Added "+req.body.chunkGuid+" in master table with metadata\n!");
 
 
+            //PROVO A GENERARE IL JSON CON L'ALBERO DEI PATH
+        //    readFileControllerM.prova('Debora');
 
-
-            //E' una prova!!!!!!!!!!!!!!!!!!!!!!!!!!!
-         /*   var matchTable = masterTable.getAllMetadataByUser('Debora');
-            console.log("^^^^^^^^^^^^^^^^^^^^^^");
-            console.log("GUID con Debora: ");
-            matchTable.forEach(function (t) {
-
-                console.log(t.metadataTable.absPath);
-            });
-            console.log("^^^^^^^^^^^^^^^^^^^^^^");*/
 
             pendingMetadata.removeMetaD(req.body.chunkGuid, req.body.userId)
         }
