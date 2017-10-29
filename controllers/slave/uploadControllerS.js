@@ -15,13 +15,11 @@ var formidable = require('formidable');
 var multiparty = require('multiparty');
 var util = require('util');
 var process = require('process');
-
-var fse = require('fs-extra');
-
 var ip = require('ip');
 var fs=require('fs');
 var chunkList = require('../../model/chunkList');
 var mkdirp = require('mkdirp');
+var slaveTable = require('../../model/slave/slaveTable');
 
 const Writable = require('stream');
 var path = require("path");
@@ -90,7 +88,7 @@ function uploadFileFn(req, res) {
 
     console.log("...UPLOADING FILE...");
 
-    var chunkMetaData = {};
+    var chunkData = {};
 
     form
         .on('field', function (field, value) {
@@ -122,15 +120,18 @@ function uploadFileFn(req, res) {
                    }
                };
 
-            chunkMetaData.guid= fields[0][1];
 
-//            console.log("Chunk metadata: "+chunkMetaData);
+            chunkData.guid= fields[0][1];
+            chunkData.userId = fields[1][1];
             request(objFileSaved, function (err, res) {
                     if (err) {
                            console.log(err);
                        }
+
                     if(res.body.status == 'OK')
                     {
+                        chunkData.metadata = res.body.metadata;
+                        slaveTable.insertChunk(chunkData.guid,chunkData.metadata,chunkData.userId);
                         var obj = {
                             url: 'http://' + req.connection.remoteAddress + ':6603/api/client/fileSavedSuccess',
                             method: 'POST',
@@ -151,7 +152,8 @@ function uploadFileFn(req, res) {
                    })
                    .on('end', function () {
                        console.log('-> upload done!'+'\n');
-   //                    res.writeHead(200, {'content-type': 'text/plain'});
+
+                       //                    res.writeHead(200, {'content-type': 'text/plain'});
               //         res.statusCode = 200;
                        res.send({status: 'ACK'});
                });
@@ -162,7 +164,8 @@ function uploadFileFn(req, res) {
                    //    res.end("file.txt");
                });
 
-    chunkList.pushChunk(chunkMetaData);
+
+    // chunkList.pushChunk(chunkMetaData);
 
   //  console.log("Chunk list: ");
   //  console.log(chunkList.getChunkList());
