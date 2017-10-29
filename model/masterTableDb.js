@@ -191,19 +191,16 @@ function getTableFn() {
 
 function getAllMetadataByUserFn(userId) {
 
- //   console.log("tabella master...................");
- //   masterTable.printTable();
-
     var matchedTables = [];
 
     masterTable.chain().data().forEach(function (table){
 
-        console.log("FOR EACH: ***********");
-        console.log(table);
+//        console.log("FOR EACH: ***********");
+//        console.log(table);
 
         var users = table.usersId;
         users.forEach(function (idUser){
-            if(idUser.userId == userId)
+            if(idUser.userId === userId)
             {
                 matchedTables.push(table);
             }

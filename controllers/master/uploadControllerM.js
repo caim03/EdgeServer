@@ -126,8 +126,10 @@ function checkAndSaveMetadataFn(req, res) {
             console.log("Added "+req.body.chunkGuid+" in master table with metadata\n!");
 
 
-            //PROVO A GENERARE IL JSON CON L'ALBERO DEI PATH
-        //    readFileControllerM.prova('Debora');
+            //TODO PER CHRISTIAN -> ESEMPIO DI COME RICHIAMARE LA FUNZIONE PER RESTITUIRE TUTTO L'ALBERO DEI FILE. MANCA SOLO LA POST AL CLIENT QUANDO ARRIVA RICHIESTA DALLO STESSO, DA RICHIAMARE IN UN ALTRO PUNTO DEL CODICE, QUI E' SOLO DI ESEMPIO.
+       //     var tree = readFileControllerM.getAllMetadata('Debora');
+       //     readFileControllerM.prettyJSONFn(tree);
+
 
 
             pendingMetadata.removeMetaD(req.body.chunkGuid, req.body.userId)
