@@ -61,22 +61,23 @@ function newMasterRebalancmentFn()
             if(!sended)
                 if(!masterTable.checkGuid(server,guid)) {
                     console.log("SPEDISCO " + guid + " A " + server);
-                    var obj = {
-                        url: 'http://' + server + ':' + config.port + '/api/chunk/sendToSlave',
-                        method: 'POST',
-                        json: {
-                            type: "CHUNK",
-                            guid: guid,
-                            ipServer: server
-                        }
-                    };
-                    request(obj, function (err, res) {
-                        if (err) {
-                            console.log(err);
-                            return;
-                        }
+                    // non servono più
+                    // var obj = {
+                    //     url: 'http://' + server + ':' + config.port + '/api/chunk/sendToSlave' ,
+                    //     method: 'POST',
+                    //     json: {
+                    //         type: "CHUNK",
+                    //         guid: guid,
+                    //         ipServer: server
+                    //     }
+                    // };
+                    // request(obj, function (err, res) {
+                    //     if (err) {
+                    //         console.log(err);
+                    //         return;
+                    //     }
 
-                    })
+                    // })
                     masterTable.addChunkRef(guid,chunk.metadata, server,chunk.userId);
                     //TODO X DEB Invio fisico del chunk! guid - chunk.metadata - server - chunk.userId
                     sended = true;
@@ -117,35 +118,43 @@ function crushedSlaveRebalancmentFn(slave)
             slaveServers.forEach(function (server) {
                 if (!sended)
                     if (!masterTable.checkGuid(server, chunkguid)) {
-                        console.log("SPEDISCO " + chunkguid + " A " + server);
-                        var obj = {
-                            url: 'http://' + server + ':' + config.port + '/api/chunk/sendToSlave',
-                            method: 'POST',
-                            json: {
-                                type: "CHUNK",
-                                guid: chunkguid,
-                                ipServer: server
-                            }
-                        };
-                        request(obj, function (err, res) {
-                            if (err) {
-                                // console.log(err);
-                                return;
-                            }
-                        });
+                        var oldSlave = masterTable.getOneSlaveByGuid(chunkguid);
+
+                        if(!oldSlave)
+                            console.log("NON RIESCO A TROVARE UNO SLAVE A CUI RICHIEDERE IL CHUNK");
+                        else
+                        {
+                        console.log("SPEDISCO " + chunkguid + " A " + server + " LO SLAVE A CUI CHIEDO IL CHUNK è " + oldSlave);
+
+                        // NON SERVE PIù
+                        // var obj = {
+                        //     url: 'http://' + server + ':' + config.port + '/api/chunk/sendToSlave',
+                        //     method: 'POST',
+                        //     json: {
+                        //         type: "CHUNK",
+                        //         guid: chunkguid,
+                        //         ipServer: server
+                        //     }
+                        // };
+                        // request(obj, function (err, res) {
+                        //     if (err) {
+                        //         // console.log(err);
+                        //         return;
+                        //     }
+                        // });
+
                         masterTable.addChunkRef(chunks.chunkGuid,chunks.metadata, server,chunks.userId);    //add idClient
                         //TODO X DEBORA Invio fisico del chunk! Master manda (ip nuovo slave,guid) al vecchio slave che a sua volta invierà il file
-                        //TODO chunks.chunkguid - chunks.metadata - chunks.userId - server(è proprio l'ip del server!)
+                        //TODO chunks.chunkguid - chunks.metadata - chunks.userId - server(ip del server a cui inviare il chunk) - oldSlave(sarebbe lo slave che possiede il chunk)
+                        //TODO master -> oldSlave -> newSlave
                         sended = true;
+                        }
                     }
 
             });
         if(!sended)
             console.log("NON HO TROVATO VALIDI SLAVES PER " + chunkguid);
     })
-
-    masterTable.printTable();
-
 }
 
 //Aggiunge in tabella il chank guid e l'ip dello slave che lo possiede.

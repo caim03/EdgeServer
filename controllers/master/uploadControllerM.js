@@ -136,7 +136,7 @@ function checkAndSaveMetadataFn(req, res) {
             });
             console.log("^^^^^^^^^^^^^^^^^^^^^^");*/
 
-            pendingMetadata.removeMetaD(req.body.chunkGuid, req.body.userId)
+            // pendingMetadata.removeMetaD(req.body.chunkGuid, req.body.userId)
         }
         else console.log("Error adding metadata file to table.");
         //    console.log("TABELLA.....");
