@@ -82,10 +82,10 @@ function newMasterRebalancmentFn()
                     //TODO X DEB Invio fisico del chunk! guid - chunk.metadata - server - chunk.userId
                     sended = true;
                 }
-        })
+        });
         if(!sended)
             console.log("NON HO TROVATO VALIDI SLAVES PER " + guid);
-    })
+    });
     chunkList.cleanList();
     // console.log("REBALANCMENT COMPLETED");
 
