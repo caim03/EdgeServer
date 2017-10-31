@@ -143,10 +143,30 @@ function crushedSlaveRebalancmentFn(slave)
                         //     }
                         // });
 
+                        console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'+chunks.usersId);
+                        console.log("metadata: "+chunks.metadata);
+
                         masterTable.addChunkRef(chunks.chunkGuid,chunks.metadata, server,chunks.userId);    //add idClient
                         //TODO X DEBORA Invio fisico del chunk! Master manda (ip nuovo slave,guid) al vecchio slave che a sua volta invierà il file
                         //TODO chunks.chunkguid - chunks.metadata - chunks.userId - server(ip del server a cui inviare il chunk) - oldSlave(sarebbe lo slave che possiede il chunk)
                         //TODO master -> oldSlave -> newSlave
+
+                        var obj = {
+                            url: 'http://' + oldSlave + ':6601/api/chunk/fileDistributionReq',
+                            method: 'POST',
+                            json: {
+                                type: "FILE_DISTRIBUTION",
+                                guid: chunkguid,
+                                server: server,
+                                usersId: chunks.usersId
+                            }
+                        };
+                        request(obj, function (err, res) {
+                            if(err) {
+                                console.log(err);
+                            }
+                        });
+
                         sended = true;
                         }
                     }

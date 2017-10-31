@@ -70,7 +70,7 @@ function sendSlaveListAndGuidFn(req, res) {
                 if (err) {
                     console.log(err);
                 }
-                if(res.body.status == 'OK')
+                if(res.body.status === 'OK')
                 {
                     console.log("<-  Received ACK from "+server);
                     console.log("->  Authorizing the client "+req.body.ipClient+" to contact the server "+server);

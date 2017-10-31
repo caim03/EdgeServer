@@ -9,10 +9,13 @@ var slaveTable = lokiDb.addCollection('slaveTable');
 
 exports.insertChunk = insertChunkFn;
 exports.getAllChunk = getAllChunkFn;
+exports.getChunk= getChunkFn;
+exports.printTable = printTableFn;
+
 function insertChunkFn(chunkguid, metadata, userId)
 {
 
-    slaveTable.insert({chunkGuid: chunkguid , metadata:metadata, userId : userId});
+    slaveTable.insert({chunkGuid: chunkguid , metadata: metadata, userId: userId});
 }
 
 function getAllChunkFn()
@@ -20,11 +23,16 @@ function getAllChunkFn()
     return slaveTable.chain().data();
 }
 
-function printTable() {
+function printTableFn() {
 
        slaveTable.chain().data().forEach(function (table) {
             console.log(table)
         });
+}
 
-
+function getChunkFn(chunkGuid) {
+    var obj = {'chunkGuid': chunkGuid};
+    var foundChunk= slaveTable.findOne(obj);
+    console.log("foundChunk: "+foundChunk);
+    return foundChunk;
 }

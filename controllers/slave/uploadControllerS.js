@@ -25,10 +25,10 @@ const Writable = require('stream');
 var path = require("path");
 
 exports.savePendingRequest = savePendingRequest;
-
 exports.uploadFile = uploadFileFn;
-
 exports.checkIfPending = checkIfPendingFn;
+exports.sendFile = sendFileFn;
+exports.saveChunk = saveChunkFn;
 
 /**
  * A slave receives (guid, ipClient) authorized from master and saves temporally the pending request.
@@ -170,4 +170,82 @@ function uploadFileFn(req, res) {
   //  console.log("Chunk list: ");
   //  console.log(chunkList.getChunkList());
 
+}
+
+//If a slave crushed, its files must be distributed.
+function sendFileFn(req, res) {
+    console.log("+++++++++++++++++");
+    if(req.body.type === 'FILE_DISTRIBUTION') {
+        slaveTable.printTable();
+            var foundChunk = slaveTable.getChunk(req.body.guid);
+            if (foundChunk) {
+                req.body.usersId.forEach(function (user) {
+                    //TODO Invio file per ogni utente oppure invio file con array di utenti e salvo nello slave nuovo per tutti gli utenti.
+                    console.log("Chunk " + req.body.guid + " - " + user + " trovato nello slave");
+                    var formData = {
+                        guid: req.body.guid,
+                        idUser: user.userId,
+                        destRelPath: foundChunk.metadata.absPath,
+                        my_file: fs.createReadStream(user.userId + '/' + foundChunk.metadata.absPath)
+                    };
+                    console.log(user.userId + '/' + foundChunk.metadata.absPath + ' --> path da cui prendere il file.');
+                    request.post({url:'http://'+req.body.server+':6601/api/chunk/newDistributedChunk', formData: formData}, function optionalCallback(err, res) {
+                        if (err) {
+                            return console.error('upload failed:', err);
+                        }
+                        if(res.body.status == 'ACK')
+                        {
+                            console.log("Ack per la ridistribuzione del file ricevuto.");
+                            console.log("File saved in master table.");
+                        }
+                    });
+                });
+
+            }
+            else console.log("Chunk " + req.body.guid+" - "+ user + " NON trovato.");
+    }
+    console.log("+++++++++++++++++");
+    res.send({
+        status: 'OK'
+    });
+}
+
+function saveChunkFn(req, res) {
+
+    console.log("Sto per salvare il chunk.");
+    var form = new formidable.IncomingForm(),
+        files = [],
+        fields = [];
+    form
+        .on('field', function (field, value) {
+            fields.push([field, value]);
+        })
+        .on('file', function (field, file) {
+            files.push([field, file]);
+        })
+        .on('fileBegin', function (name, file) {
+            /*   if (!fs.existsSync(fields[1][1]))
+                   fs.mkdirSync(fields[1][1]);*/
+
+            shell.mkdir('-p', path.dirname(fields[1][1] + '/' + fields[2][1]));
+
+
+            file.path = fields[1][1] + '/' + fields[2][1];
+
+            console.log("PATH IN CUI SALVO IL NUOVO FILE: "+file.path);
+
+            var logStream = fs.createWriteStream(file.path, {'flags': 'a'});
+// use {'flags': 'a'} to append and {'flags': 'w'} to erase and write a new file
+            logStream.write('Initial line...');
+            logStream.end('this is the end line');
+
+        })
+        .on('end', function () {
+                console.log('-> upload done!'+'\n');
+
+                //                    res.writeHead(200, {'content-type': 'text/plain'});
+                //         res.statusCode = 200;
+                res.send({status: 'ACK'});
+        });
+        form.parse(req);
 }

@@ -151,7 +151,7 @@ function getOneSlaveByGuidFn(guid)
         return null;
 }
 
-    function getAllChunksBySlaveFn(IpServer)
+function getAllChunksBySlaveFn(IpServer)
 {
 
     var chunkguids = [];
@@ -160,7 +160,9 @@ function getOneSlaveByGuidFn(guid)
         ips.forEach(function (slave) {
             if (slave.slaveIp === IpServer)
                 chunkguids.push({
-                    chunkguid: table.chunkguid
+                    chunkguid: table.chunkguid,
+                    metadata: table.metadataTable,
+                    usersId: table.usersId
                 });
         });
     });
