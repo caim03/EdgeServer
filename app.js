@@ -26,6 +26,16 @@ app.listen(config.port, config.ip, function() {
   console.log("server starting on " + config.ip + ':' + config.port + " IP: " + ip.address());
 });
 
+/*var timeout = express.timeout // express v3 and below
+var timeout = require('connect-timeout'); //express v4
+
+app.use(timeout(120000));
+app.use(haltOnTimedout);
+
+function haltOnTimedout(req, res, next){
+    if (!req.timedout) next();
+}*/
+
 
 if (process.argv[2] === "master") {
     info.setInfoMaster(true);

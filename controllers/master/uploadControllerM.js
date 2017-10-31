@@ -70,7 +70,11 @@ function sendSlaveListAndGuidFn(req, res) {
                 if (err) {
                     console.log(err);
                 }
-                if(res.body.status === 'OK')
+           /*     res.setTimeout(5000, function() {
+                    console.log('timed out');
+                    res.abort();
+                }); */
+                if(!err && res.statusCode === 200)
                 {
                     console.log("<-  Received ACK from "+server);
                     console.log("->  Authorizing the client "+req.body.ipClient+" to contact the server "+server);
@@ -127,8 +131,8 @@ function checkAndSaveMetadataFn(req, res) {
 
 
             //TODO PER CHRISTIAN -> ESEMPIO DI COME RICHIAMARE LA FUNZIONE PER RESTITUIRE TUTTO L'ALBERO DEI FILE. MANCA SOLO LA POST AL CLIENT QUANDO ARRIVA RICHIESTA DALLO STESSO, DA RICHIAMARE IN UN ALTRO PUNTO DEL CODICE, QUI E' SOLO DI ESEMPIO.
-       //     var tree = readFileControllerM.getAllMetadata('Debora');
-       //     readFileControllerM.prettyJSONFn(tree);
+   //         var tree = readFileControllerM.getAllMetadata('Debora');
+   //         readFileControllerM.prettyJSONFn(tree);
 
 
 

@@ -28,7 +28,6 @@ function getAllMetadataFn(user) {
 function checkIfFoundFn(name, arr) {
     var foundedPos = -1;
     var i;
-    console.log("Array "+arr.length);
     for(i=0; i<arr.length; i++)
     {
         if(arr[i].name === name)
@@ -50,7 +49,7 @@ function createDirectoryTreeFn(matchedMetadata) {
     var current = [];
 
     matchedMetadata.forEach(function (table) {
-        console.log("Path for Debora: "+table.metadataTable.absPath);
+     //   console.log("Path for Debora: "+table.metadataTable.absPath);
         parsedPath = path.parse(table.metadataTable.absPath);
         current = tree;
         var arr = parsedPath.dir.split('/');

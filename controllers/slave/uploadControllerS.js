@@ -44,6 +44,7 @@ function savePendingRequest(req, res) {
         console.log("("+req.body.guid+" - "+req.body.idClient+") saved as pending request!");
         console.log("->  Sending ack to master...\n");
     }
+    res.statusCode = 200;
     res.send({ ipSlave: ip.address(), status: 'OK'});
 }
 
@@ -101,9 +102,9 @@ function uploadFileFn(req, res) {
          /*   if (!fs.existsSync(fields[1][1]))
                 fs.mkdirSync(fields[1][1]);*/
 
-            shell.mkdir('-p', path.dirname(fields[1][1] + '/' + fields[2][1]));
+            shell.mkdir('-p', path.dirname(ip.address()+'/'+fields[1][1] + '/' + fields[2][1]));
 
-            file.path = fields[1][1] + '/' + fields[2][1];
+            file.path = ip.address()+'/'+fields[1][1] + '/' + fields[2][1];
             pendingReq.removeReq(fields[0][1], fields[1][1]);
 
             //INVIO GUID-USER AL MASTER DA CONFRONTARE NELLA PENDING METADATA TABLE.
@@ -121,48 +122,46 @@ function uploadFileFn(req, res) {
                };
 
 
-            chunkData.guid= fields[0][1];
-            chunkData.userId = fields[1][1];
-            request(objFileSaved, function (err, res) {
-                    if (err) {
-                           console.log(err);
-                       }
+                chunkData.guid= fields[0][1];
+                chunkData.userId = fields[1][1];
+                request(objFileSaved, function (err, res) {
+                        if (err) {
+                               console.log(err);
+                           }
 
-                    if(res.body.status == 'OK')
-                    {
-                        chunkData.metadata = res.body.metadata;
-                        slaveTable.insertChunk(chunkData.guid,chunkData.metadata,chunkData.userId);
-                        var obj = {
-                            url: 'http://' + req.connection.remoteAddress + ':6603/api/client/fileSavedSuccess',
-                            method: 'POST',
-                            json: {
-                                type: "FILE_SAVED_SUCC",
-                                nameFile: file.name
-                            }
-                        };
-                        request(obj, function (err, res) {
-                            if(err)
-                                console.log(err);
-                        })
+                        if(res.body.status == 'OK')
+                        {
+                            chunkData.metadata = res.body.metadata;
+                            slaveTable.insertChunk(chunkData.guid,chunkData.metadata,chunkData.userId);
+                            var obj = {
+                                url: 'http://' + req.connection.remoteAddress + ':6603/api/client/fileSavedSuccess',
+                                method: 'POST',
+                                json: {
+                                    type: "FILE_SAVED_SUCC",
+                                    nameFile: file.name
+                                }
+                            };
+                            request(obj, function (err, res) {
+                                if(err)
+                                    console.log(err);
+                            })
 
-                    }
-               });
+                        }
+                   });
+            })
+           .on('end', function () {
+               console.log('-> upload done!'+'\n');
 
-
-                   })
-                   .on('end', function () {
-                       console.log('-> upload done!'+'\n');
-
-                       //                    res.writeHead(200, {'content-type': 'text/plain'});
-              //         res.statusCode = 200;
-                       res.send({status: 'ACK'});
-               });
-               form.parse(req);
-               req.on('end', function() {
-                   //    writeStream.end();
-                   //    res.statusCode = 200;
-                   //    res.end("file.txt");
-               });
+               //                    res.writeHead(200, {'content-type': 'text/plain'});
+      //         res.statusCode = 200;
+               res.send({status: 'ACK'});
+           });
+           form.parse(req);
+           req.on('end', function() {
+               //    writeStream.end();
+               //    res.statusCode = 200;
+               //    res.end("file.txt");
+           });
 
 
     // chunkList.pushChunk(chunkMetaData);
@@ -174,29 +173,27 @@ function uploadFileFn(req, res) {
 
 //If a slave crushed, its files must be distributed.
 function sendFileFn(req, res) {
-    console.log("+++++++++++++++++");
     if(req.body.type === 'FILE_DISTRIBUTION') {
         slaveTable.printTable();
             var foundChunk = slaveTable.getChunk(req.body.guid);
             if (foundChunk) {
                 req.body.usersId.forEach(function (user) {
                     //TODO Invio file per ogni utente oppure invio file con array di utenti e salvo nello slave nuovo per tutti gli utenti.
-                    console.log("Chunk " + req.body.guid + " - " + user + " trovato nello slave");
+                //    console.log("Chunk " + req.body.guid + " - " + user + " trovato nello slave");
                     var formData = {
                         guid: req.body.guid,
                         idUser: user.userId,
                         destRelPath: foundChunk.metadata.absPath,
-                        my_file: fs.createReadStream(user.userId + '/' + foundChunk.metadata.absPath)
+                        my_file: fs.createReadStream(ip.address()+'/'+user.userId + '/' + foundChunk.metadata.absPath)
                     };
-                    console.log(user.userId + '/' + foundChunk.metadata.absPath + ' --> path da cui prendere il file.');
+               //     console.log(user.userId + '/' + foundChunk.metadata.absPath + ' --> path da cui prendere il file.');
                     request.post({url:'http://'+req.body.server+':6601/api/chunk/newDistributedChunk', formData: formData}, function optionalCallback(err, res) {
                         if (err) {
                             return console.error('upload failed:', err);
                         }
-                        if(res.body.status == 'ACK')
+                        if(res.body.status === 'ACK')
                         {
-                            console.log("Ack per la ridistribuzione del file ricevuto.");
-                            console.log("File saved in master table.");
+                            console.log("File "+foundChunk.metadata.absPath+" saved in "+req.body.server);
                         }
                     });
                 });
@@ -204,7 +201,6 @@ function sendFileFn(req, res) {
             }
             else console.log("Chunk " + req.body.guid+" - "+ user + " NON trovato.");
     }
-    console.log("+++++++++++++++++");
     res.send({
         status: 'OK'
     });
@@ -212,7 +208,6 @@ function sendFileFn(req, res) {
 
 function saveChunkFn(req, res) {
 
-    console.log("Sto per salvare il chunk.");
     var form = new formidable.IncomingForm(),
         files = [],
         fields = [];
@@ -227,17 +222,14 @@ function saveChunkFn(req, res) {
             /*   if (!fs.existsSync(fields[1][1]))
                    fs.mkdirSync(fields[1][1]);*/
 
-            shell.mkdir('-p', path.dirname(fields[1][1] + '/' + fields[2][1]));
 
 
-            file.path = fields[1][1] + '/' + fields[2][1];
+//            shell.mkdir('-p', path.dirname(fields[1][1] + '2/' + fields[2][1]));
+//            file.path = fields[1][1] + '2/' + fields[2][1];
 
-            console.log("PATH IN CUI SALVO IL NUOVO FILE: "+file.path);
-
-            var logStream = fs.createWriteStream(file.path, {'flags': 'a'});
-// use {'flags': 'a'} to append and {'flags': 'w'} to erase and write a new file
-            logStream.write('Initial line...');
-            logStream.end('this is the end line');
+            shell.mkdir('-p', path.dirname(ip.address()+'/'+fields[1][1] + '/' + fields[2][1]));
+            file.path = ip.address()+'/'+fields[1][1] + '/' + fields[2][1];
+            console.log("Saving file in "+file.path);
 
         })
         .on('end', function () {
@@ -248,4 +240,10 @@ function saveChunkFn(req, res) {
                 res.send({status: 'ACK'});
         });
         form.parse(req);
+        req.on('end', function() {
+            //    writeStream.end();
+                res.statusCode = 200;
+            //    res.end("file.txt");
+        });
+
 }
