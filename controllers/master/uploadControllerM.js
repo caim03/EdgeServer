@@ -33,18 +33,20 @@ function guidGeneratorFn() {
  * @param req
  * @param res
  */
-function sendSlaveListAndGuidFn(req, res) {
+function sendSlaveListAndGuidFn(req, res1) {
 
-    if(req.body.type == "METADATA"){
+    if(req.body.type === "METADATA"){
 
         //Genera GUID
         var guid = guidGeneratorFn();
         console.log("<-  Received metadata for file "+req.body.fileName);
 
+        var slavesList = [];
+
         console.log("Generated GUID: "+guid);
 
         //save metadata
-        pendingMetadata.addFileMetadata(guid, req.body.fileName, req.body.destRelPath, req.body.extension, req.body.sizeFile, req.body.idClient, req.body.lastModified);
+        pendingMetadata.addFileMetadata(guid, req.body.fileName, req.body.destRelPath, req.body.extension, req.body.sizeFile, req.body.idUser, req.body.lastModified);
 
         //genera slaveList
         var slaveServers = masterController.buildSlaveList();
@@ -54,7 +56,7 @@ function sendSlaveListAndGuidFn(req, res) {
         });
 
         //Master sends (GUID, IdClient) to slaves
-        var idClient = req.body.idClient;
+        var idUser = req.body.idUser;
         slaveServers.forEach(function (server) {
             var objToSlave = {
                 url: 'http://' + server + ':6601/api/chunk/newChunkGuidMaster',
@@ -62,11 +64,11 @@ function sendSlaveListAndGuidFn(req, res) {
                 json: {
                     type: "GUID_MASTER",
                     guid: guid,
-                    idClient: idClient
+                    idUser: idUser
                 }
             };
-            console.log("->  Sending ("+guid+" - "+idClient+") to server "+server);
-            request(objToSlave, function (err, res) {
+            console.log("->  Sending ("+guid+" - "+idUser+") to server "+server);
+            request(objToSlave, function (err, res2) {
                 if (err) {
                     console.log(err);
                 }
@@ -74,44 +76,38 @@ function sendSlaveListAndGuidFn(req, res) {
                     console.log('timed out');
                     res.abort();
                 }); */
-                if(!err && res.statusCode === 200)
+                if(!err && res2.statusCode === 200)
                 {
                     console.log("<-  Received ACK from "+server);
-                    console.log("->  Authorizing the client "+req.body.ipClient+" to contact the server "+server);
-                    //SEND TO CLIENT THE AUTHORIZATION TO SEND REQUEST TO SLAVES.
-                    var objGuidSlaves = {
-                        url: 'http://' + req.body.ipClient  + ':6603/api/client/sendRequest',
-                        method: 'POST',
-                        json: {
+                    console.log("->  Authorizing the client "+idUser+" to contact the server "+server);
+
+                    slavesList.push(res2.body.ipSlave);
+
+                    if(slavesList.length=== config.replicationNumber)
+                    {
+//                            console.log("Lista slaves: ---------------");
+//                            slavesList.forEach(function (t) { console.log(t) });
+                        var objGuidSlaves = {
                             type: "UPINFO",     //info the customer needs from master to update a file
                             guid: guid,
-//                            slaveList: slaveServers,
-                            origPath: req.body.origAbsPath,
-                            destPath: req.body.destRelPath,
-                            ipSlave: res.body.ipSlave
-                        }
-                    };
-
-                    request(objGuidSlaves, function (err, res) {
-                        if (err) {
-                            console.log(err);
-                        }
-                    });
+                     //       origPath: req.body.origAbsPath,
+                     //       destPath: req.body.destRelPath,
+                            ipSlaves: slavesList
+                        };
+                        res1.send(objGuidSlaves);
+                    }
                 }
             });
         });
-        res.send({status: 'OK'});
     }
-
 }
 
 function checkAndSaveMetadataFn(req, res) {
 
-
-    if(req.body.type == 'UPLOADING_SUCCESS') {
+    if(req.body.type === 'UPLOADING_SUCCESS') {
         console.log(req.body.ipServer+"-> upload completed, saving (" + req.body.chunkGuid + " - " + req.body.userId + ") to master table.\n");
 
-        var ipSlave = req.connection.remoteAddress;
+        var ipSlave = req.body.slaveIp;
 
         //    console.log(req.body.chunkGuid+"..."+req.body.userId+"..."+req.body.ipServer+'\n');
 
@@ -127,7 +123,7 @@ function checkAndSaveMetadataFn(req, res) {
                 lastModified: foundMetaD.lastModified
             };
             masterTable.addChunkRef(req.body.chunkGuid, metadata, req.body.ipServer, req.body.userId);
-            console.log("Added "+req.body.chunkGuid+" in master table with metadata\n!");
+            console.log("Added "+req.body.chunkGuid+" in master table with metadata!\n");
 
 
             //TODO PER CHRISTIAN -> ESEMPIO DI COME RICHIAMARE LA FUNZIONE PER RESTITUIRE TUTTO L'ALBERO DEI FILE. MANCA SOLO LA POST AL CLIENT QUANDO ARRIVA RICHIESTA DALLO STESSO, DA RICHIAMARE IN UN ALTRO PUNTO DEL CODICE, QUI E' SOLO DI ESEMPIO.
@@ -141,16 +137,6 @@ function checkAndSaveMetadataFn(req, res) {
         else console.log("Error adding metadata file to table.");
         //    console.log("TABELLA.....");
         //    masterTable.printTable();
-
-
-    /*    var objMetadataSaved = {
-            url: 'http://' + ipSlave + ':6601/api/chunk/metadataSaved',
-            method: 'POST',
-            json: {
-                type: "METADATA_SAVED",
-                name: metadata[0].name
-            }
-        };*/
         res.send({status: 'OK',metadata : metadata});
     }
 }

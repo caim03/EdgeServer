@@ -40,12 +40,12 @@ function savePendingRequest(req, res) {
 
     if(req.body.type == "GUID_MASTER")
     {
-        pendingReq.addNewReq(req.body.guid, req.body.idClient);
-        console.log("("+req.body.guid+" - "+req.body.idClient+") saved as pending request!");
+        pendingReq.addNewReq(req.body.guid, req.body.idUser);
+        console.log("("+req.body.guid+" - "+req.body.idUser+") saved as pending request!");
         console.log("->  Sending ack to master...\n");
     }
     res.statusCode = 200;
-    res.send({ ipSlave: ip.address(), status: 'OK'});
+    res.send({ ipSlave: ip.address(), guid: req.body.guid});
 }
 
 /**
@@ -58,10 +58,10 @@ function checkIfPendingFn(req, res) {
   //  console.log("PENDING REQUESTS:");
   //  pendingReq.printTable();
   //  console.log("\n");
-    if(req.body.type == 'GUID_CLIENT') {
-        console.log("<-  Received ("+req.body.guid+" - "+req.body.idClient+") from client.");
-        if (pendingReq.checkIfPending(req.body.guid, req.body.idClient)) {
-            console.log("("+req.body.guid + " - " + req.body.idClient + ") founded as pending, authorizing client to send file.\n");
+    if(req.body.type === 'GUID_CLIENT') {
+        console.log("<-  Received ("+req.body.guid+" - "+req.body.idUser+") from client.");
+        if (pendingReq.checkIfPending(req.body.guid, req.body.idUser)) {
+            console.log("("+req.body.guid + " - " + req.body.idUser + ") founded as pending, authorizing client to send file.\n");
             var obj = {
                 type: "ACK_PENDING",
                 guid: req.body.guid,
@@ -79,7 +79,7 @@ function checkIfPendingFn(req, res) {
  * @param req
  * @param res
  */
-function uploadFileFn(req, res) {
+function uploadFileFn(req, res1) {
 
     //TODO Da verificare: il caricamento effettivo del file avviene dopo aver comunicato al master di averlo salvato???
 
@@ -117,52 +117,50 @@ function uploadFileFn(req, res) {
                        type: "UPLOADING_SUCCESS",
                        ipServer: ip.address(),
                        chunkGuid: fields[0][1],
-                       userId: fields[1][1]
+                       userId: fields[1][1],
+                       slaveIp: ip.address()
                    }
                };
 
 
                 chunkData.guid= fields[0][1];
                 chunkData.userId = fields[1][1];
-                request(objFileSaved, function (err, res) {
-                        if (err) {
-                               console.log(err);
-                           }
-
-                        if(res.body.status == 'OK')
-                        {
-                            chunkData.metadata = res.body.metadata;
-                            slaveTable.insertChunk(chunkData.guid,chunkData.metadata,chunkData.userId);
-                            var obj = {
-                                url: 'http://' + req.connection.remoteAddress + ':6603/api/client/fileSavedSuccess',
-                                method: 'POST',
-                                json: {
-                                    type: "FILE_SAVED_SUCC",
-                                    nameFile: file.name
-                                }
-                            };
-                            request(obj, function (err, res) {
-                                if(err)
-                                    console.log(err);
-                            })
-
-                        }
-                   });
+                request(objFileSaved, function (err, res2) {
+                    if (err) {
+                           console.log(err);
+                    }
+                    if(res2.body.status === 'OK')
+                    {
+                        console.log("Notifying "+fields[1][1]+" the uploading success of "+file.name);
+                        chunkData.metadata = res2.body.metadata;
+                        slaveTable.insertChunk(chunkData.guid,chunkData.metadata,chunkData.userId);
+                        var obj = {
+                            type: "FILE_SAVED_SUCCESS",
+                            nameFile: file.name
+                        };
+                        res1.send(obj);
+                   /*     var obj = {
+                            url: 'http://' + req.connection.remoteAddress + ':6603/api/client/fileSavedSuccess',
+                            method: 'POST',
+                            json: {
+                                type: "FILE_SAVED_SUCC",
+                                nameFile: file.name
+                            }
+                        };
+                        request(obj, function (err, res) {
+                            if(err)
+                                console.log(err);
+                        })*/
+                    }
+                });
             })
            .on('end', function () {
                console.log('-> upload done!'+'\n');
 
                //                    res.writeHead(200, {'content-type': 'text/plain'});
       //         res.statusCode = 200;
-               res.send({status: 'ACK'});
            });
            form.parse(req);
-           req.on('end', function() {
-               //    writeStream.end();
-               //    res.statusCode = 200;
-               //    res.end("file.txt");
-           });
-
 
     // chunkList.pushChunk(chunkMetaData);
 
