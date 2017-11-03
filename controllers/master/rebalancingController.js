@@ -114,7 +114,7 @@ function crushedSlaveRebalancmentFn(slave)
 
         sended = false;
         var chunkguid = chunks.chunkguid;
-        if(slaveServers.length!=0)
+        if(slaveServers.length!==0)
             slaveServers.forEach(function (server) {
                 if (!sended)
                     if (!masterTable.checkGuid(server, chunkguid)) {
@@ -126,30 +126,8 @@ function crushedSlaveRebalancmentFn(slave)
                         {
                         console.log("SPEDISCO " + chunkguid + " A " + server + " LO SLAVE A CUI CHIEDO IL CHUNK è " + oldSlave);
 
-                        // NON SERVE PIù
-                        // var obj = {
-                        //     url: 'http://' + server + ':' + config.port + '/api/chunk/sendToSlave',
-                        //     method: 'POST',
-                        //     json: {
-                        //         type: "CHUNK",
-                        //         guid: chunkguid,
-                        //         ipServer: server
-                        //     }
-                        // };
-                        // request(obj, function (err, res) {
-                        //     if (err) {
-                        //         // console.log(err);
-                        //         return;
-                        //     }
-                        // });
-
-                        console.log('^^^^^^^^^^^^^^^^^^^^^^^^^^^^^'+chunks.usersId);
-                        console.log("metadata: "+chunks.metadata);
-
                         masterTable.addChunkRef(chunks.chunkGuid,chunks.metadata, server,chunks.userId);    //add idClient
-                        //TODO X DEBORA Invio fisico del chunk! Master manda (ip nuovo slave,guid) al vecchio slave che a sua volta invierà il file
-                        //TODO chunks.chunkguid - chunks.metadata - chunks.userId - server(ip del server a cui inviare il chunk) - oldSlave(sarebbe lo slave che possiede il chunk)
-                        //TODO master -> oldSlave -> newSlave
+                        // Invio fisico del chunk! Master manda (ip nuovo slave,guid) al vecchio slave che a sua volta invierà il file
 
                         var obj = {
                             url: 'http://' + oldSlave + ':6601/api/chunk/fileDistributionReq',

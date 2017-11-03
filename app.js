@@ -42,16 +42,6 @@ if (process.argv[2] === "master") {
 
     console.log('I am the master.');
 
- //   masterTable.addChunkRef(1234,123);
-//    console.log("Tabella: "+masterTable.getObjectForChunkId(1234));
-
- /*   for(var i=0; i<masterTable.getTable().length; i++)
-    {
-        console.log("i: "+i);
-        console.log(masterTable.getTable().chunkId+" - "+masterTable.getTable().slaveIp);
-    }
-*/
-
     masterController.subscribeToBalancer();
     masterController.heartbeatMessage();
 }

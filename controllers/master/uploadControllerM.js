@@ -105,11 +105,7 @@ function sendSlaveListAndGuidFn(req, res1) {
 function checkAndSaveMetadataFn(req, res) {
 
     if(req.body.type === 'UPLOADING_SUCCESS') {
-        console.log(req.body.ipServer+"-> upload completed, saving (" + req.body.chunkGuid + " - " + req.body.userId + ") to master table.\n");
-
-        var ipSlave = req.body.slaveIp;
-
-        //    console.log(req.body.chunkGuid+"..."+req.body.userId+"..."+req.body.ipServer+'\n');
+        console.log(req.body.slaveIp+"-> upload completed, saving (" + req.body.chunkGuid + " - " + req.body.userId + ") to master table.\n");
 
         var metadata = '';
 
@@ -117,18 +113,18 @@ function checkAndSaveMetadataFn(req, res) {
         if (foundMetaD) {
             metadata = {
                 name: foundMetaD.name,
-                absPath: foundMetaD.absPath,
+                relPath: foundMetaD.relPath,
                 size: foundMetaD.size,
                 extension: foundMetaD.extension,
                 lastModified: foundMetaD.lastModified
             };
-            masterTable.addChunkRef(req.body.chunkGuid, metadata, req.body.ipServer, req.body.userId);
+            masterTable.addChunkRef(req.body.chunkGuid, metadata, req.body.slaveIp, req.body.userId);
             console.log("Added "+req.body.chunkGuid+" in master table with metadata!\n");
 
 
             //TODO PER CHRISTIAN -> ESEMPIO DI COME RICHIAMARE LA FUNZIONE PER RESTITUIRE TUTTO L'ALBERO DEI FILE. MANCA SOLO LA POST AL CLIENT QUANDO ARRIVA RICHIESTA DALLO STESSO, DA RICHIAMARE IN UN ALTRO PUNTO DEL CODICE, QUI E' SOLO DI ESEMPIO.
-   //         var tree = readFileControllerM.getAllMetadata('Debora');
-   //         readFileControllerM.prettyJSONFn(tree);
+     //       var tree = readFileControllerM.getAllMetadata('Debora');
+     //       readFileControllerM.prettyJSONFn(tree);
 
 
 

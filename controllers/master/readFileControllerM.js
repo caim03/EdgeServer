@@ -49,8 +49,8 @@ function createDirectoryTreeFn(matchedMetadata) {
     var current = [];
 
     matchedMetadata.forEach(function (table) {
-     //   console.log("Path for Debora: "+table.metadataTable.absPath);
-        parsedPath = path.parse(table.metadataTable.absPath);
+     //   console.log("Path for Debora: "+table.metadataTable.relPath);
+        parsedPath = path.parse(table.metadataTable.relPath);
         current = tree;
         var arr = parsedPath.dir.split('/');
         for(i=0; i<arr.length; i++)

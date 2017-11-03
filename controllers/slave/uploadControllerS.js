@@ -81,8 +81,6 @@ function checkIfPendingFn(req, res) {
  */
 function uploadFileFn(req, res1) {
 
-    //TODO Da verificare: il caricamento effettivo del file avviene dopo aver comunicato al master di averlo salvato???
-
     var form = new formidable.IncomingForm(),
         files = [],
         fields = [];
@@ -115,13 +113,11 @@ function uploadFileFn(req, res1) {
                    method: 'POST',
                    json: {
                        type: "UPLOADING_SUCCESS",
-                       ipServer: ip.address(),
                        chunkGuid: fields[0][1],
                        userId: fields[1][1],
                        slaveIp: ip.address()
                    }
                };
-
 
                 chunkData.guid= fields[0][1];
                 chunkData.userId = fields[1][1];
@@ -131,34 +127,20 @@ function uploadFileFn(req, res1) {
                     }
                     if(res2.body.status === 'OK')
                     {
-                        console.log("Notifying "+fields[1][1]+" the uploading success of "+file.name);
+                        console.log("->  Notifying "+fields[1][1]+" the uploading success of "+file.name);
                         chunkData.metadata = res2.body.metadata;
                         slaveTable.insertChunk(chunkData.guid,chunkData.metadata,chunkData.userId);
-                        var obj = {
+                        var objSuccess = {
                             type: "FILE_SAVED_SUCCESS",
                             nameFile: file.name
                         };
-                        res1.send(obj);
-                   /*     var obj = {
-                            url: 'http://' + req.connection.remoteAddress + ':6603/api/client/fileSavedSuccess',
-                            method: 'POST',
-                            json: {
-                                type: "FILE_SAVED_SUCC",
-                                nameFile: file.name
-                            }
-                        };
-                        request(obj, function (err, res) {
-                            if(err)
-                                console.log(err);
-                        })*/
+                        res1.statusCode = 200;
+                        res1.send(objSuccess);
                     }
                 });
             })
            .on('end', function () {
                console.log('-> upload done!'+'\n');
-
-               //                    res.writeHead(200, {'content-type': 'text/plain'});
-      //         res.statusCode = 200;
            });
            form.parse(req);
 
@@ -166,7 +148,6 @@ function uploadFileFn(req, res1) {
 
   //  console.log("Chunk list: ");
   //  console.log(chunkList.getChunkList());
-
 }
 
 //If a slave crushed, its files must be distributed.
@@ -181,17 +162,17 @@ function sendFileFn(req, res) {
                     var formData = {
                         guid: req.body.guid,
                         idUser: user.userId,
-                        destRelPath: foundChunk.metadata.absPath,
-                        my_file: fs.createReadStream(ip.address()+'/'+user.userId + '/' + foundChunk.metadata.absPath)
+                        destRelPath: foundChunk.metadata.relPath,
+                        my_file: fs.createReadStream(ip.address()+'/'+user.userId + '/' + foundChunk.metadata.relPath)
                     };
-               //     console.log(user.userId + '/' + foundChunk.metadata.absPath + ' --> path da cui prendere il file.');
+               //     console.log(user.userId + '/' + foundChunk.metadata.relPath + ' --> path da cui prendere il file.');
                     request.post({url:'http://'+req.body.server+':6601/api/chunk/newDistributedChunk', formData: formData}, function optionalCallback(err, res) {
                         if (err) {
                             return console.error('upload failed:', err);
                         }
                         if(res.body.status === 'ACK')
                         {
-                            console.log("File "+foundChunk.metadata.absPath+" saved in "+req.body.server);
+                            console.log("File "+foundChunk.metadata.relPath+" saved in "+req.body.server);
                         }
                     });
                 });
