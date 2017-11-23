@@ -7,11 +7,8 @@ var serverInfo = require('../../model/serverInfo');
 var masterController = require('../master/masterController');
 var chunkList = require('../../model/chunkList');
 var pendingReq = require('../../model/slave/pendingRequests');
-
 var shell = require('shelljs');
-
 var formidable = require('formidable');
-
 var multiparty = require('multiparty');
 var util = require('util');
 var process = require('process');
@@ -20,7 +17,6 @@ var fs=require('fs');
 var chunkList = require('../../model/chunkList');
 var mkdirp = require('mkdirp');
 var slaveTable = require('../../model/slave/slaveTable');
-
 const Writable = require('stream');
 var path = require("path");
 
@@ -38,7 +34,7 @@ exports.saveChunk = saveChunkFn;
  */
 function savePendingRequest(req, res) {
 
-    if(req.body.type == "GUID_MASTER")
+    if(req.body.type === "GUID_MASTER")
     {
         pendingReq.addNewReq(req.body.guid, req.body.idUser);
         console.log("("+req.body.guid+" - "+req.body.idUser+") saved as pending request!");
@@ -77,7 +73,7 @@ function checkIfPendingFn(req, res) {
  * The slave saves the file received by the client.
  *
  * @param req
- * @param res
+ * @param res1
  */
 function uploadFileFn(req, res1) {
 

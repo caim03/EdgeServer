@@ -13,20 +13,20 @@ var config = require('../../config/config');
 var request = require('request');
 
 
-
-
 exports.newMasterRebalancment = newMasterRebalancmentFn;
 exports.crushedSlaveRebalancment = crushedSlaveRebalancmentFn;
 exports.addChunkGuidInTable = addChunkGuidInTableFn;
 
 
 /**
- *  Hey sono un nuovo master!
- *  1) Scrivo a tutti nella rete, e gli chiedo tutti i metadati dei chunk in loro possesso
- *  2) Aggiorno mano mano la tabella master
- *  3) Infine distribuisco i miei chunks a chi ha il carico minore
+ *  Questa funzione viene richiamata dal generico server dopo che viene eletto come nuovo master:
+ *      1) Scrivo a tutti nella rete, e gli chiedo tutti i metadati dei chunk in loro possesso
+ *      2) Aggiorno mano mano la tabella master
+ *      3) Infine distribuisco i miei chunks a chi ha il carico minore
  *
- *  TODO NB LOCKARE STO PROCESSO + BUFFERIZZARE (Load Balancer?) le richieste fino a ribilanciamento completato
+ *      4) TODO NB LOCKARE STO PROCESSO + BUFFERIZZARE (Load Balancer?) le richieste fino a ribilanciamento completato
+ *
+ *  @return null
  */
 function newMasterRebalancmentFn()
 {
@@ -92,11 +92,13 @@ function newMasterRebalancmentFn()
 }
 
 /**
- *  Dopo che uno slave crasha
+ *  Dopo che uno slave crasha:
+ *      1) Cerca tutti i chunk relativi a quello slave nella tabella
+ *      2) Ribilancia quei chunk ad altri slave
+ *      3) Aggiorna la tabella
  *
- *  1) Cerca tutti i chunk relativi a quello slave nella tabella
- *  2) Ribilancia quei chunk ad altri slave
- *  3) Aggiorna la tabella
+ *  @param slave
+ *  @return null
  */
 function crushedSlaveRebalancmentFn(slave)
 {
@@ -156,8 +158,15 @@ function crushedSlaveRebalancmentFn(slave)
 }
 
 //Aggiunge in tabella il chank guid e l'ip dello slave che lo possiede.
-function addChunkGuidInTableFn(slaveIp, chankGuid)
+/**
+ * Questa funzione aggiunge nella tabella il chunk guid e l'ip dello slave che lo possiede.
+ *
+ * @param slaveIp
+ * @param chunkGuid
+ * @return null
+ */
+function addChunkGuidInTableFn(slaveIp, chunkGuid)
 {
-    masterTable.addChunkRef(chankGuid, slaveIp);    //add idClient
+    masterTable.addChunkRef(chunkGuid, slaveIp);    //add idClient
     masterTable.printTable();
 }

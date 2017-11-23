@@ -3,8 +3,8 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var config = require('./config/config');
-var masterController = require('./controllers/master/masterController');
-var chunkController = require('./controllers/slave/chunkController');
+var topologyMasterController = require('./controllers/master/topologyController');
+var topologySlaveController = require('./controllers/slave/topologyController');
 var info = require('./model/serverInfo');
 var ip = require('ip');
 
@@ -42,18 +42,16 @@ if (process.argv[2] === "master") {
 
     console.log('I am the master.');
 
-    masterController.subscribeToBalancer();
-    masterController.heartbeatMessage();
+    topologyMasterController.subscribeToBalancer();
+    topologyMasterController.heartbeatMessage();
 }
 else {
     info.setInfoMaster(false);
 
     console.log('I am a slave.');
 
-//    masterController.sendChunkToMaster();
+    topologySlaveController.findMaster();
+    topologySlaveController.subscribeToMaster();
 
-    chunkController.findMaster();
-    chunkController.subscribeToMaster();
-
-    chunkController.waitHeartbeat();
+    topologySlaveController.waitHeartbeat();
 }

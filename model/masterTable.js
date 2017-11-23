@@ -21,7 +21,7 @@ function addChunkRefFn(chunkGuid, slaveIp)
         if(table.chunkguid === chunkGuid) {
             table.slavesIp.push({
                 slaveIp: slaveIp
-            })
+            });
             found = true;
         }
     });

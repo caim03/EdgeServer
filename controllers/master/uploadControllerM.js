@@ -7,16 +7,14 @@ var chunkList = require('../../model/chunkList');
 var syncRequest = require('sync-request');
 var masterController = require('./masterController');
 var readFileControllerM = require('./readFileControllerM');
-
 var pendingMetadata = require('../../model/master/pendingMetadata');
 var path = require("path");
 
 
 exports.sendSlaveListAndGuid = sendSlaveListAndGuidFn;
-
 exports.guidGenerator = guidGeneratorFn;
-
 exports.checkAndSaveMetadata = checkAndSaveMetadataFn;
+
 
 function guidGeneratorFn() {
     var S4 = function() {
@@ -31,7 +29,7 @@ function guidGeneratorFn() {
  * After the answer of the server X, the master sends (GUID, server X) to client.
  *
  * @param req
- * @param res
+ * @param res1
  */
 function sendSlaveListAndGuidFn(req, res1) {
 
@@ -72,10 +70,12 @@ function sendSlaveListAndGuidFn(req, res1) {
                 if (err) {
                     console.log(err);
                 }
-           /*     res.setTimeout(5000, function() {
+
+                /*  res.setTimeout(5000, function() {
                     console.log('timed out');
                     res.abort();
                 }); */
+
                 if(!err && res2.statusCode === 200)
                 {
                     console.log("<-  Received ACK from "+server);
@@ -85,13 +85,13 @@ function sendSlaveListAndGuidFn(req, res1) {
 
                     if(slavesList.length=== config.replicationNumber)
                     {
-//                            console.log("Lista slaves: ---------------");
-//                            slavesList.forEach(function (t) { console.log(t) });
+                        // console.log("Lista slaves: ---------------");
+                        // slavesList.forEach(function (t) { console.log(t) });
                         var objGuidSlaves = {
                             type: "UPINFO",     //info the customer needs from master to update a file
                             guid: guid,
-                     //       origPath: req.body.origAbsPath,
-                     //       destPath: req.body.destRelPath,
+                        //  origPath: req.body.origAbsPath,
+                        //  destPath: req.body.destRelPath,
                             ipSlaves: slavesList
                         };
                         res1.send(objGuidSlaves);
@@ -102,6 +102,13 @@ function sendSlaveListAndGuidFn(req, res1) {
     }
 }
 
+/**
+ * Questa funzione permette al master di effettuare dei controlli sui metadati ricevuti dal client e
+ * ,in caso positivo, li memorizza.
+ *
+ * @param req
+ * @param res
+ */
 function checkAndSaveMetadataFn(req, res) {
 
     if(req.body.type === 'UPLOADING_SUCCESS') {
@@ -122,14 +129,15 @@ function checkAndSaveMetadataFn(req, res) {
             console.log("Added "+req.body.chunkGuid+" in master table with metadata!\n");
 
 
-            //TODO PER CHRISTIAN -> ESEMPIO DI COME RICHIAMARE LA FUNZIONE PER RESTITUIRE TUTTO L'ALBERO DEI FILE. MANCA SOLO LA POST AL CLIENT QUANDO ARRIVA RICHIESTA DALLO STESSO, DA RICHIAMARE IN UN ALTRO PUNTO DEL CODICE, QUI E' SOLO DI ESEMPIO.
-     //       var tree = readFileControllerM.getAllMetadata('Debora');
-     //       readFileControllerM.prettyJSONFn(tree);
+            // TODO PER CHRISTIAN -> ESEMPIO DI COME RICHIAMARE LA FUNZIONE PER RESTITUIRE TUTTO L'ALBERO DEI FILE. MANCA SOLO LA POST AL CLIENT QUANDO ARRIVA RICHIESTA DALLO STESSO, DA RICHIAMARE IN UN ALTRO PUNTO DEL CODICE, QUI E' SOLO DI ESEMPIO.
+            // var tree = readFileControllerM.getAllMetadata('Debora');
+            // readFileControllerM.prettyJSONFn(tree);
 
 
 
             // pendingMetadata.removeMetaD(req.body.chunkGuid, req.body.userId)
         }
+
         else console.log("Error adding metadata file to table.");
         //    console.log("TABELLA.....");
         //    masterTable.printTable();
