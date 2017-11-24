@@ -1,10 +1,9 @@
 var request = require('request');
-var syncRequest = require('sync-request');
 var config = require('../../config/config');
 var masterTable = require('../../model/masterTableDb');
 var pendingReq = require('../../model/slave/pendingRequests');
 var process = require('process');
-var fse = require('fs-extra');
+//var fse = require('fs-extra');
 var ip = require('ip');
 var fs=require('fs');
 var path = require("path");

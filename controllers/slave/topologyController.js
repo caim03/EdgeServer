@@ -8,7 +8,7 @@ var chunkServers = require('../../model/chunkServer');
 var serverInfo = require('../../model/serverInfo');
 var master = require('../../model/masterServer');
 var request = require('request');
-var election = require('electionController');
+var election = require('../slave/electionController');
 
 
 exports.findMaster = findMasterFn;

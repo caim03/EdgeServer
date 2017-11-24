@@ -8,7 +8,7 @@ var master = require('../../model/masterServer');
 var chunkServers = require('../../model/chunkServer');
 var serverInfo = require('../../model/serverInfo');
 var masterTopologyController = require('../master/topologyController');
-var slaveTopologyController = require('topologyController');
+var slaveTopologyController = require('../slave/topologyController');
 var rebalancingController = require('../master/rebalancingController');
 
 var chunkList = require('../../model/chunkList');
