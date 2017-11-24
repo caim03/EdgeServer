@@ -30,12 +30,12 @@ function getAllMetadataFn(user) {
 }
 
 /**
- * // TODO commentare la funzione
+ * // Questa funzione permette di verificare l'esistenza di un elemento (file) dentro un array (directory tree)
  *
  * @param name
  * @param arr
  * @return foundPos
- * */
+ */
 function checkIfFoundFn(name, arr) {
     var foundPos = -1;
     var i;
