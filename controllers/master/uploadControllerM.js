@@ -81,8 +81,8 @@ function sendSlaveListAndGuidFn(req, res1) {
                     console.log("<-  Received ACK from "+server);
                     console.log("->  Authorizing the client "+idUser+" to contact the server "+server);
 
-                    slavesList.push(res2.body.ipSlave);
-
+                    // slavesList.push(res2.body.ipSlave);
+                    slavesList.push(server);
                     if(slavesList.length=== config.replicationNumber)
                     {
                         // console.log("Lista slaves: ---------------");
