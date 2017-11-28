@@ -6,7 +6,9 @@ var config = require('./config/config');
 var topologyMasterController = require('./controllers/master/topologyController');
 var topologySlaveController = require('./controllers/slave/topologyController');
 var info = require('./model/serverInfo');
-var ip = require('ip');
+var ip = require('./model/ip');
+
+// var ip = require('ip');
 
 //var masterTable = require('./model/masterTable');
 
@@ -20,10 +22,17 @@ app.use(express.static(__dirname + '/public'));
 require('./routes/masterRoute')(app);
 require('./routes/chunkRoute')(app);
 
+
+ip.setAddress();
+ip.getPrivateIp();
+
+
+
+
 // start server on the specified port and binding host
 app.listen(config.port, config.ip, function() {
   // print a message when the server starts listening
-  console.log("server starting on " + config.ip + ':' + config.port + " IP: " + ip.address());
+  console.log("server starting on " + config.ip + ':' + config.port + " IP: " + ip.getPrivateIp());
 });
 
 /*var timeout = express.timeout // express v3 and below
@@ -35,7 +44,6 @@ app.use(haltOnTimedout);
 function haltOnTimedout(req, res, next){
     if (!req.timedout) next();
 }*/
-
 
 if (process.argv[2] === "master") {
     info.setInfoMaster(true);

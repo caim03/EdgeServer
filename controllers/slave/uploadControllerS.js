@@ -12,7 +12,7 @@ var formidable = require('formidable');
 var multiparty = require('multiparty');
 var util = require('util');
 var process = require('process');
-var ip = require('ip');
+var ip = require('../../model/ip');
 var fs=require('fs');
 var chunkList = require('../../model/chunkList');
 var mkdirp = require('mkdirp');
@@ -41,7 +41,7 @@ function savePendingRequest(req, res) {
         console.log("->  Sending ack to master...\n");
     }
     res.statusCode = 200;
-    res.send({ ipSlave: ip.address(), guid: req.body.guid});
+    res.send({ ipSlave: ip.getPublicIp(), guid: req.body.guid});
 }
 
 /**
@@ -61,11 +61,11 @@ function checkIfPendingFn(req, res) {
             var obj = {
                 type: "ACK_PENDING",
                 guid: req.body.guid,
-                ipServer: ip.address()
+                ipServer: ip.getPublicIp()
             };
             res.send(obj);
         }
-        else console.log("You have not been authorized by server to upload " + req.body.guid + " in " + ip.address());
+        else console.log("You have not been authorized by server to upload " + req.body.guid + " in " + ip.getPrivateIp());
     }
 }
 
@@ -96,9 +96,9 @@ function uploadFileFn(req, res1) {
          /*   if (!fs.existsSync(fields[1][1]))
                 fs.mkdirSync(fields[1][1]);*/
 
-            shell.mkdir('-p', path.dirname(ip.address()+'/'+fields[1][1] + '/' + fields[2][1]));
+            shell.mkdir('-p', path.dirname(ip.getPublicIp()+'/'+fields[1][1] + '/' + fields[2][1]));
 
-            file.path = ip.address()+'/'+fields[1][1] + '/' + fields[2][1];
+            file.path = ip.getPublicIp()+'/'+fields[1][1] + '/' + fields[2][1];
             pendingReq.removeReq(fields[0][1], fields[1][1]);
 
             //INVIO GUID-USER AL MASTER DA CONFRONTARE NELLA PENDING METADATA TABLE.
@@ -111,7 +111,7 @@ function uploadFileFn(req, res1) {
                        type: "UPLOADING_SUCCESS",
                        chunkGuid: fields[0][1],
                        userId: fields[1][1],
-                       slaveIp: ip.address()
+                       slaveIp: ip.getPublicIp()
                    }
                };
 
@@ -159,7 +159,7 @@ function sendFileFn(req, res) {
                         guid: req.body.guid,
                         idUser: user.userId,
                         destRelPath: foundChunk.metadata.relPath,
-                        my_file: fs.createReadStream(ip.address()+'/'+user.userId + '/' + foundChunk.metadata.relPath)
+                        my_file: fs.createReadStream(ip.getPublicIp()+'/'+user.userId + '/' + foundChunk.metadata.relPath)
                     };
                //     console.log(user.userId + '/' + foundChunk.metadata.relPath + ' --> path da cui prendere il file.');
                     request.post({url:'http://'+req.body.server+':6601/api/chunk/newDistributedChunk', formData: formData}, function optionalCallback(err, res) {
@@ -202,8 +202,8 @@ function saveChunkFn(req, res) {
 //            shell.mkdir('-p', path.dirname(fields[1][1] + '2/' + fields[2][1]));
 //            file.path = fields[1][1] + '2/' + fields[2][1];
 
-            shell.mkdir('-p', path.dirname(ip.address()+'/'+fields[1][1] + '/' + fields[2][1]));
-            file.path = ip.address()+'/'+fields[1][1] + '/' + fields[2][1];
+            shell.mkdir('-p', path.dirname(ip.getPublicIp()+'/'+fields[1][1] + '/' + fields[2][1]));
+            file.path = ip.getPublicIp()+'/'+fields[1][1] + '/' + fields[2][1];
             console.log("Saving file in "+file.path);
 
         })

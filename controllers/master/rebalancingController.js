@@ -8,7 +8,7 @@ var chunkList = require('../../model/chunkList');
 var slaveTable = require('../../model/slave/slaveTable');
 var syncRequest = require('sync-request');
 var masterController = require('./masterController');
-var ip = require("ip");
+var ip = require("../../model/ip");
 var config = require('../../config/config');
 var request = require('request');
 
@@ -33,7 +33,7 @@ function newMasterRebalancmentFn()
     // console.log("STARTING REBALANCMENT");
     masterTable.cleanTable();
     chunkServer.getChunk().forEach(function (server) {
-        if(server.ip !== ip.address()) {
+        if(server.ip !== ip.getPublicIp()) {
             var obj = {
                 url: 'http://' + server.ip + ':' + config.port + '/api/chunk/getAllChunkData',
                 method: 'GET'
