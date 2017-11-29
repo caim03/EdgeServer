@@ -1,5 +1,6 @@
 const publicIp = require('public-ip');
 const privateIp = require('ip');
+var info = require('./serverInfo');
 var ipP = null;
 exports.setAddress = setAddressFn;
 exports.getPublicIp = getPublicIpFn;
@@ -7,13 +8,11 @@ exports.getPrivateIp = getPrivateIpFn;
 
 function setAddressFn(){
 
-    var pippo = publicIp.v4().then(ip => {
-        console.log("your public ip address", ip);
+    var publicPromise = publicIp.v4().then(ip => {
         return ip;
     });
 
-    Promise.resolve(pippo).then(function(value) {
-        console.log(value);
+    Promise.resolve(publicPromise).then(function(value) {
         ipP = value;  // "Success"
     }, function(value) {
         // not called
@@ -23,7 +22,11 @@ function setAddressFn(){
 
 function getPublicIpFn()
 {
-  return ipP;
+
+  if(info.getLocal())
+    return privateIp.address();
+  else
+    return ipP;
 }
 
 function getPrivateIpFn() {

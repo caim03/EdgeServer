@@ -45,6 +45,14 @@ function haltOnTimedout(req, res, next){
     if (!req.timedout) next();
 }*/
 
+if(process.argv[3] === "local")
+{
+    info.setLocal(true);
+    config.balancerIp = "172.17.0.2";
+    console.log("working in local");
+
+}
+
 if (process.argv[2] === "master") {
     info.setInfoMaster(true);
 

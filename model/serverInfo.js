@@ -9,6 +9,8 @@ exports.setInfoId = setInfoIdFn;
 exports.getInfoId = getInfoIdFn;
 exports.setInfoMaster = setInfoMasterFn;
 exports.getInfoMaster = getInfoMasterFn;
+exports.setLocal = setLocalFn;
+exports.getLocal = getLocalFn;
 
 function getInfoFn() {
     return info;
@@ -32,4 +34,14 @@ function setInfoMasterFn(bool) {
 
 function getInfoMasterFn() {
     return info.master;
+}
+
+function setLocalFn(bool)
+{
+    info.local = bool;
+}
+
+function getLocalFn()
+{
+    return info.local;
 }
