@@ -143,6 +143,10 @@ function uploadFileFn(req, res1) {
                     }
                 });
             })
+            .on('error', function (error) {
+                console.log(error);
+
+            })
            .on('end', function () {
 
                console.log("END");
