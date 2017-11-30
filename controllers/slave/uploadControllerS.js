@@ -83,7 +83,7 @@ function uploadFileFn(req, res1) {
 
     console.log("...UPLOADING FILE...");
 
-    console.log(req.body);
+    console.log(req);
 
     var chunkData = {};
 
@@ -138,10 +138,8 @@ function uploadFileFn(req, res1) {
                     res1.send(objSuccess);
                 }
             });
-            console.log("PORCODIOFILEBEGIN");
         })
         .on('file', function (field, file) {
-            console.log("FILE");
             files.push([field, file]);
         })
 
