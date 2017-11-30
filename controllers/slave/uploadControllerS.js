@@ -83,6 +83,8 @@ function uploadFileFn(req, res1) {
 
     console.log("...UPLOADING FILE...");
 
+    console.log(req.body);
+
     var chunkData = {};
 
     form
