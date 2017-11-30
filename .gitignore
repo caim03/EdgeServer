@@ -59,7 +59,8 @@ typings/
 # dotenv environment variables file
 .env
 
-
+JetBrains.Dockerfile
+JetBrains1.Dockerfile
 .idea/workspace.xml
 /node_modules/
 /Root/

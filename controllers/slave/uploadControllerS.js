@@ -96,11 +96,14 @@ function uploadFileFn(req, res1) {
          /*   if (!fs.existsSync(fields[1][1]))
                 fs.mkdirSync(fields[1][1]);*/
 
-            shell.mkdir('-p', path.dirname(ip.getPublicIp()+'/'+fields[1][1] + '/' + fields[2][1]));
 
-            file.path = ip.getPublicIp()+'/'+fields[1][1] + '/' + fields[2][1];
+            console.log(fields);
+            console.log(path.dirname(ip.getPublicIp()+'/'+fields[1][1]  + fields[2][1]));
+            shell.mkdir('-p', path.dirname(ip.getPublicIp()+'/'+fields[1][1] +  fields[2][1]));
+
+            file.path = ip.getPublicIp()+'/'+fields[1][1] + fields[2][1];
             pendingReq.removeReq(fields[0][1], fields[1][1]);
-
+            console.log(file.path);
             //INVIO GUID-USER AL MASTER DA CONFRONTARE NELLA PENDING METADATA TABLE.
             console.log("->  Sending ("+fields[0][1]+" - "+fields[1][1]+") to master.");
 
@@ -136,6 +139,22 @@ function uploadFileFn(req, res1) {
                 });
             })
            .on('end', function () {
+
+               var temp_path = this.openedFiles[0].path;
+               var temp_name = this.openedFiles[0].name;
+               console.log(temp_name);
+               console.log(temp_path);
+
+               fs.stat(temp_path , function (error, stat) {
+                   if(error) console.log(error);
+
+                   else
+
+                   console.log(stat);
+
+               });
+
+
                console.log('-> upload done!'+'\n');
            });
            form.parse(req);
