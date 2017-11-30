@@ -138,6 +138,7 @@ function uploadFileFn(req, res1) {
                     res1.send(objSuccess);
                 }
             });
+            console.log("PORCODIOFILEBEGIN");
         })
         .on('file', function (field, file) {
             console.log("FILE");
