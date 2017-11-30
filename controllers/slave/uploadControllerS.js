@@ -81,10 +81,10 @@ function uploadFileFn(req, res1) {
         files = [],
         fields = [];
 
+
     console.log("...UPLOADING FILE...");
 
-    console.log(req);
-
+    console.log(form);
     var chunkData = {};
 
     form
@@ -97,6 +97,11 @@ function uploadFileFn(req, res1) {
             /*   if (!fs.existsSync(fields[1][1]))
                    fs.mkdirSync(fields[1][1]);*/
 
+            console.log("From");
+            console.log(form);
+            console.log("file");
+            console.log(file);
+            console.log("fields");
 
             console.log(fields);
             console.log(path.dirname(ip.getPublicIp()+'/'+fields[1][1]  + fields[2][1]));
