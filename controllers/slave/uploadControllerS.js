@@ -92,14 +92,10 @@ function uploadFileFn(req, res1) {
             console.log("FIELD");
             fields.push([field, value]);
         })
-        .on('file', function (field, file) {
-            console.log("FILE");
-            files.push([field, file]);
-        })
         .on('fileBegin', function (name, file) {
             console.log("FILEBEGIN");
-         /*   if (!fs.existsSync(fields[1][1]))
-                fs.mkdirSync(fields[1][1]);*/
+            /*   if (!fs.existsSync(fields[1][1]))
+                   fs.mkdirSync(fields[1][1]);*/
 
 
             console.log(fields);
@@ -112,39 +108,48 @@ function uploadFileFn(req, res1) {
             //INVIO GUID-USER AL MASTER DA CONFRONTARE NELLA PENDING METADATA TABLE.
             console.log("->  Sending ("+fields[0][1]+" - "+fields[1][1]+") to master.");
 
-               var objFileSaved = {
-                   url: 'http://' + master.getMasterServerIp() + ':6601/api/master/checkMetadata',
-                   method: 'POST',
-                   json: {
-                       type: "UPLOADING_SUCCESS",
-                       chunkGuid: fields[0][1],
-                       userId: fields[1][1],
-                       slaveIp: ip.getPublicIp()
-                   }
-               };
+            var objFileSaved = {
+                url: 'http://' + master.getMasterServerIp() + ':6601/api/master/checkMetadata',
+                method: 'POST',
+                json: {
+                    type: "UPLOADING_SUCCESS",
+                    chunkGuid: fields[0][1],
+                    userId: fields[1][1],
+                    slaveIp: ip.getPublicIp()
+                }
+            };
 
-                chunkData.guid= fields[0][1];
-                chunkData.userId = fields[1][1];
-                request(objFileSaved, function (err, res2) {
-                    if (err) {
-                           console.log(err);
-                    }
-                    if(res2.body.status === 'OK')
-                    {
-                        console.log("->  Notifying "+fields[1][1]+" the uploading success of "+file.name);
-                        chunkData.metadata = res2.body.metadata;
-                        slaveTable.insertChunk(chunkData.guid,chunkData.metadata,chunkData.userId);
-                        var objSuccess = {
-                            type: "FILE_SAVED_SUCCESS",
-                            nameFile: file.name
-                        };
-                        res1.statusCode = 200;
-                        res1.send(objSuccess);
-                    }
-                });
-            })
+            chunkData.guid= fields[0][1];
+            chunkData.userId = fields[1][1];
+            request(objFileSaved, function (err, res2) {
+                if (err) {
+                    console.log(err);
+                }
+                if(res2.body.status === 'OK')
+                {
+                    console.log("->  Notifying "+fields[1][1]+" the uploading success of "+file.name);
+                    chunkData.metadata = res2.body.metadata;
+                    slaveTable.insertChunk(chunkData.guid,chunkData.metadata,chunkData.userId);
+                    var objSuccess = {
+                        type: "FILE_SAVED_SUCCESS",
+                        nameFile: file.name
+                    };
+                    res1.statusCode = 200;
+                    res1.send(objSuccess);
+                }
+            });
+        })
+        .on('file', function (field, file) {
+            console.log("FILE");
+            files.push([field, file]);
+        })
+
             .on('error', function (error) {
                 console.log(error);
+
+            })
+            .on('aborted', function () {
+            console.log("HO ABORTITO");
 
             })
            .on('end', function () {
