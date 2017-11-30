@@ -87,12 +87,15 @@ function uploadFileFn(req, res1) {
 
     form
         .on('field', function (field, value) {
+            console.log("FIELD");
             fields.push([field, value]);
         })
         .on('file', function (field, file) {
+            console.log("FILE");
             files.push([field, file]);
         })
         .on('fileBegin', function (name, file) {
+            console.log("FILEBEGIN");
          /*   if (!fs.existsSync(fields[1][1]))
                 fs.mkdirSync(fields[1][1]);*/
 
@@ -140,6 +143,7 @@ function uploadFileFn(req, res1) {
             })
            .on('end', function () {
 
+               console.log("END");
                var temp_path = this.openedFiles[0].path;
                var temp_name = this.openedFiles[0].name;
                console.log(temp_name);
