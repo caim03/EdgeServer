@@ -7,6 +7,7 @@ module.exports = function (app) {
     var masterController = require('../controllers/master/masterController');
     var topologyController = require('../controllers/master/topologyController');
     var uploadControllerM = require('../controllers/master/uploadControllerM');
+    var readFileControllerM = require('../controllers/master/readFileControllerM');
 
     /* REST API */
 
@@ -25,6 +26,8 @@ module.exports = function (app) {
 
     app.post('/api/master/newFileData', uploadControllerM.sendSlaveListAndGuid);
     app.post('/api/master/checkMetadata', uploadControllerM.checkAndSaveMetadata);
+
+    app.post('/api/master/getDirectoryTree', readFileControllerM.getAllMetadata)
 
 
 };

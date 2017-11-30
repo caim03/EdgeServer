@@ -1,6 +1,5 @@
 const publicIp = require('public-ip');
 const privateIp = require('ip');
-var info = require('./serverInfo');
 var ipP = null;
 exports.setAddress = setAddressFn;
 exports.getPublicIp = getPublicIpFn;

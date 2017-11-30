@@ -19,13 +19,16 @@ exports.prettyJSONFn = prettyJSONFn;
  * Questa funzione permette al master di accedere a tutti i metadati memorizzati nella tabella, effettuando la
  * ricerca in base all'utente che effettua la richiesta.
  *
- * @param user
- * @return tree
+ * @param req
+ * @param res
+ * @return null
  */
-function getAllMetadataFn(user) {
-    var matchTables = masterTable.getAllMetadataByUser(user);
+function getAllMetadataFn(req, res) {
+    console.log("Tree requested by " + req.body.username);
+    var matchTables = masterTable.getAllMetadataByUser(req.body.username);
     var tree = createDirectoryTreeFn(matchTables);
-    return tree;
+
+    res.status(200).send(tree);
 }
 
 /**

@@ -7,7 +7,7 @@
 var config = {
     port: 6601, // Porta di ascolto del server
     ip: '0.0.0.0', // Preleva l'indirizzo ip della macchina
-    balancerIp: '34.206.63.183', // Ip statico del load balancer
+    balancerIp: '172.17.0.2', // Ip statico del load balancer
     balancerPort: 6602, // Porta di ascolto del load balancer
     balancerSubPath: '/api/lb/edge/subscribe', // Path di sottoscrizione del master al load balancer
     ageingTime: 3, // Scadenza dei chunkServer quando non rispondono al messaggio di heartbeat
