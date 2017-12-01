@@ -156,6 +156,11 @@ function uploadFileFn(req, res1) {
             console.log("HO ABORTITO");
 
             })
+            .on('progress', function(bytesReceived, bytesExpected) {
+
+                var percent = (bytesReceived / bytesExpected * 100) | 0;
+                console.log('Uploading: %' + percent + '\r');
+            })
            .on('end', function () {
 
                console.log("END");
