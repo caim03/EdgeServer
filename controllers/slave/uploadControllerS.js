@@ -51,9 +51,7 @@ function savePendingRequest(req, res) {
  */
 function checkIfPendingFn(req, res) {
 
-  //  console.log("PENDING REQUESTS:");
-  //  pendingReq.printTable();
-  //  console.log("\n");
+
     if(req.body.type === 'GUID_CLIENT') {
         console.log("<-  Received ("+req.body.guid+" - "+req.body.idUser+") from client.");
         if (pendingReq.checkIfPending(req.body.guid, req.body.idUser)) {
@@ -88,13 +86,9 @@ function uploadFileFn(req, res1) {
 
     form
         .on('field', function (field, value) {
-            console.log("FIELD");
             fields.push([field, value]);
         })
         .on('fileBegin', function (name, file) {
-            console.log("FILEBEGIN");
-            /*   if (!fs.existsSync(fields[1][1]))
-                   fs.mkdirSync(fields[1][1]);*/
             shell.mkdir('-p', path.dirname(ip.getPublicIp()+'/'+fields[1][1] +  fields[2][1]));
 
             file.path = ip.getPublicIp()+'/'+fields[1][1] + fields[2][1];
@@ -123,20 +117,10 @@ function uploadFileFn(req, res1) {
                 {
                     chunkData.metadata = res2.body.metadata;
                     slaveTable.insertChunk(chunkData.guid,chunkData.metadata,chunkData.userId);
-                //     console.log("->  Notifying "+fields[1][1]+" the uploading success of "+file.name);
-                //     chunkData.metadata = res2.body.metadata;
-                //     slaveTable.insertChunk(chunkData.guid,chunkData.metadata,chunkData.userId);
-                //     var objSuccess = {
-                //         type: "FILE_SAVED_SUCCESS",
-                //         nameFile: file.name
-                //     };
-                //     res1.statusCode = 200;
-                //     res1.send(objSuccess);
                 }
             });
         })
         .on('file', function (field, file) {
-            console.log("FILE");
             files.push([field, file]);
         })
 
@@ -145,7 +129,6 @@ function uploadFileFn(req, res1) {
 
             })
             .on('aborted', function () {
-            console.log("HO ABORTITO");
 
             })
             .on('progress', function(bytesReceived, bytesExpected) {
