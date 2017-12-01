@@ -154,31 +154,15 @@ function uploadFileFn(req, res1) {
                 console.log('Uploading: %' + percent + '\r');
             })
            .on('end', function () {
-
-               console.log("END");
-               var temp_path = this.openedFiles[0].path;
                var temp_name = this.openedFiles[0].name;
-               console.log(temp_name);
-               console.log(temp_path);
 
-               fs.stat(temp_path , function (error, stat) {
-                   if(error) console.log(error);
-
-                   else
-
-                   console.log(stat);
-
-               });
-
-               console.log("->  Notifying "+fields[1][1]+" the uploading success of "+file.name);
-
+               console.log("->  Notifying "+fields[1][1]+" the uploading success of "+temp_name);
                var objSuccess = {
                    type: "FILE_SAVED_SUCCESS",
-                   nameFile: file.name
+                   nameFile: temp_name
                };
                res1.statusCode = 200;
                res1.send(objSuccess);
-
                console.log('-> upload done!'+'\n');
            });
            form.parse(req);
