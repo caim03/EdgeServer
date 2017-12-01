@@ -16,7 +16,8 @@ var ip = require('./model/ip');
 // create a new express server
 var app = express();
 // app.use(bodyParser.json());
-app.use(express.json());app.use(express.urlencoded());
+// app.use(express.json());
+app.use(express.urlencoded());
 // serve the files out of ./public as our main files
 app.use(express.static(__dirname + '/public'));
 
