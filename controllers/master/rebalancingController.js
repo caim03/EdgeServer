@@ -11,6 +11,7 @@ var masterController = require('./masterController');
 var ip = require("../../model/ip");
 var config = require('../../config/config');
 var request = require('request');
+var fs=require('fs');
 
 
 exports.newMasterRebalancment = newMasterRebalancmentFn;
