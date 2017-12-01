@@ -85,14 +85,6 @@ function uploadFileFn(req, res1) {
     console.log("...UPLOADING FILE...");
     var chunkData = {};
 
-    console.log(req);
-    console.log(req.body());
-    console.log(req.getBody('utf8'));
-
-
-
-
-
 
     form
         .on('field', function (field, value) {
@@ -179,7 +171,7 @@ function uploadFileFn(req, res1) {
 
                console.log('-> upload done!'+'\n');
            });
-           form.parse(req.body.json);
+           form.parse(req);
 
     // chunkList.pushChunk(chunkMetaData);
 
