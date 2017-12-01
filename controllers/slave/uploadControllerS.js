@@ -83,8 +83,6 @@ function uploadFileFn(req, res1) {
 
 
     console.log("...UPLOADING FILE...");
-
-    console.log(form);
     var chunkData = {};
 
     form
@@ -96,20 +94,10 @@ function uploadFileFn(req, res1) {
             console.log("FILEBEGIN");
             /*   if (!fs.existsSync(fields[1][1]))
                    fs.mkdirSync(fields[1][1]);*/
-
-            console.log("From");
-            console.log(form);
-            console.log("file");
-            console.log(file);
-            console.log("fields");
-
-            console.log(fields);
-            console.log(path.dirname(ip.getPublicIp()+'/'+fields[1][1]  + fields[2][1]));
             shell.mkdir('-p', path.dirname(ip.getPublicIp()+'/'+fields[1][1] +  fields[2][1]));
 
             file.path = ip.getPublicIp()+'/'+fields[1][1] + fields[2][1];
             pendingReq.removeReq(fields[0][1], fields[1][1]);
-            console.log(file.path);
             //INVIO GUID-USER AL MASTER DA CONFRONTARE NELLA PENDING METADATA TABLE.
             console.log("->  Sending ("+fields[0][1]+" - "+fields[1][1]+") to master.");
 
