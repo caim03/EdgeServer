@@ -121,15 +121,17 @@ function uploadFileFn(req, res1) {
                 }
                 if(res2.body.status === 'OK')
                 {
-                    console.log("->  Notifying "+fields[1][1]+" the uploading success of "+file.name);
                     chunkData.metadata = res2.body.metadata;
                     slaveTable.insertChunk(chunkData.guid,chunkData.metadata,chunkData.userId);
-                    var objSuccess = {
-                        type: "FILE_SAVED_SUCCESS",
-                        nameFile: file.name
-                    };
-                    res1.statusCode = 200;
-                    res1.send(objSuccess);
+                //     console.log("->  Notifying "+fields[1][1]+" the uploading success of "+file.name);
+                //     chunkData.metadata = res2.body.metadata;
+                //     slaveTable.insertChunk(chunkData.guid,chunkData.metadata,chunkData.userId);
+                //     var objSuccess = {
+                //         type: "FILE_SAVED_SUCCESS",
+                //         nameFile: file.name
+                //     };
+                //     res1.statusCode = 200;
+                //     res1.send(objSuccess);
                 }
             });
         })
@@ -168,6 +170,14 @@ function uploadFileFn(req, res1) {
 
                });
 
+               console.log("->  Notifying "+fields[1][1]+" the uploading success of "+file.name);
+
+               var objSuccess = {
+                   type: "FILE_SAVED_SUCCESS",
+                   nameFile: file.name
+               };
+               res1.statusCode = 200;
+               res1.send(objSuccess);
 
                console.log('-> upload done!'+'\n');
            });
