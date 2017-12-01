@@ -18,7 +18,7 @@ var app = express();
 app.use(bodyParser.json());
 // app.use(express.json());
 // app.use(express.urlencoded());
-// serve the files out of ./public as our main files
+//serve the files out of ./public as our main files
 app.use(express.static(__dirname + '/public'));
 
 require('./routes/masterRoute')(app);
