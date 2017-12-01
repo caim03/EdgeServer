@@ -133,6 +133,7 @@ function uploadFileFn(req, res1) {
             });
         })
         .on('file', function (field, file) {
+            console.log("FILE");
             files.push([field, file]);
         })
 
