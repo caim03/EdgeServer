@@ -9,6 +9,8 @@ var serverInfo = require('../../model/serverInfo');
 var master = require('../../model/masterServer');
 var request = require('request');
 var election = require('../slave/electionController');
+var info = require('../../model/serverInfo');
+var masterTopologyController = require('../master/topologyController');
 
 
 exports.findMaster = findMasterFn;
@@ -32,7 +34,12 @@ function findMasterFn() {
     };
 
     var res = syncRequest('GET', obj.url);
-    master.setMasterServerIp(res.getBody('utf8'));  // utf8 convert body from buffer to string
+
+    if(JSON.parse(res.getBody('utf8')).status=== "ACK")
+        master.setMasterServerIp(JSON.parse(res.getBody('utf8')).masterIp);  // utf8 convert body from buffer to string
+    else {
+        console.log("there isn't a master in this fog");
+    }
 }
 
 
