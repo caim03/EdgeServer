@@ -82,20 +82,21 @@ function newMasterRebalancmentFn()
                     masterTable.addChunkRef(guid,chunk.metadata, server,chunk.userId);
                     //TODO X DEB Invio fisico del chunk! guid - chunk.metadata - server - chunk.userId
 
-
+                    console.log(chunk);
                     var formData = {
                         guid: guid,
                         idUser: chunk.usersId,
                         destRelPath: chunk.metadata.relPath,
                         my_file: fs.createReadStream(ip.getPublicIp()+'/'+chunk.userId + '/' + chunk.metadata.relPath)
                     };
+                    console.log(formData);
                     request.post({url:'http://'+server+':6601/api/chunk/newDistributedChunk', formData: formData}, function optionalCallback(err, res) {
                         if (err) {
                             return console.error('upload failed:', err);
                         }
                         if(res.body.status === 'ACK')
                         {
-                            console.log("File "+foundChunk.metadata.relPath+" saved in "+req.body.server);
+                            console.log("File "+chunk.metadata.relPath+" saved in "+req.body.server);
                         }
                     });
 
