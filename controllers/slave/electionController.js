@@ -10,7 +10,7 @@ var serverInfo = require('../../model/serverInfo');
 var masterTopologyController = require('../master/topologyController');
 var slaveTopologyController = require('../slave/topologyController');
 var rebalancingController = require('../master/rebalancingController');
-
+var app = require('../../app');
 var chunkList = require('../../model/chunkList');
 
 var slaveTable = require('../../model/slave/slaveTable');
@@ -101,11 +101,11 @@ function startElectionFn() {
 
         chunkServers.popServer(myself);
         serverInfo.setInfoMaster(true);
-
         rebalancingController.newMasterRebalancment();
-
-        masterTopologyController.subscribeToBalancer();
-        console.log(chunkServers.getChunk());
-        masterTopologyController.heartbeatMessage();
+        app.startMaster(true);
+        //
+        // masterTopologyController.subscribeToBalancer();
+        // console.log(chunkServers.getChunk());
+        // masterTopologyController.heartbeatMessage();
     }
 }

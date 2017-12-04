@@ -8,10 +8,8 @@ var topologySlaveController = require('./controllers/slave/topologyController');
 var info = require('./model/serverInfo');
 var ip = require('./model/ip');
 
-// var ip = require('ip');
-
-//var masterTable = require('./model/masterTable');
-
+exports.startMaster = startMasterFn;
+exports.startSlave = startSlaveFn;
 
 // create a new express server
 var app = express();
@@ -56,20 +54,31 @@ if(process.argv[3] === "local")
 }
 
 if (process.argv[2] === "master") {
+
+    startMasterFn(false);
+}
+else {
+
+    startSlaveFn();
+
+}
+
+function startMasterFn(proclamation)
+{
     info.setInfoMaster(true);
 
     console.log('I am the master.');
-
-    topologyMasterController.subscribeToBalancer();
+    topologyMasterController.subscribeToBalancer(proclamation);
     topologyMasterController.heartbeatMessage();
 }
-else {
+
+function startSlaveFn()
+{
     info.setInfoMaster(false);
 
     console.log('I am a slave.');
 
     topologySlaveController.findMaster();
     topologySlaveController.subscribeToMaster();
-
     topologySlaveController.waitHeartbeat();
 }
