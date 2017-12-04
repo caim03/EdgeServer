@@ -11,6 +11,7 @@ var masterController = require('./masterController');
 var ip = require("../../model/ip");
 var config = require('../../config/config');
 var request = require('request');
+var fs=require('fs');
 
 
 exports.newMasterRebalancment = newMasterRebalancmentFn;
@@ -80,6 +81,25 @@ function newMasterRebalancmentFn()
                     // })
                     masterTable.addChunkRef(guid,chunk.metadata, server,chunk.userId);
                     //TODO X DEB Invio fisico del chunk! guid - chunk.metadata - server - chunk.userId
+
+                    var formData = {
+                        guid: guid,
+                        idUser: chunk.userId,
+                        destRelPath: chunk.metadata.relPath,
+                        my_file: fs.createReadStream(ip.getPublicIp()+'/'+chunk.userId + '/' + chunk.metadata.relPath)
+                    };
+                    request.post({url:'http://'+server+':6601/api/chunk/newDistributedChunk', formData: formData}, function optionalCallback(err, res) {
+                        if (err) {
+                            return console.error('upload failed:', err);
+                        }
+                        if(res.body.status === 'ACK')
+                        {
+                            console.log("File "+chunk.metadata.relPath+" saved in "+req.body.server);
+                        }
+                    });
+
+
+
                     sended = true;
                 }
         });

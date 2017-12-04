@@ -51,9 +51,7 @@ function savePendingRequest(req, res) {
  */
 function checkIfPendingFn(req, res) {
 
-  //  console.log("PENDING REQUESTS:");
-  //  pendingReq.printTable();
-  //  console.log("\n");
+
     if(req.body.type === 'GUID_CLIENT') {
         console.log("<-  Received ("+req.body.guid+" - "+req.body.idUser+") from client.");
         if (pendingReq.checkIfPending(req.body.guid, req.body.idUser)) {
@@ -83,33 +81,18 @@ function uploadFileFn(req, res1) {
 
 
     console.log("...UPLOADING FILE...");
-
-    console.log(form);
     var chunkData = {};
+
 
     form
         .on('field', function (field, value) {
-            console.log("FIELD");
             fields.push([field, value]);
         })
         .on('fileBegin', function (name, file) {
-            console.log("FILEBEGIN");
-            /*   if (!fs.existsSync(fields[1][1]))
-                   fs.mkdirSync(fields[1][1]);*/
-
-            console.log("From");
-            console.log(form);
-            console.log("file");
-            console.log(file);
-            console.log("fields");
-
-            console.log(fields);
-            console.log(path.dirname(ip.getPublicIp()+'/'+fields[1][1]  + fields[2][1]));
             shell.mkdir('-p', path.dirname(ip.getPublicIp()+'/'+fields[1][1] +  fields[2][1]));
 
             file.path = ip.getPublicIp()+'/'+fields[1][1] + fields[2][1];
             pendingReq.removeReq(fields[0][1], fields[1][1]);
-            console.log(file.path);
             //INVIO GUID-USER AL MASTER DA CONFRONTARE NELLA PENDING METADATA TABLE.
             console.log("->  Sending ("+fields[0][1]+" - "+fields[1][1]+") to master.");
 
@@ -132,15 +115,8 @@ function uploadFileFn(req, res1) {
                 }
                 if(res2.body.status === 'OK')
                 {
-                    console.log("->  Notifying "+fields[1][1]+" the uploading success of "+file.name);
                     chunkData.metadata = res2.body.metadata;
                     slaveTable.insertChunk(chunkData.guid,chunkData.metadata,chunkData.userId);
-                    var objSuccess = {
-                        type: "FILE_SAVED_SUCCESS",
-                        nameFile: file.name
-                    };
-                    res1.statusCode = 200;
-                    res1.send(objSuccess);
                 }
             });
         })
@@ -153,27 +129,23 @@ function uploadFileFn(req, res1) {
 
             })
             .on('aborted', function () {
-            console.log("HO ABORTITO");
 
             })
+            .on('progress', function(bytesReceived, bytesExpected) {
+
+                var percent = (bytesReceived / bytesExpected * 100) | 0;
+                console.log('Uploading: %' + percent + '\r');
+            })
            .on('end', function () {
-
-               console.log("END");
-               var temp_path = this.openedFiles[0].path;
                var temp_name = this.openedFiles[0].name;
-               console.log(temp_name);
-               console.log(temp_path);
 
-               fs.stat(temp_path , function (error, stat) {
-                   if(error) console.log(error);
-
-                   else
-
-                   console.log(stat);
-
-               });
-
-
+               console.log("->  Notifying "+fields[1][1]+" the uploading success of "+temp_name);
+               var objSuccess = {
+                   type: "FILE_SAVED_SUCCESS",
+                   nameFile: temp_name
+               };
+               res1.statusCode = 200;
+               res1.send(objSuccess);
                console.log('-> upload done!'+'\n');
            });
            form.parse(req);

@@ -81,13 +81,22 @@ function subscribeToBalancerFn(){
         method: 'POST',
         json: {type: 'MASTER'}
     };
-
-    console.log("-> Subscribing to load balancer.");
-
     request(obj, function (err, res) {
+
         if(err) {
             console.log(err);
         }
+
+        if(res.body.status === "ACK")
+            console.log("Subscribed to load balancer");
+
+        else
+            if(res.body.status === "MASTER_ALREADY_EXISTS") {
+                console.log("Master already exists at " + res.body.masterIp);
+
+        }
+
+
     })
 }
 
