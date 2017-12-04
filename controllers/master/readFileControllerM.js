@@ -27,7 +27,21 @@ function getAllMetadataFn(req, res) {
     console.log("Tree requested by " + req.body.username);
     var matchTables = masterTable.getAllMetadataByUser(req.body.username);
     var tree = createDirectoryTreeFn(matchTables);
+    tree = [{
+        name: 'Christian',
+        folder: true,
+        children: [
+            {
+                name: 'SDCC',
+                folder: false
+            },
+            {
+                name: 'NIP',
+                folder: false
+            }
+        ]
 
+    }];
     res.status(200).send(tree);
 }
 
