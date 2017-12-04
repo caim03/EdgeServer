@@ -19,13 +19,32 @@ exports.prettyJSONFn = prettyJSONFn;
  * Questa funzione permette al master di accedere a tutti i metadati memorizzati nella tabella, effettuando la
  * ricerca in base all'utente che effettua la richiesta.
  *
- * @param user
- * @return tree
+ * @param req
+ * @param res
+ * @return null
  */
-function getAllMetadataFn(user) {
-    var matchTables = masterTable.getAllMetadataByUser(user);
-    var tree = createDirectoryTreeFn(matchTables);
-    return tree;
+function getAllMetadataFn(req, res) {
+    console.log("Tree requested by " + req.body.username);
+    var matchTables = masterTable.getAllMetadataByUser(req.body.username);
+    var tree = createDirectoryTreeFn(matchTables, req.body.username);
+    res.status(200).send(tree);
+    res.end();
+
+    /*tree = [{
+        name: 'Christian',
+        folder: true,
+        children: [
+            {
+                name: 'SDCC',
+                folder: false
+            },
+            {
+                name: 'NIP',
+                folder: false
+            }
+        ]
+
+    }]; */
 }
 
 /**
@@ -54,15 +73,24 @@ function checkIfFoundFn(name, arr) {
  * Questa funzione permette la master di creare l'albero di directory di un determinato utente.
  *
  * @param matchedMetadata
+ * @param username
  * @return tree
  */
-function createDirectoryTreeFn(matchedMetadata) {
+function createDirectoryTreeFn(matchedMetadata, username) {
     var tree = [];//[{name: 'Files', folder: true, children:[{name:'provaFile', folder: true, children: []}]}];
 //    console.log("Tree dim: "+tree.length);
     var parsedPath = {};
     var i;
     var foundPos;
     var current = [];
+
+    var root = {
+        name: username,
+        folder: true,
+        children: []
+    };
+
+    tree.push(root);
 
     matchedMetadata.forEach(function (table) {
      //   console.log("Path for Debora: "+table.metadataTable.relPath);

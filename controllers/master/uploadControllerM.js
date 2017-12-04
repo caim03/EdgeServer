@@ -104,7 +104,7 @@ function sendSlaveListAndGuidFn(req, res1) {
 
 /**
  * Questa funzione permette al master di effettuare dei controlli sui metadati ricevuti dal client e
- * ,in caso positivo, li memorizza.
+ * in caso positivo, li memorizza.
  *
  * @param req
  * @param res
