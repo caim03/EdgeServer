@@ -6,6 +6,8 @@ var chunkServer = require('../../model/chunkServer');
 var config = require('../../config/config');
 var request = require('request');
 var rebalancingController = require('./rebalancingController');
+var app = require('../../app');
+var hbIntervalId;
 
 
 exports.subscribe = subscribeFn;
@@ -75,30 +77,43 @@ function subscribeFn(req, res) {
  *
  * @return null
  */
-function subscribeToBalancerFn(){
+function subscribeToBalancerFn(proclamation) {
+
+    var type;
+    if (!proclamation)
+        type = "MASTER";
+    else
+        type = "PROCLAMATION";
+
+
     var obj = {
         url: 'http://' + config.balancerIp + ':' + config.balancerPort + config.balancerSubPath,
         method: 'POST',
-        json: {type: 'MASTER'}
+        json: {type: type}
     };
+
+
     request(obj, function (err, res) {
 
-        if(err) {
+        if (err) {
             console.log(err);
         }
-
-        if(res.body.status === "ACK")
+        else if (res.body.status === "ACK") {
             console.log("Subscribed to load balancer");
+        }
+        else if (res.body.status === "MASTER_ALREADY_EXISTS") {
+            console.log("Master already exists at " + res.body.masterIp);
 
-        else
-            if(res.body.status === "MASTER_ALREADY_EXISTS") {
-                console.log("Master already exists at " + res.body.masterIp);
+            clearInterval(hbIntervalId);
+
+            app.startSlave();
 
         }
 
 
     })
 }
+
 
 
 /**
@@ -111,7 +126,7 @@ function subscribeToBalancerFn(){
  */
 function heartbeatMessageFn() {
     /* setInterval(callback, timeout, [args...]) chiama la funzione di callback ogni timeout millisecondi */
-    setInterval(function () {
+    hbIntervalId = setInterval(function () {
         chunkServer.getChunk().forEach(function (server) {
             var obj = {
                 url: 'http://' + server.ip + ':' + config.port + '/api/chunk/heartbeat',
