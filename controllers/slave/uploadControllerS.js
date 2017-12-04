@@ -89,7 +89,7 @@ function uploadFileFn(req, res1) {
             fields.push([field, value]);
         })
         .on('fileBegin', function (name, file) {
-            shell.mkdir('-p', path.dirname(ip.getPublicIp()+'/'+fields[1][1] +  fields[2][1]));
+            shell.mkdir('-p', path.dirname(fields[2][1]));
 
             file.path = ip.getPublicIp()+'/'+fields[1][1] + fields[2][1];
             pendingReq.removeReq(fields[0][1], fields[1][1]);

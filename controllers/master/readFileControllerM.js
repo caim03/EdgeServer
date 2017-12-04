@@ -26,8 +26,11 @@ exports.prettyJSONFn = prettyJSONFn;
 function getAllMetadataFn(req, res) {
     console.log("Tree requested by " + req.body.username);
     var matchTables = masterTable.getAllMetadataByUser(req.body.username);
-    var tree = createDirectoryTreeFn(matchTables);
-    tree = [{
+    var tree = createDirectoryTreeFn(matchTables, req.body.username);
+    res.status(200).send(tree);
+    res.end();
+
+    /*tree = [{
         name: 'Christian',
         folder: true,
         children: [
@@ -41,8 +44,7 @@ function getAllMetadataFn(req, res) {
             }
         ]
 
-    }];
-    res.status(200).send(tree);
+    }]; */
 }
 
 /**
@@ -71,15 +73,24 @@ function checkIfFoundFn(name, arr) {
  * Questa funzione permette la master di creare l'albero di directory di un determinato utente.
  *
  * @param matchedMetadata
+ * @param username
  * @return tree
  */
-function createDirectoryTreeFn(matchedMetadata) {
+function createDirectoryTreeFn(matchedMetadata, username) {
     var tree = [];//[{name: 'Files', folder: true, children:[{name:'provaFile', folder: true, children: []}]}];
 //    console.log("Tree dim: "+tree.length);
     var parsedPath = {};
     var i;
     var foundPos;
     var current = [];
+
+    var root = {
+        name: username,
+        folder: true,
+        children: []
+    };
+
+    tree.push(root);
 
     matchedMetadata.forEach(function (table) {
      //   console.log("Path for Debora: "+table.metadataTable.relPath);
