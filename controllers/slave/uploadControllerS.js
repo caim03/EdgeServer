@@ -27,7 +27,7 @@ exports.sendFile = sendFileFn;
 exports.saveChunk = saveChunkFn;
 
 /**
- * A slave receives (guid, ipClient) authorized from master and saves temporally the pending request.
+ * A slave receives (guid, ipClient) authorization from master and saves temporally the pending request.
  *
  * @param req
  * @param res

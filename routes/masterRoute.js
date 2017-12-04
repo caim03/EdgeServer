@@ -26,8 +26,8 @@ module.exports = function (app) {
 
     app.post('/api/master/newFileData', uploadControllerM.sendSlaveListAndGuid);
     app.post('/api/master/checkMetadata', uploadControllerM.checkAndSaveMetadata);
-
-    app.post('/api/master/getDirectoryTree', readFileControllerM.getAllMetadata)
+    app.post('/api/master/getDirectoryTree', readFileControllerM.getAllMetadata);
+    app.post('/api/master/readFile', readFileControllerM.getReadSlaves);
 
 
 };

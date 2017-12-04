@@ -13,6 +13,7 @@ exports.getAllMetadata = getAllMetadataFn;
 exports.checkIfFound = checkIfFoundFn;
 exports.createDirectoryTree = createDirectoryTreeFn;
 exports.prettyJSONFn = prettyJSONFn;
+exports.getReadSlaves = getReadSlavesFn;
 
 
 /**
@@ -29,22 +30,6 @@ function getAllMetadataFn(req, res) {
     var tree = createDirectoryTreeFn(matchTables, req.body.username);
     res.status(200).send(tree);
     res.end();
-
-    /*tree = [{
-        name: 'Christian',
-        folder: true,
-        children: [
-            {
-                name: 'SDCC',
-                folder: false
-            },
-            {
-                name: 'NIP',
-                folder: false
-            }
-        ]
-
-    }]; */
 }
 
 /**
@@ -94,7 +79,7 @@ function createDirectoryTreeFn(matchedMetadata, username) {
 
     matchedMetadata.forEach(function (table) {
      //   console.log("Path for Debora: "+table.metadataTable.relPath);
-        parsedPath = path.parse(table.metadataTable.relPath);
+        parsedPath = path.parse(table.metadata.relPath);
         current = tree;
         var arr = parsedPath.dir.split('/');
         for(i=0; i<arr.length; i++)
@@ -106,7 +91,14 @@ function createDirectoryTreeFn(matchedMetadata, username) {
                 if(i===(arr.length-1))
                 {
 //                    console.log(arr[i]+" è l'ultima cartella.");
-                    current[foundPos].children.push({folder: false, name: table.metadataTable.name, size: table.metadataTable.size, extension: table.metadataTable.extension, lastModified: table.metadataTable.lastModified});
+                    current[foundPos].children.push({folder: false,
+                        name: table.metadata.name,
+                        size: table.metadata.size,
+                        extension: table.metadata.extension,
+                        lastModified: table.metadata.lastModified,
+                        path: table.metadata.relPath,
+                        guid: table.guid
+                    });
                  //   break;
                 }
                 else{
@@ -119,7 +111,7 @@ function createDirectoryTreeFn(matchedMetadata, username) {
                 if(i===(arr.length-1))
                 {
 //                    console.log(arr[i]+" è l'ultima cartella prima del file.");
-                    current.push({folder: true, name:arr[i], children: [{folder: false, name: table.metadataTable.name, size: table.metadataTable.size, extension: table.metadataTable.extension, lastModified:table.metadataTable.lastModified}]});
+                    current.push({folder: true, name:arr[i], children: [{folder: false, name: table.metadata.name, size: table.metadata.size, extension: table.metadata.extension, lastModified:table.metadata.lastModified}]});
                 }
                 else{
 //                    console.log(arr[i]+" NON è l'ultima cartella prima del file.");
@@ -140,4 +132,11 @@ function createDirectoryTreeFn(matchedMetadata, username) {
  */
 function prettyJSONFn(obj) {
     console.log(JSON.stringify(obj, null, 2));
+}
+
+function getReadSlavesFn(req, res) {
+    var metadata = req.body;
+
+    var slaves = masterTable.getAllSlavesByGuid(req.body.guid);
+    res.send(slaves);
 }

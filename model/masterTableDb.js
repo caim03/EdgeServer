@@ -22,6 +22,7 @@ exports.removeFromOccupationTable = removeFromOccupationTableFn;
 exports.getTable = getTableFn;
 exports.getAllMetadataByUser = getAllMetadataByUserFn;
 exports.getOneSlaveByGuid = getOneSlaveByGuidFn;
+exports.getAllSlavesByGuid = getAllSlavesByGuidFn;
 
 
 function addChunkRefFn(chunkGuid, metadata, slaveIp, idUser)
@@ -151,6 +152,17 @@ function getOneSlaveByGuidFn(guid)
         return null;
 }
 
+function getAllSlavesByGuidFn(guid) {
+
+    var foundGuid = masterTable.findOne({'chunkguid': guid});
+    if (foundGuid.slavesIp) {
+        return foundGuid.slavesIp;
+    }
+    else {
+        return null;
+    }
+}
+
 function getAllChunksBySlaveFn(IpServer)
 {
 
@@ -217,7 +229,10 @@ function getAllMetadataByUserFn(userId) {
         users.forEach(function (idUser){
             if(idUser.userId === userId)
             {
-                matchedTables.push(table);
+                matchedTables.push({
+                    matadata: table.metadataTable,
+                    guid: table.chunkguid
+                });
             }
         });
     });

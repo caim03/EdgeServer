@@ -10,7 +10,6 @@ module.exports = function (app) {
 
     /* REST API */
 
-    app.get('/api/chunk/read',chunkController.readFile);
     app.post('/api/chunk/write', chunkController.writeFile);
     app.delete('/api/chunk/delete', chunkController.deleteFile);
     app.put('/api/chunk/update', chunkController.updateFile);
@@ -36,4 +35,6 @@ module.exports = function (app) {
     // app.post('/api/chunk/newChunkGuid', uploadControllerS.uploadFile);
     app.post('/api/chunk/fileDistributionReq', uploadControllerS.sendFile);
     app.post('/api/chunk/newDistributedChunk', uploadControllerS.saveChunk);
+
+    app.post('/api/chunk/readFile', chunkController.readFile);
 };

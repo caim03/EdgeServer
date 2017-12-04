@@ -3,6 +3,7 @@
  */
 var chunkList = require('../../model/chunkList');
 var slaveTable = require('../../model/slave/slaveTable');
+var fs = require('fs');
 
 /* Export delle funzionalità del chunkController */
 
@@ -16,7 +17,10 @@ exports.sendAckToMaster = sendAckToMasterFn;
 
 /* TODO Funzione adibita alla lettura di un chunk */
 function readFileFn(req, res) {
-    res.send("HTTP GET");
+    console.log("Reading file...");
+    var metadata = req.body;
+
+    fs.createReadStream(metadata.path).pipe(res);
 }
 
 /* TODO Funzione adibita alla scrittura di un chunk */
