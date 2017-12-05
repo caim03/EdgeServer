@@ -23,6 +23,7 @@ exports.getTable = getTableFn;
 exports.getAllMetadataByUser = getAllMetadataByUserFn;
 exports.getOneSlaveByGuid = getOneSlaveByGuidFn;
 exports.getAllSlavesByGuid = getAllSlavesByGuidFn;
+exports.getFileByUserAndRelPath = getFileByUserAndRelPathFn;
 
 
 function addChunkRefFn(chunkGuid, metadata, slaveIp, idUser)
@@ -238,4 +239,28 @@ function getAllMetadataByUserFn(userId) {
     });
 
     return matchedTables;
+}
+
+function getFileByUserAndRelPathFn(userId, relPath) {
+    var matchedTable = {};
+
+    masterTable.chain().data().forEach(function (table){
+
+        var users = table.usersId;
+        users.forEach(function (idUser){
+            if(idUser.userId === userId)
+            {
+                //verifico relPath
+                if(table.metadataTable.relPath === relPath) {
+                    var temp = {
+                        guid: table.chunkguid,
+                        slavesIp: table.slavesIp
+                    };
+                    matchedTable = temp;
+                }
+            }
+        });
+    });
+
+    return matchedTable;
 }

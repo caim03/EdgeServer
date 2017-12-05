@@ -7,6 +7,8 @@ module.exports = function (app) {
     var uploadControllerS = require('../controllers/slave/uploadControllerS');
     var topologyController = require('../controllers/slave/topologyController');
     var electionController = require('../controllers/slave/electionController');
+    var deleteController = require('../controllers/slave/deleteControllerS');
+
 
     /* REST API */
 
@@ -37,4 +39,6 @@ module.exports = function (app) {
     app.post('/api/chunk/newDistributedChunk', uploadControllerS.saveChunk);
 
     app.post('/api/chunk/readFile', chunkController.readFile);
+    app.post('/api/chunk/removeChunk', deleteController.removeChunk);
+
 };
