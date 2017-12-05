@@ -24,7 +24,18 @@ exports.getAllMetadataByUser = getAllMetadataByUserFn;
 exports.getOneSlaveByGuid = getOneSlaveByGuidFn;
 exports.getAllSlavesByGuid = getAllSlavesByGuidFn;
 exports.getFileByUserAndRelPath = getFileByUserAndRelPathFn;
+exports.removeByGuid = removeByGuidFn;
 
+function removeByGuidFn(chunkGuid)
+{
+    var obj = {'chunkguid': chunkGuid};
+    var foundChunk= masterTable.findOne(obj);
+    if(foundChunk)
+    {
+        masterTable.chain().find(obj).remove();
+    }
+    else console.log("Guid not found");
+}
 
 function addChunkRefFn(chunkGuid, metadata, slaveIp, idUser)
 {
@@ -250,17 +261,15 @@ function getFileByUserAndRelPathFn(userId, relPath) {
         users.forEach(function (idUser){
             if(idUser.userId === userId)
             {
-                //verifico relPath
+                //trovo relPath nella master table
                 if(table.metadataTable.relPath === relPath) {
-                    var temp = {
+                    matchedTable = {
                         guid: table.chunkguid,
                         slavesIp: table.slavesIp
                     };
-                    matchedTable = temp;
                 }
             }
         });
     });
-
     return matchedTable;
 }

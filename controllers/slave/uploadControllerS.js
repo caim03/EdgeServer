@@ -120,9 +120,6 @@ function uploadFileFn(req, res1) {
                 {
                     chunkData.metadata = res2.body.metadata;
                     slaveTable.insertChunk(chunkData.guid,chunkData.metadata,chunkData.userId);
-                    console.log("=============\n");
-                    slaveTable.printTable();
-                    console.log("=============\n");
                 }
             });
         })

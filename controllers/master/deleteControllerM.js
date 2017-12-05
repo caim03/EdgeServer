@@ -12,31 +12,22 @@ exports.deleteFile = deleteFileFn;
 
 function deleteFileFn(req, res1) {
 
-    console.log("Sono "+req.body.idUser);
-    console.log("Voglio cancellare "+req.body.relPath);
-/*    console.log("---------------\n");
+    console.log(req.body.idUser+" want to delete "+req.body.relPath);
+
+  /*  console.log("MMMMMMMMM\n");
     masterTable.printTable();
-    console.log("---------------\n"); */
-
-    console.log("MMMMMMMMMMMMMMMMMMMMMM\n");
-    masterTable.printTable();
-    console.log("MMMMMMMMMMMMMMMMMMMMMM\n");
-
-
-    console.log("Cerco: "+req.body.idUser+" ... "+req.body.relPath);
+    console.log("MMMMMMMMM\n");
+*/
 
     var matchedTable = masterTable.getFileByUserAndRelPath(req.body.idUser, req.body.relPath);
 
-    console.log("---------------\n");
-    console.log(matchedTable);
-    console.log("---------------\n");
-
+    matchedTable.slavesIp.forEach(function (ip) {
+        console.log("--> sending " + matchedTable.guid + " to "+ip.slaveIp);
+    });
     var slavesReturned = [];
 
-    var tempIp = ['172.17.0.4', '172.17.0.6'];
-
- /*   matchedTable.slavesIp.forEach(function (ip) {
-       console.log("^^^^^^^^"+ip.slaveIp);
+    matchedTable.slavesIp.forEach(function (ip) {
+    //   console.log("^^^^^^^^"+ip.slaveIp);
        var obj = {
            url: 'http://' + ip.slaveIp + ':6601/api/chunk/removeChunk',
            method: 'POST',
@@ -51,11 +42,21 @@ function deleteFileFn(req, res1) {
            }
            if(res2.body.type === 'REMOVED_CHUNK')
            {
-               console.log("Chunk removed in "+obj.json.chunkGuid);
+               slavesReturned.push(ip.slaveIp);
+               if(slavesReturned.length=== config.replicationNumber)
+               {
+
+                   masterTable.removeByGuid(matchedTable.guid);
+                   console.log(obj.json.chunkGuid+" removed in "+ip.slaveIp);
+                   res1.send({type: 'DELETE_SUCCESS'});
+               }
            }
        });
+    });
+/*
+    //TEST WITH STATIC IP FOR SLAVES
 
-    });*/
+    var tempIp = ['172.17.0.4', '172.17.0.6'];
 
     tempIp.forEach(function (ip) {
         var obj = {
@@ -76,11 +77,11 @@ function deleteFileFn(req, res1) {
                 if(slavesReturned.length=== config.replicationNumber)
                 {
 
-                    //TODO rimuovere da master table
+                    masterTable.removeByGuid(matchedTable.guid);
                     console.log(obj.json.chunkGuid+" removed in "+ip);
                     res1.send({type: 'DELETE_SUCCESS'});
                 }
             }
         });
-    });
+    });*/
 }
