@@ -79,7 +79,6 @@ function createDirectoryTreeFn(matchedMetadata, username) {
 
     matchedMetadata.forEach(function (table) {
      //   console.log("Path for Debora: "+table.metadataTable.relPath);
-        console.log(table);
         parsedPath = path.parse(table.metadata.relPath);
         current = tree;
         var arr = parsedPath.dir.split('/');
