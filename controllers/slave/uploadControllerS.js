@@ -91,7 +91,7 @@ function uploadFileFn(req, res1) {
         .on('fileBegin', function (name, file) {
             shell.mkdir('-p', path.dirname(fields[2][1]));
 
-            file.path = ip.getPublicIp()+'/'+fields[1][1] + fields[2][1];
+            file.path = fields[2][1];
             pendingReq.removeReq(fields[0][1], fields[1][1]);
             //INVIO GUID-USER AL MASTER DA CONFRONTARE NELLA PENDING METADATA TABLE.
             console.log("->  Sending ("+fields[0][1]+" - "+fields[1][1]+") to master.");
