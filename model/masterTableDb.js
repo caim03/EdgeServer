@@ -230,7 +230,7 @@ function getAllMetadataByUserFn(userId) {
             if(idUser.userId === userId)
             {
                 matchedTables.push({
-                    matadata: table.metadataTable,
+                    metadata: table.metadataTable,
                     guid: table.chunkguid
                 });
             }
