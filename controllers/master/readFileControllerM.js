@@ -32,6 +32,7 @@ function getAllMetadataFn(req, res) {
     res.end();
 }
 
+
 /**
  * // Questa funzione permette di verificare l'esistenza di un elemento (file) dentro un array (directory tree)
  *
@@ -65,7 +66,7 @@ function createDirectoryTreeFn(matchedMetadata, username) {
     var tree = [];//[{name: 'Files', folder: true, children:[{name:'provaFile', folder: true, children: []}]}];
 //    console.log("Tree dim: "+tree.length);
     var parsedPath = {};
-    var i;
+    var i,j;
     var foundPos;
     var current = [];
 
@@ -78,7 +79,6 @@ function createDirectoryTreeFn(matchedMetadata, username) {
     tree.push(root);
 
     matchedMetadata.forEach(function (table) {
-     //   console.log("Path for Debora: "+table.metadataTable.relPath);
         parsedPath = path.parse(table.metadata.relPath);
         current = tree;
         var arr = parsedPath.dir.split('/');
@@ -99,7 +99,6 @@ function createDirectoryTreeFn(matchedMetadata, username) {
                         path: table.metadata.relPath,
                         guid: table.guid
                     });
-                 //   break;
                 }
                 else{
 //                    console.log(arr[i]+" NON è l'ultima cartella.");
@@ -108,14 +107,34 @@ function createDirectoryTreeFn(matchedMetadata, username) {
             }
             else{
 //                console.log("Non ho trovato "+arr[i]);
+                var folderPath = arr[0];
+                if(i>0)
+                {
+                    for(j=1; j<=i; j++)
+                    {
+                        folderPath = folderPath +'/'+ arr[j];
+                    }
+                }
                 if(i===(arr.length-1))
                 {
 //                    console.log(arr[i]+" è l'ultima cartella prima del file.");
-                    current.push({folder: true, name:arr[i], children: [{folder: false, name: table.metadata.name, size: table.metadata.size, extension: table.metadata.extension, lastModified:table.metadata.lastModified}]});
+                    current.push({
+                            folder: true,
+                            folderPath: folderPath,
+                            name:arr[i],
+                            children: [{
+                                    folder: false,
+                                    name: table.metadata.name,
+                                    size: table.metadata.size,
+                                    extension: table.metadata.extension,
+                                    lastModified:table.metadata.lastModified,
+                                    path: table.metadata.relPath,
+                                    guid: table.guid}]
+                        });
                 }
                 else{
 //                    console.log(arr[i]+" NON è l'ultima cartella prima del file.");
-                    current.push({folder: true, name:arr[i], children: []});
+                    current.push({folder: true, folderPath: folderPath, name:arr[i], children: []});
                     current = current[current.length-1].children;
                 }
             }
