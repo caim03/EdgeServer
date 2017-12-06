@@ -130,8 +130,8 @@ function checkAndSaveMetadataFn(req, res) {
 
  //           masterTable.printTable();
             // TODO PER CHRISTIAN -> ESEMPIO DI COME RICHIAMARE LA FUNZIONE PER RESTITUIRE TUTTO L'ALBERO DEI FILE. MANCA SOLO LA POST AL CLIENT QUANDO ARRIVA RICHIESTA DALLO STESSO, DA RICHIAMARE IN UN ALTRO PUNTO DEL CODICE, QUI E' SOLO DI ESEMPIO.
-            // var tree = readFileControllerM.getAllMetadata('Debora');
-            // readFileControllerM.prettyJSONFn(tree);
+     //        var tree = readFileControllerM.getAllMetadata('Debora');
+     //        readFileControllerM.prettyJSONFn(tree);
 
 
 
