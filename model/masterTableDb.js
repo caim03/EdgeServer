@@ -25,6 +25,7 @@ exports.getOneSlaveByGuid = getOneSlaveByGuidFn;
 exports.getAllSlavesByGuid = getAllSlavesByGuidFn;
 exports.getFileByUserAndRelPath = getFileByUserAndRelPathFn;
 exports.removeByGuid = removeByGuidFn;
+exports.removeSlaveOccupation = removeSlaveOccupationFn;
 
 function removeByGuidFn(chunkGuid)
 {
@@ -67,10 +68,10 @@ function addChunkRefFn(chunkGuid, metadata, slaveIp, idUser)
         masterTable.update(foundGuid);
     }
 
-    buildSlaveOccupation(slaveIp);
+    addSlaveOccupation(slaveIp);
 }
 
-function buildSlaveOccupation(slaveIp)
+function addSlaveOccupation(slaveIp)
 {
     totalChunk++;
     var found = false;
@@ -89,6 +90,15 @@ function buildSlaveOccupation(slaveIp)
 
 
 
+}
+
+function removeSlaveOccupationFn(slaveIp) {
+    totalChunk--;
+    ipOccupation.forEach(function (table) {
+        if(table.slaveIp === slaveIp) {
+            table.occupation--;
+        }
+    });
 }
 
 function guidGeneratorFn() {
