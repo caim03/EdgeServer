@@ -8,6 +8,8 @@ module.exports = function (app) {
     var topologyController = require('../controllers/master/topologyController');
     var uploadControllerM = require('../controllers/master/uploadControllerM');
     var readFileControllerM = require('../controllers/master/readFileControllerM');
+    var deleteFileControllerM = require('../controllers/master/deleteControllerM');
+
 
     /* REST API */
 
@@ -29,5 +31,6 @@ module.exports = function (app) {
     app.post('/api/master/getDirectoryTree', readFileControllerM.getAllMetadata);
     app.post('/api/master/readFile', readFileControllerM.getReadSlaves);
 
+    app.post('/api/master/deleteFile', deleteFileControllerM.deleteFile);
 
 };

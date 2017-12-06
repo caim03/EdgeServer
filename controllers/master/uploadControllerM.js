@@ -103,7 +103,7 @@ function sendSlaveListAndGuidFn(req, res1) {
 }
 
 /**
- * Questa funzione permette al master di effettuare dei controlli sui metadati ricevuti dal client e
+ * Questa funzione permette al master di effettuare dei controlli sui metadati ricevuti dal client e,
  * in caso positivo, li memorizza.
  *
  * @param req
@@ -128,7 +128,7 @@ function checkAndSaveMetadataFn(req, res) {
             masterTable.addChunkRef(req.body.chunkGuid, metadata, req.body.slaveIp, req.body.userId);
             console.log("Added "+req.body.chunkGuid+" in master table with metadata!\n");
 
-            masterTable.printTable();
+ //           masterTable.printTable();
             // TODO PER CHRISTIAN -> ESEMPIO DI COME RICHIAMARE LA FUNZIONE PER RESTITUIRE TUTTO L'ALBERO DEI FILE. MANCA SOLO LA POST AL CLIENT QUANDO ARRIVA RICHIESTA DALLO STESSO, DA RICHIAMARE IN UN ALTRO PUNTO DEL CODICE, QUI E' SOLO DI ESEMPIO.
             // var tree = readFileControllerM.getAllMetadata('Debora');
             // readFileControllerM.prettyJSONFn(tree);

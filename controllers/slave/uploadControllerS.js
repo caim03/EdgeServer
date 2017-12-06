@@ -12,7 +12,9 @@ var formidable = require('formidable');
 var multiparty = require('multiparty');
 var util = require('util');
 var process = require('process');
+
 var ip = require('../../model/ip');
+
 var fs=require('fs');
 var chunkList = require('../../model/chunkList');
 var mkdirp = require('mkdirp');
@@ -55,7 +57,7 @@ function checkIfPendingFn(req, res) {
     if(req.body.type === 'GUID_CLIENT') {
         console.log("<-  Received ("+req.body.guid+" - "+req.body.idUser+") from client.");
         if (pendingReq.checkIfPending(req.body.guid, req.body.idUser)) {
-            console.log("("+req.body.guid + " - " + req.body.idUser + ") founded as pending, authorizing client to send file.\n");
+            console.log("("+req.body.guid + " - " + req.body.idUser + ") found as pending, authorizing client to send file.\n");
             var obj = {
                 type: "ACK_PENDING",
                 guid: req.body.guid,
@@ -92,6 +94,7 @@ function uploadFileFn(req, res1) {
             shell.mkdir('-p', path.dirname(fields[2][1]));
 
             file.path = fields[2][1];
+
             pendingReq.removeReq(fields[0][1], fields[1][1]);
             //INVIO GUID-USER AL MASTER DA CONFRONTARE NELLA PENDING METADATA TABLE.
             console.log("->  Sending ("+fields[0][1]+" - "+fields[1][1]+") to master.");
@@ -123,32 +126,31 @@ function uploadFileFn(req, res1) {
         .on('file', function (field, file) {
             files.push([field, file]);
         })
-
-            .on('error', function (error) {
+        .on('error', function (error) {
                 console.log(error);
 
-            })
-            .on('aborted', function () {
+        })
+        .on('aborted', function () {
 
-            })
-            .on('progress', function(bytesReceived, bytesExpected) {
+        })
+        .on('progress', function(bytesReceived, bytesExpected) {
 
-                var percent = (bytesReceived / bytesExpected * 100) | 0;
-                console.log('Uploading: %' + percent + '\r');
-            })
-           .on('end', function () {
-               var temp_name = this.openedFiles[0].name;
+            var percent = (bytesReceived / bytesExpected * 100) | 0;
+            console.log('Uploading: %' + percent + '\r');
+        })
+       .on('end', function () {
+           var temp_name = this.openedFiles[0].name;
 
-               console.log("->  Notifying "+fields[1][1]+" the uploading success of "+temp_name);
-               var objSuccess = {
-                   type: "FILE_SAVED_SUCCESS",
-                   nameFile: temp_name
-               };
-               res1.statusCode = 200;
-               res1.send(objSuccess);
-               console.log('-> upload done!'+'\n');
-           });
-           form.parse(req);
+           console.log("->  Notifying "+fields[1][1]+" the uploading success of "+temp_name);
+           var objSuccess = {
+               type: "FILE_SAVED_SUCCESS",
+               nameFile: temp_name
+           };
+           res1.statusCode = 200;
+           res1.send(objSuccess);
+           console.log('-> upload done!'+'\n');
+       });
+       form.parse(req);
 
     // chunkList.pushChunk(chunkMetaData);
 
