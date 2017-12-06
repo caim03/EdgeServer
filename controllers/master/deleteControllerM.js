@@ -43,6 +43,7 @@ function deleteFileFn(req, res1) {
            if(res2.body.type === 'REMOVED_CHUNK')
            {
                slavesReturned.push(ip.slaveIp);
+               masterTable.removeSlaveOccupation(ip.slaveIp);
                if(slavesReturned.length=== config.replicationNumber)
                {
 

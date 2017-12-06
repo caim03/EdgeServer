@@ -24,6 +24,7 @@ function removeByGuidFn(chunkGuid)
     else console.log("Guid not found");
 }
 
+
 function insertChunkFn(chunkguid, metadata, userId)
 {
     slaveTable.insert({chunkGuid: chunkguid , metadata: metadata, userId: userId});
