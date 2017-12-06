@@ -33,7 +33,8 @@ function deleteFileFn(req, res1) {
            method: 'POST',
            json: {
                type: "REMOVE_CHUNK",
-               chunkGuid: matchedTable.guid
+               chunkGuid: matchedTable.guid,
+               path: req.body.relPath
            }
        };
        request(obj, function (err, res2) {
