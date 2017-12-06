@@ -14,7 +14,7 @@ var config = {
     heartbeatTime: 10000, // Frequenza di heartbeat
     waitHeartbeat: 20000, // Tempo scaduto il quale si assume il fallimento del master per l'inizio dell'elezione
     randomGuidTime: 15000,   //Tempo scaduto il quale viene simulato l'arrivo di un nuovo guid per il chunk al master.
-    replicationNumber: 2
+    replicationNumber: 1
 };
 
 module.exports = config;
