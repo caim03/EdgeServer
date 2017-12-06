@@ -28,6 +28,8 @@ function removeChunkFn(req, res) {
     {
         slaveTable.removeByGuid(req.body.chunkGuid);
 
+        console.log(req.body);
+
         fs.unlink(req.body.relPath, function(error) {
             if (error) {
                 console.log(error);
