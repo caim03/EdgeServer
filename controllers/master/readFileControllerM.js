@@ -120,7 +120,7 @@ function createDirectoryTreeFn(matchedMetadata, username) {
 //                    console.log(arr[i]+" è l'ultima cartella prima del file.");
                     current.push({
                             folder: true,
-                            folderPath: folderPath,
+                            path: folderPath,
                             name:arr[i],
                             children: [{
                                     folder: false,
@@ -134,7 +134,7 @@ function createDirectoryTreeFn(matchedMetadata, username) {
                 }
                 else{
 //                    console.log(arr[i]+" NON è l'ultima cartella prima del file.");
-                    current.push({folder: true, folderPath: folderPath, name:arr[i], children: []});
+                    current.push({folder: true, path: folderPath, name:arr[i], children: []});
                     current = current[current.length-1].children;
                 }
             }
