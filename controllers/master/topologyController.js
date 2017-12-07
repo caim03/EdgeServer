@@ -7,6 +7,7 @@ var config = require('../../config/config');
 var request = require('request');
 var rebalancingController = require('./rebalancingController');
 var app = require('../../app');
+var master = require('../../model/masterServer');
 var hbIntervalId;
 
 
@@ -80,16 +81,23 @@ function subscribeFn(req, res) {
 function subscribeToBalancerFn(proclamation) {
 
     var type;
-    if (!proclamation)
+    var oldMaster;
+    if (!proclamation) {
         type = "MASTER";
-    else
+        oldMaster = null;
+    }
+    else {
         type = "PROCLAMATION";
-
+        oldMaster = master.getMasterServerIp();
+    }
 
     var obj = {
         url: 'http://' + config.balancerIp + ':' + config.balancerPort + config.balancerSubPath,
         method: 'POST',
-        json: {type: type}
+        json: {
+            type: type,
+            oldMaster: oldMaster
+        }
     };
 
 
@@ -98,19 +106,9 @@ function subscribeToBalancerFn(proclamation) {
         if (err) {
             console.log(err);
         }
-        else if (res.body.status === "ACK") {
+        if(res.body.status === "ACK") {
             console.log("Subscribed to load balancer");
         }
-        else if (res.body.status === "MASTER_ALREADY_EXISTS") {
-            console.log("Master already exists at " + res.body.masterIp);
-
-            clearInterval(hbIntervalId);
-
-            app.startSlave();
-
-        }
-
-
     })
 }
 
