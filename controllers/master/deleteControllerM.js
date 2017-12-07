@@ -55,35 +55,4 @@ function deleteFileFn(req, res1) {
            }
        });
     });
-/*
-    //TEST WITH STATIC IP FOR SLAVES
-
-    var tempIp = ['172.17.0.4', '172.17.0.6'];
-
-    tempIp.forEach(function (ip) {
-        var obj = {
-        url: 'http://' + ip + ':6601/api/chunk/removeChunk',
-        method: 'POST',
-        json: {
-            type: "REMOVE_CHUNK",
-            chunkGuid: matchedTable.guid
-            }
-        };
-        request(obj, function (err, res2) {
-            if (err) {
-                console.log(err);
-            }
-            if(res2.body.type === 'REMOVED_CHUNK')
-            {
-                slavesReturned.push(ip);
-                if(slavesReturned.length=== config.replicationNumber)
-                {
-
-                    masterTable.removeByGuid(matchedTable.guid);
-                    console.log(obj.json.chunkGuid+" removed in "+ip);
-                    res1.send({type: 'DELETE_SUCCESS'});
-                }
-            }
-        });
-    });*/
 }
