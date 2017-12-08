@@ -8,6 +8,7 @@ var s3fsImpl = null;
 
 exports.setS3Connection = setS3ConnectionFn;
 exports.saveFile = saveFileFn;
+exports.retrieveFile = retrieveFileFn;
 
 function setS3ConnectionFn() {
 
@@ -32,3 +33,9 @@ function saveFileFn(filename, fileStream) {
 
 }
 
+function retrieveFileFn(filename)
+{
+    var file = s3fsImpl.createReadStream(filename);
+
+    return file;
+}

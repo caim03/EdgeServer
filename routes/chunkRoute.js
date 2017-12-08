@@ -43,4 +43,6 @@ module.exports = function (app) {
     app.post('/api/chunk/removeChunk', deleteController.removeChunk);
 
     app.post('/api/chunk/periodicBackup',backupController.periodicBackup);
+
+    app.post('/api/chunk/restoreGuid',backupController.restoreGuid)
 };

@@ -59,6 +59,7 @@ function addChunkRefFn(chunkGuid, metadata, slaveIp, idUser)
             userId: idUser
         });
 
+
         masterTable.insert({chunkguid: chunkGuid , metadataTable: metadata, slavesIp: slavesIp , usersId : usersId, cloud: false});
 
     }
@@ -182,7 +183,8 @@ function getAllSlavesByGuidFn(guid) {
 
     var foundGuid = masterTable.findOne({'chunkguid': guid});
     if (foundGuid.slavesIp) {
-        return foundGuid.slavesIp;
+        return {'slavesIp' :foundGuid.slavesIp,
+                'metadata' : foundGuid.metadataTable};
     }
     else {
         return null;
