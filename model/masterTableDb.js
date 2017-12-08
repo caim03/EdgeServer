@@ -27,6 +27,9 @@ exports.getAllSlavesByGuid = getAllSlavesByGuidFn;
 exports.getFileByUserAndRelPath = getFileByUserAndRelPathFn;
 exports.removeByGuid = removeByGuidFn;
 exports.removeSlaveOccupation = removeSlaveOccupationFn;
+exports.createBackupList = createBackupListFn;
+exports.setCloudToGuids = setCloudToGuidsFn;
+
 
 function removeByGuidFn(chunkGuid)
 {
@@ -285,7 +288,7 @@ function getFileByUserAndRelPathFn(userId, relPath) {
     return matchedTable;
 }
 
-function createBackupList()
+function createBackupListFn()
 {
 
     var backupList = [];
@@ -293,7 +296,7 @@ function createBackupList()
     chunkServer.getChunk().forEach(function (slave) {
         backupList.push({
             slaveIp: slave.ip,
-            guidToBackup: null,
+            guidToBackup: [],
         })
     });
 
@@ -307,13 +310,13 @@ function createBackupList()
         //Nella backupList
         backupList.forEach(function (list)
         {
-            if(slaveBackupper.indexOf(list.slaveIp) != -1)
+            if(slaveBackupper === list.slaveIp)
                 list.guidToBackup.push(table.chunkguid);
         });
     })
 
-    console.log(backupList);
 
+    return backupList;
 
 }
 
@@ -326,6 +329,20 @@ METRICA: CASUALE
 function slaveChoise(slavesIp)
 {
 
-    return slavesIp[Math.floor(Math.random()*slavesIp.length)];
+    return slavesIp[Math.floor(Math.random()*slavesIp.length)].slaveIp;
+
+}
+
+function setCloudToGuidsFn(guids,cloud)
+{
+
+    guids.forEach(function (guid) {
+
+    var foundGuid = masterTable.findOne({'chunkguid': guid});
+
+    foundGuid.cloud = cloud;
+
+    masterTable.update(foundGuid);
+    })
 
 }
