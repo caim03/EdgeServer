@@ -3,14 +3,18 @@ var config = require('../../config/config');
 var masterTable = require('../../model/masterTableDb');
 var pendingReq = require('../../model/slave/pendingRequests');
 var process = require('process');
-//var fse = require('fs-extra');
 var ip = require('ip');
 var fs=require('fs');
 var path = require("path");
+var s3Controller = require('../s3Controller');
 
 exports.deleteFile = deleteFileFn;
 
 function deleteFileFn(req, res1) {
+
+    var path = req.body.relPath;
+    var user = req.body.idUser;
+    var notify = false;
 
     console.log(req.body.idUser+" want to delete "+req.body.relPath);
 
@@ -47,10 +51,41 @@ function deleteFileFn(req, res1) {
                masterTable.removeSlaveOccupation(ip.slaveIp);
                if(slavesReturned.length=== config.replicationNumber)
                {
+                   if(req.body.type !== "NOTIFY_DELETE"){
+                       notify = s3Controller.deleteFile(path);
+                   }
+                   else {
+                       notify = true;
+                   }
 
-                   masterTable.removeByGuid(matchedTable.guid);
-                   console.log(obj.json.chunkGuid+" removed in "+ip.slaveIp);
-                   res1.send({type: 'DELETE_SUCCESS'});
+                   if(notify) {
+                       masterTable.removeByGuid(matchedTable.guid);
+
+                       var notify = {
+                           url: 'http://' + config.balancerIp + ':' + config.balancerPort + config.balancerNotify,
+                           method: 'POST',
+                           json: {
+                               type: "NOTIFY_DELETE",
+                               path: path,
+                               idUser: user
+                           }
+                       };
+                       request(notify, function(err, res3) {
+                           if(err) {
+                               console.log(err);
+                           }
+                           else {
+                               console.log("Notify successfully");
+                               res3.end();
+                           }
+                       });
+
+                       console.log(obj.json.chunkGuid+" removed in "+ip.slaveIp);
+                       res1.send({type: 'DELETE_SUCCESS'});
+                   }
+                   else {
+                       res1.send({type: 'DELETE_ABORTED'});
+                   }
                }
            }
        });
