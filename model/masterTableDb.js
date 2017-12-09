@@ -8,6 +8,7 @@ var lokiDb = new loki();
 //var userTable = lokiDb.addCollection('userTable');
 var masterTable = lokiDb.addCollection('masterTable');
 var metadataTable = lokiDb.addCollection('metadataTable');
+var chunkServer = require('../model/chunkServer');
 var ipOccupation = [];
 var totalChunk = 0;
 
@@ -55,7 +56,7 @@ function addChunkRefFn(chunkGuid, metadata, slaveIp, idUser)
             userId: idUser
         });
 
-        masterTable.insert({chunkguid: chunkGuid , metadataTable: metadata, slavesIp: slavesIp , usersId : usersId});
+        masterTable.insert({chunkguid: chunkGuid , metadataTable: metadata, slavesIp: slavesIp , usersId : usersId, cloud: false});
 
     }
     else
@@ -282,4 +283,49 @@ function getFileByUserAndRelPathFn(userId, relPath) {
         });
     });
     return matchedTable;
+}
+
+function createBackupList()
+{
+
+    var backupList = [];
+
+    chunkServer.getChunk().forEach(function (slave) {
+        backupList.push({
+            slaveIp: slave.ip,
+            guidToBackup: null,
+        })
+    });
+
+    var guidToBackup = masterTable.find({'cloud': false})
+
+    guidToBackup.forEach(function (table) {
+
+        //Prende un unico slave che deve backuppare il chunk
+        var slaveBackupper = slaveChoise(table.slavesIp);
+
+        //Nella backupList
+        backupList.forEach(function (list)
+        {
+            if(slaveBackupper.indexOf(list.slaveIp) != -1)
+                list.guidToBackup.push(table.chunkguid);
+        });
+    })
+
+    console.log(backupList);
+
+
+}
+
+/*
+
+Sceglie uno slave tra la lista che deve effettuare il backup di UN CHUNK
+
+METRICA: CASUALE
+ */
+function slaveChoise(slavesIp)
+{
+
+    return slavesIp[Math.floor(Math.random()*slavesIp.length)];
+
 }
