@@ -8,6 +8,15 @@ var ip = require('ip');
 var fs=require('fs');
 var path = require("path");
 
+var AWS = require("aws-sdk");
+
+AWS.config.update({
+    region: "us-east-2",
+    endpoint: "https://dynamodb.us-east-2.amazonaws.com"
+});
+
+var ddb = new AWS.DynamoDB();
+
 
 exports.getAllMetadata = getAllMetadataFn;
 exports.checkIfFound = checkIfFoundFn;
@@ -27,9 +36,42 @@ exports.getReadSlaves = getReadSlavesFn;
 function getAllMetadataFn(req, res) {
     console.log("Tree requested by " + req.body.username);
     var matchTables = masterTable.getAllMetadataByUser(req.body.username);
-    var tree = createDirectoryTreeFn(matchTables, req.body.username);
-    res.status(200).send(tree);
-    res.end();
+  /*  if(matchTables.length ===0) {
+        var docClient = new AWS.DynamoDB.DocumentClient();
+
+        console.log("Chiedo a dynamo");
+        //TODO Query a Dynamo per prendere tutti gli item con idUser fornito da req
+        //Non funziona
+                    var params = {
+                        TableName: "MasterT",
+                        FilterExpression: "#id = :id",
+                        ExpressionAttributeNames:{
+                            "#id": "idUser"
+                        },
+                        ExpressionAttributeValues: {
+                            ":id":req.body.username
+                        }
+                    };
+                    docClient.query(params, function(err, data) {
+                        if (err) {
+                            console.log("Error", err);
+                        } else {
+                            console.log("Success", data.Items);
+                        }
+                    });
+                //TODO Fare i passaggi seguenti per ogni item trovato dalla query
+                //insert in masterTable addChunkRef(guid, metadata, [], idUser)
+                //getAllMetadataByUser(...)
+                //createDirectoryTree
+                //res.send(tree)
+                }
+                else
+                {*/
+        var tree = createDirectoryTreeFn(matchTables, req.body.username);
+        res.status(200).send(tree);
+        res.end();
+        //      }
+    //}
 }
 
 
