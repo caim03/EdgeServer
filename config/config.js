@@ -7,7 +7,7 @@
 var config = {
     port: 6601, // Porta di ascolto del server
     ip: '0.0.0.0', // Preleva l'indirizzo ip della macchina
-    balancerIp: '34.195.19.72', // Ip statico del load balancer.
+    balancerIp: "10.220.215.244", //'34.195.19.72', // Ip statico del load balancer.
     balancerPort: 6602, // Porta di ascolto del load balancer
     balancerSubPath: '/api/lb/edge/subscribe', // Path di sottoscrizione del master al load balancer
     balancerNotify: '/api/lb/edge/notifyDelete', // Path per notificare la delete alle altre fog

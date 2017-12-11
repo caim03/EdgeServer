@@ -52,39 +52,42 @@ function deleteFileFn(req, res1) {
                if(slavesReturned.length=== config.replicationNumber)
                {
                    if(req.body.type !== "NOTIFY_DELETE"){
-                       notify = s3Controller.deleteFile(path);
-                   }
-                   else {
-                       notify = true;
-                   }
+                       notify = s3Controller.deleteFile(path, function(result) {
+                           if(result) {
+                               masterTable.removeByGuid(matchedTable.guid);
 
-                   if(notify) {
-                       masterTable.removeByGuid(matchedTable.guid);
+                               var notify = {
+                                   url: 'http://' + config.balancerIp + ':' + config.balancerPort + config.balancerNotify,
+                                   method: 'POST',
+                                   json: {
+                                       type: "NOTIFY_DELETE",
+                                       path: path,
+                                       idUser: user
+                                   }
+                               };
+                               request(notify, function(err, res3) {
+                                   if(err) {
+                                       console.log(err);
+                                   }
+                                   else {
+                                       console.log("Notify successfully");
+                                       res3.end();
+                                   }
+                               });
 
-                       var notify = {
-                           url: 'http://' + config.balancerIp + ':' + config.balancerPort + config.balancerNotify,
-                           method: 'POST',
-                           json: {
-                               type: "NOTIFY_DELETE",
-                               path: path,
-                               idUser: user
-                           }
-                       };
-                       request(notify, function(err, res3) {
-                           if(err) {
-                               console.log(err);
+                               console.log(obj.json.chunkGuid+" removed in "+ip.slaveIp);
+                               res1.send({type: 'DELETE_SUCCESS'});
                            }
                            else {
-                               console.log("Notify successfully");
-                               res3.end();
+                               res1.send({type: 'DELETE_ABORTED'});
                            }
                        });
+                   }
 
+                   else {
+                       masterTable.removeByGuid(matchedTable.guid);
                        console.log(obj.json.chunkGuid+" removed in "+ip.slaveIp);
                        res1.send({type: 'DELETE_SUCCESS'});
-                   }
-                   else {
-                       res1.send({type: 'DELETE_ABORTED'});
                    }
                }
            }

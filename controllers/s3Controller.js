@@ -26,14 +26,14 @@ function setS3ConnectionFn() {
     return s3fsImpl;
 }
 
-function deleteFileFn(path) {
+function deleteFileFn(path, callback) {
     s3fsImpl.unlink(path)
         .then(function() {
             console.log("Il file: " + path + " è stato eliminato");
-            return true;
+            callback(true);
         }, function(error) {
             console.log(error);
-            return false;
+            callback(false);
         });
 }
 
