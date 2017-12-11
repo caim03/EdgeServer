@@ -40,10 +40,10 @@ function restoreGuidFn(req, res) {
     var userId = req.body.userId;
     //Preleva il fileStream da S3 e lo salva in locale
     var sourceFileStream = s3Controller.retrieveFile(metadata.relPath);
-    shell.mkdir('-p', path.dirname("prova/" + metadata.relPath));
+    shell.mkdir('-p', path.dirname(metadata.relPath));
     // copyFile(sourceFileStream,"prova/" + metadata.relPath);
     //TODO controllo errore!
-    sourceFileStream.pipe(fs.createWriteStream("prova/" + metadata.relPath));
+    sourceFileStream.pipe(fs.createWriteStream(metadata.relPath));
 
     slaveTable.insertChunk(guid,metadata,userId);
 

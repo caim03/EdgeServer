@@ -67,6 +67,8 @@ else {
 }
 
 ddb.setDynamoAccess();
+s3Controller.setS3Connection();
+
 function startMasterFn(proclamation)
 {
     info.setInfoMaster(true);
@@ -82,7 +84,6 @@ function startSlaveFn()
     info.setInfoMaster(false);
     console.log('I am a slave.');
 
-    s3Controller.setS3Connection();
     topologySlaveController.findMaster();
     topologySlaveController.subscribeToMaster();
     topologySlaveController.waitHeartbeat();

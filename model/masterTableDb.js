@@ -95,6 +95,9 @@ function addSlaveListToGuidFn(chunkguid, slavesIp)
         masterTable.update(foundGuid);
         addSlaveOccupation(slaveIp);
     })
+
+    foundGuid.cloud = true;
+    masterTable.update(foundGuid);
 }
 
 function addSlaveOccupation(slaveIp)

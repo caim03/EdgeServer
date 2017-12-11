@@ -220,6 +220,9 @@ function getReadSlavesFn(req, res) {
 
     // slaves = [];
 
+    console.log("SLAVE LIST");
+    console.log(slaves);
+
     //SE LA LISTA è VUOTA -> CERCARE in S3
     if(slaves.length === 0)
     {
