@@ -128,6 +128,8 @@ function isEmptyObjectFn(obj) {
     return true;
 }
 
+
+
 //createTableFn();
 //example adding item
 /*

@@ -9,6 +9,7 @@ var lokiDb = new loki();
 var masterTable = lokiDb.addCollection('masterTable');
 var metadataTable = lokiDb.addCollection('metadataTable');
 var chunkServer = require('../model/chunkServer');
+var dynamoTable = require('../model/master/dynamoTable');
 var ipOccupation = [];
 var totalChunk = 0;
 
@@ -30,7 +31,7 @@ exports.removeSlaveOccupation = removeSlaveOccupationFn;
 exports.createBackupList = createBackupListFn;
 exports.setCloudToGuids = setCloudToGuidsFn;
 exports.addSlaveListToGuid = addSlaveListToGuidFn;
-
+exports.saveMasterTableOnDynamo = saveMasterTableOnDynamoFn;
 
 function removeByGuidFn(chunkGuid)
 {
@@ -320,7 +321,7 @@ function createBackupListFn()
     chunkServer.getChunk().forEach(function (slave) {
         backupList.push({
             slaveIp: slave.ip,
-            guidToBackup: [],
+            guidToBackup: []
         })
     });
 
@@ -337,7 +338,7 @@ function createBackupListFn()
             if(slaveBackupper === list.slaveIp)
                 list.guidToBackup.push(table.chunkguid);
         });
-    })
+    });
 
 
     return backupList;
@@ -369,4 +370,15 @@ function setCloudToGuidsFn(guids,cloud)
     masterTable.update(foundGuid);
     })
 
+}
+
+function saveMasterTableOnDynamoFn()
+{
+    masterTable.chain().data().forEach(function (table){
+
+        var users = table.usersId;
+        users.forEach(function (idUser){
+            dynamoTable.addItem(idUser,table.chunkguid, table.metadata);
+        });
+    });
 }

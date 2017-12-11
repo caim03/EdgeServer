@@ -48,12 +48,11 @@ function periodicBackupFn()
             })
 
             //TODO SALVARE MASTERTABLE SU DYNAMO
-
+            masterTable.saveMasterTableOnDynamo();
 
     }, config.backupPeriodicTime);
 
-
-    }
+ }
 
     function restoreGuidFromS3Fn(guid, metadata, userId)
     {
