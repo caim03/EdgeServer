@@ -7,6 +7,7 @@ var process = require('process');
 var ip = require('ip');
 var fs=require('fs');
 var path = require("path");
+var backupControllerM = require("./backupControllerM");
 
 var AWS = require("aws-sdk");
 
@@ -198,6 +199,27 @@ function prettyJSONFn(obj) {
 function getReadSlavesFn(req, res) {
     var metadata = req.body;
 
-    var slaves = masterTable.getAllSlavesByGuid(req.body.guid);
+    console.log(req.body);
+
+    var allSlaveByGuid = masterTable.getAllSlavesByGuid(req.body.guid);
+
+    // var slaves = allSlaveByGuid.slavesIp;
+
+    slaves = [];
+
+    //SE LA LISTA è VUOTA -> CERCARE in S3
+    if(slaves.length === 0)
+    {
+
+        var slavesList= backupControllerM.restoreGuidFromS3(req.body.guid, allSlaveByGuid.metadata, req.body.user);
+        masterTable.addSlaveListToGuid(req.body.guid, slaves);
+
+        slavesList.forEach(function (slave) {
+            slaves.push({slaveIp: slave});
+        })
+
+
+    }
+
     res.send(slaves);
 }

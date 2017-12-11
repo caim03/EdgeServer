@@ -11,10 +11,12 @@ var s3fsImpl = null;
 
 exports.setS3Connection = setS3ConnectionFn;
 exports.saveFile = saveFileFn;
+exports.retrieveFile = retrieveFileFn;
 exports.deleteFile = deleteFileFn;
 
 function setS3ConnectionFn() {
-    if(s3fsImpl === null) {
+
+    if (s3fsImpl === null) {
         s3fsImpl = new S3FS(s3Config.bucketName, {
             accessKeyId: s3Config.accessKeyID,
             secretAccessKey: s3Config.secretAccessKeyId
@@ -22,16 +24,6 @@ function setS3ConnectionFn() {
         s3fsImpl.create();
     }
     return s3fsImpl;
-}
-
-function saveFileFn(filename, fileStream) {
-    s3fsImpl.writeFile(filename, fileStream)
-        .then(function(){
-            console.log("OK");
-        })
-        .catch(function(err) {
-            console.log(err);
-        })
 }
 
 function deleteFileFn(path) {
@@ -43,4 +35,21 @@ function deleteFileFn(path) {
             console.log(error);
             return false;
         });
+}
+
+function saveFileFn(filename, fileStream) {
+    s3fsImpl.writeFile(filename, fileStream).then(function () {
+        console.log(filename + " saved!");
+    }).catch(function (err) {
+        console.log(err);
+    });
+
+
+}
+
+function retrieveFileFn(filename)
+{
+    var file = s3fsImpl.createReadStream(filename);
+
+    return file;
 }

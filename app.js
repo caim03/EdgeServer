@@ -7,7 +7,8 @@ var topologyMasterController = require('./controllers/master/topologyController'
 var topologySlaveController = require('./controllers/slave/topologyController');
 var info = require('./model/serverInfo');
 var ip = require('./model/ip');
-
+var backupController = require('./controllers/master/backupControllerM');
+var s3Controller = require('./controllers/s3Controller');
 exports.startMaster = startMasterFn;
 exports.startSlave = startSlaveFn;
 
@@ -66,18 +67,19 @@ else {
 function startMasterFn(proclamation)
 {
     info.setInfoMaster(true);
-
     console.log('I am the master.');
+
     topologyMasterController.subscribeToBalancer(proclamation);
     topologyMasterController.heartbeatMessage();
+    backupController.periodicBackup();
 }
-
 function startSlaveFn()
 {
-    info.setInfoMaster(false);
 
+    info.setInfoMaster(false);
     console.log('I am a slave.');
 
+    s3Controller.setS3Connection();
     topologySlaveController.findMaster();
     topologySlaveController.subscribeToMaster();
     topologySlaveController.waitHeartbeat();

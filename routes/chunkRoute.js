@@ -8,6 +8,7 @@ module.exports = function (app) {
     var topologyController = require('../controllers/slave/topologyController');
     var electionController = require('../controllers/slave/electionController');
     var deleteController = require('../controllers/slave/deleteControllerS');
+    var backupController = require('../controllers/slave/backupControllerS')
 
 
     /* REST API */
@@ -41,4 +42,7 @@ module.exports = function (app) {
     app.post('/api/chunk/readFile', chunkController.readFile);
     app.post('/api/chunk/removeChunk', deleteController.removeChunk);
 
+    app.post('/api/chunk/periodicBackup',backupController.periodicBackup);
+
+    app.post('/api/chunk/restoreGuid',backupController.restoreGuid)
 };
