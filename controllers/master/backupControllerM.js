@@ -6,6 +6,7 @@ var masterController = require("./masterController");
 
 exports.periodicBackup = periodicBackupFn;
 exports.restoreGuidFromS3 = restoreGuidFromS3Fn;
+exports.stopPeriodicBackup = stopPeriodicBackupFn;
 
 
 var buIntervalId;
@@ -54,7 +55,7 @@ function periodicBackupFn()
 
     }
 
-    function restoreGuidFromS3Fn(guid, metadata)
+    function restoreGuidFromS3Fn(guid, metadata, userId)
     {
 
         //genera slaveList
@@ -72,7 +73,8 @@ function periodicBackupFn()
                 json: {
                     type: "RESTORE",
                     guid: guid,
-                    metadata: metadata
+                    metadata: metadata,
+                    userId: userId
                 }
             };
 
@@ -86,4 +88,10 @@ function periodicBackupFn()
 
         return slaveServers;
 
+    }
+
+
+    function stopPeriodicBackupFn()
+    {
+        clearInterval(buIntervalId);
     }

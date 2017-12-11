@@ -168,11 +168,16 @@ function getReadSlavesFn(req, res) {
     //SE LA LISTA è VUOTA -> CERCARE in S3
     if(slaves.length === 0)
     {
-        slaves = backupControllerM.restoreGuidFromS3(req.body.guid, allSlaveByGuid.metadata);
+
+        var slavesList= backupControllerM.restoreGuidFromS3(req.body.guid, allSlaveByGuid.metadata, req.body.user);
+        masterTable.addSlaveListToGuid(req.body.guid, slaves);
+
+        slavesList.forEach(function (slave) {
+            slaves.push({slaveIp: slave});
+        })
+
 
     }
-
-    //TODO modificare la masterTable inserendo gli slavesip
 
     res.send(slaves);
 }

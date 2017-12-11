@@ -29,6 +29,7 @@ exports.removeByGuid = removeByGuidFn;
 exports.removeSlaveOccupation = removeSlaveOccupationFn;
 exports.createBackupList = createBackupListFn;
 exports.setCloudToGuids = setCloudToGuidsFn;
+exports.addSlaveListToGuid = addSlaveListToGuidFn;
 
 
 function removeByGuidFn(chunkGuid)
@@ -74,6 +75,23 @@ function addChunkRefFn(chunkGuid, metadata, slaveIp, idUser)
     }
 
     addSlaveOccupation(slaveIp);
+}
+
+function addSlaveListToGuidFn(chunkguid, slavesIp)
+{
+    var foundGuid = masterTable.findOne({'chunkguid': chunkguid});
+
+    slavesIp.forEach(function (slaveIp) {
+        foundGuid.slavesIp.push({
+            slaveIp: slaveIp
+        });
+
+        masterTable.update(foundGuid);
+
+        addSlaveOccupation(slaveIp);
+
+    })
+
 }
 
 function addSlaveOccupation(slaveIp)

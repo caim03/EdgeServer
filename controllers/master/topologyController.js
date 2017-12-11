@@ -8,7 +8,7 @@ var request = require('request');
 var rebalancingController = require('./rebalancingController');
 var app = require('../../app');
 var hbIntervalId;
-
+var backupControllerM = require("./backupControllerM");
 
 exports.subscribe = subscribeFn;
 exports.subscribeToBalancer = subscribeToBalancerFn;
@@ -105,7 +105,7 @@ function subscribeToBalancerFn(proclamation) {
             console.log("Master already exists at " + res.body.masterIp);
 
             clearInterval(hbIntervalId);
-
+            backupControllerM.stopPeriodicBackup();
             app.startSlave();
 
         }
