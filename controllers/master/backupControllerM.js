@@ -47,7 +47,6 @@ function periodicBackupFn()
 
             })
 
-            //TODO SALVARE MASTERTABLE SU DYNAMO
             masterTable.saveMasterTableOnDynamo();
 
     }, config.backupPeriodicTime);

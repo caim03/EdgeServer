@@ -1,16 +1,10 @@
-var AWS = require("aws-sdk");
-
+var dynamoController = require("../../controllers/dynamoController");
 exports.createTable = createTableFn;
 exports.addItem = addItemFn;
 exports.isEmptyObject = isEmptyObjectFn;
 exports.getMetadataFromDynamo = getMetadataFromDynamoFn;
 
-AWS.config.update({
-    region: "us-east-2",
-    endpoint: "https://dynamodb.us-east-2.amazonaws.com"
-});
-
-var ddb = new AWS.DynamoDB();
+var ddb = dynamoController.getDynamoDb();
 var masterTable = require('../../model/masterTableDb');
 
 function createTableFn()
@@ -56,9 +50,8 @@ function createTableFn()
 
 function addItemFn(idUser, guid, metadata)
 {
-    var docClient = new AWS.DynamoDB.DocumentClient();
+    var docClient = dynamoController.getDynamoDocumentClient();
     console.log("Adding metadata for "+idUser+".");
-
     var params = {
         TableName: 'MasterT',
         Item: {
@@ -84,7 +77,7 @@ function addItemFn(idUser, guid, metadata)
 
 function getMetadataFromDynamoFn(idUser, callback)
 {
-    var docClient = new AWS.DynamoDB.DocumentClient();
+    var docClient = dynamoController.getDynamoDocumentClient();
 
     var params = {
         TableName: "MasterT",

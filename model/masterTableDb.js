@@ -325,20 +325,21 @@ function createBackupListFn()
         })
     });
 
-    var guidToBackup = masterTable.find({'cloud': false})
+    var guidToBackup = masterTable.find({'cloud': false});
 
     guidToBackup.forEach(function (table) {
 
-        //Prende un unico slave che deve backuppare il chunk
-        var slaveBackupper = slaveChoise(table.slavesIp);
+        if(table.slavesIp.length !== 0) {
+            //Prende un unico slave che deve backuppare il chunk
+            var slaveBackupper = slaveChoise(table.slavesIp);
 
-        //Nella backupList
-        backupList.forEach(function (list)
-        {
-            if(slaveBackupper === list.slaveIp)
-                list.guidToBackup.push(table.chunkguid);
+            //Nella backupList
+            backupList.forEach(function (list) {
+                if (slaveBackupper === list.slaveIp)
+                    list.guidToBackup.push(table.chunkguid);
+            });
+        }
         });
-    });
 
 
     return backupList;
@@ -375,10 +376,9 @@ function setCloudToGuidsFn(guids,cloud)
 function saveMasterTableOnDynamoFn()
 {
     masterTable.chain().data().forEach(function (table){
-
         var users = table.usersId;
         users.forEach(function (idUser){
-            dynamoTable.addItem(idUser,table.chunkguid, table.metadata);
+            dynamoTable.addItem(idUser.userId,table.chunkguid, table.metadataTable);
         });
     });
 }

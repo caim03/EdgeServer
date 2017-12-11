@@ -9,6 +9,8 @@ var info = require('./model/serverInfo');
 var ip = require('./model/ip');
 var backupController = require('./controllers/master/backupControllerM');
 var s3Controller = require('./controllers/s3Controller');
+var ddb = require('./controllers/dynamoController');
+
 exports.startMaster = startMasterFn;
 exports.startSlave = startSlaveFn;
 
@@ -64,6 +66,7 @@ else {
 
 }
 
+ddb.setDynamoAccess();
 function startMasterFn(proclamation)
 {
     info.setInfoMaster(true);

@@ -45,9 +45,12 @@ function getAllMetadataFn(req, res) {
             if(result) {
                 var matches = masterTable.getAllMetadataByUser(req.body.username);
                 var tree = createDirectoryTreeFn(matches, req.body.username);
+                console.log("IF");
+                console.log(tree);
             }
             else {
                 var tree = createDirectoryTreeFn(matchTables, req.body.username);
+                console.log(tree);
             }
 
             res.status(200);
@@ -213,9 +216,9 @@ function getReadSlavesFn(req, res) {
 
     var allSlaveByGuid = masterTable.getAllSlavesByGuid(req.body.guid);
 
-    // var slaves = allSlaveByGuid.slavesIp;
+    var slaves = allSlaveByGuid.slavesIp;
 
-    slaves = [];
+    // slaves = [];
 
     //SE LA LISTA è VUOTA -> CERCARE in S3
     if(slaves.length === 0)

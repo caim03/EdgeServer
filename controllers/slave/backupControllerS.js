@@ -47,6 +47,8 @@ function restoreGuidFn(req, res) {
 
     slaveTable.insertChunk(guid,metadata,userId);
 
+    slaveTable.printTable();
+
     res.send({status : "ACK"});
 
 
