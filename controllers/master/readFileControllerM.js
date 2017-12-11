@@ -9,6 +9,7 @@ var process = require('process');
 var ip = require('ip');
 var fs=require('fs');
 var path = require("path");
+var backupControllerM = require("./backupControllerM");
 
 var AWS = require("aws-sdk");
 
@@ -39,15 +40,19 @@ function getAllMetadataFn(req, res) {
     console.log("Tree requested by " + req.body.username);
     var matchTables = masterTable.getAllMetadataByUser(req.body.username);
     if(matchTables.length ===0) {
-        dynamoTable.getMetadataFromDynamo(req.body.username);
-        //TODO Non funziona
-  /*      var matches = masterTable.getAllMetadataByUser(req.body.username);
-        var tree1 = createDirectoryTreeFn(matches, req.body.username);
-        res.send(tree1);*/
+        dynamoTable.getMetadataFromDynamo(req.body.username, function(result){
+            if(result) {
+                var matches = masterTable.getAllMetadataByUser(req.body.username);
+                var tree = createDirectoryTreeFn(matches, req.body.username);
+            }
+            else {
+                var tree = createDirectoryTreeFn(matchTables, req.body.username);
+            }
 
-        // var tree1 = createDirectoryTreeFn(masterTable.getAllMetadataByUser(req.body.username), req.body.username);
-        res.send(200);
-
+            res.status(200);
+            res.send(tree);
+            res.end()
+        });
     }
     else
     {
@@ -197,6 +202,27 @@ function prettyJSONFn(obj) {
 function getReadSlavesFn(req, res) {
     var metadata = req.body;
 
-    var slaves = masterTable.getAllSlavesByGuid(req.body.guid);
+    console.log(req.body);
+
+    var allSlaveByGuid = masterTable.getAllSlavesByGuid(req.body.guid);
+
+    // var slaves = allSlaveByGuid.slavesIp;
+
+    slaves = [];
+
+    //SE LA LISTA è VUOTA -> CERCARE in S3
+    if(slaves.length === 0)
+    {
+
+        var slavesList= backupControllerM.restoreGuidFromS3(req.body.guid, allSlaveByGuid.metadata, req.body.user);
+        masterTable.addSlaveListToGuid(req.body.guid, slaves);
+
+        slavesList.forEach(function (slave) {
+            slaves.push({slaveIp: slave});
+        })
+
+
+    }
+
     res.send(slaves);
 }

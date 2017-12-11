@@ -82,7 +82,7 @@ function addItemFn(idUser, guid, metadata)
     });
 }
 
-function getMetadataFromDynamoFn(idUser)
+function getMetadataFromDynamoFn(idUser, callback)
 {
     var docClient = new AWS.DynamoDB.DocumentClient();
 
@@ -103,6 +103,7 @@ function getMetadataFromDynamoFn(idUser)
             console.log("Query succeeded.");
             if(isEmptyObjectFn(data.Items)) {
                 console.log("No match found");
+                callback(false);
           //      masterTable.printTable();
             }
             else
@@ -110,6 +111,7 @@ function getMetadataFromDynamoFn(idUser)
                 data.Items.forEach(function(item) {
                     console.log(" -", item.idUser + ": " + item.metadata.name+", "+item.metadata.relPath+", "+item.metadata.size+", "+item.metadata.extension+", "+item.metadata.lastModified);
                     masterTable.addChunkRef(item.guid, item.metadata, '', item.idUser);
+                    callback(true);
                //     masterTable.printTable();
                 });
             }

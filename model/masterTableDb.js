@@ -27,6 +27,10 @@ exports.getAllSlavesByGuid = getAllSlavesByGuidFn;
 exports.getFileByUserAndRelPath = getFileByUserAndRelPathFn;
 exports.removeByGuid = removeByGuidFn;
 exports.removeSlaveOccupation = removeSlaveOccupationFn;
+exports.createBackupList = createBackupListFn;
+exports.setCloudToGuids = setCloudToGuidsFn;
+exports.addSlaveListToGuid = addSlaveListToGuidFn;
+
 
 function removeByGuidFn(chunkGuid)
 {
@@ -58,6 +62,7 @@ function addChunkRefFn(chunkGuid, metadata, slaveIp, idUser)
             userId: idUser
         });
 
+
         masterTable.insert({chunkguid: chunkGuid , metadataTable: metadata, slavesIp: slavesIp , usersId : usersId, cloud: false});
 
     }
@@ -76,6 +81,19 @@ function addChunkRefFn(chunkGuid, metadata, slaveIp, idUser)
     }
     if(slaveIp !== '')
         addSlaveOccupation(slaveIp);
+}
+
+function addSlaveListToGuidFn(chunkguid, slavesIp)
+{
+    var foundGuid = masterTable.findOne({'chunkguid': chunkguid});
+
+    slavesIp.forEach(function (slaveIp) {
+        foundGuid.slavesIp.push({
+            slaveIp: slaveIp
+        });
+        masterTable.update(foundGuid);
+        addSlaveOccupation(slaveIp);
+    })
 }
 
 function addSlaveOccupation(slaveIp)
@@ -186,7 +204,8 @@ function getAllSlavesByGuidFn(guid) {
 
     var foundGuid = masterTable.findOne({'chunkguid': guid});
     if (foundGuid.slavesIp) {
-        return foundGuid.slavesIp;
+        return {'slavesIp' :foundGuid.slavesIp,
+                'metadata' : foundGuid.metadataTable};
     }
     else {
         return null;
@@ -293,7 +312,7 @@ function getFileByUserAndRelPathFn(userId, relPath) {
     return matchedTable;
 }
 
-function createBackupList()
+function createBackupListFn()
 {
 
     var backupList = [];
@@ -301,7 +320,7 @@ function createBackupList()
     chunkServer.getChunk().forEach(function (slave) {
         backupList.push({
             slaveIp: slave.ip,
-            guidToBackup: null,
+            guidToBackup: [],
         })
     });
 
@@ -315,13 +334,13 @@ function createBackupList()
         //Nella backupList
         backupList.forEach(function (list)
         {
-            if(slaveBackupper.indexOf(list.slaveIp) != -1)
+            if(slaveBackupper === list.slaveIp)
                 list.guidToBackup.push(table.chunkguid);
         });
     })
 
-    console.log(backupList);
 
+    return backupList;
 
 }
 
@@ -334,6 +353,20 @@ METRICA: CASUALE
 function slaveChoise(slavesIp)
 {
 
-    return slavesIp[Math.floor(Math.random()*slavesIp.length)];
+    return slavesIp[Math.floor(Math.random()*slavesIp.length)].slaveIp;
+
+}
+
+function setCloudToGuidsFn(guids,cloud)
+{
+
+    guids.forEach(function (guid) {
+
+    var foundGuid = masterTable.findOne({'chunkguid': guid});
+
+    foundGuid.cloud = cloud;
+
+    masterTable.update(foundGuid);
+    })
 
 }
