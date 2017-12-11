@@ -117,8 +117,9 @@ function createDirectoryTreeFn(matchedMetadata, username) {
     var current = [];
 
     var root = {
-        name: username,
         folder: true,
+        path: username,
+        name: username,
         children: []
     };
 
