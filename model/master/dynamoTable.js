@@ -15,7 +15,7 @@ var masterTable = require('../../model/masterTableDb');
 
 function createTableFn()
 {
-    console.log("I'm creating table Users");
+    console.log("I'm creating table MasterT");
     var params = {
         TableName : 'MasterT',
         KeySchema: [
@@ -110,7 +110,7 @@ function getMetadataFromDynamoFn(idUser)
                 data.Items.forEach(function(item) {
                     console.log(" -", item.idUser + ": " + item.metadata.name+", "+item.metadata.relPath+", "+item.metadata.size+", "+item.metadata.extension+", "+item.metadata.lastModified);
                     masterTable.addChunkRef(item.guid, item.metadata, '', item.idUser);
-                    masterTable.printTable();
+               //     masterTable.printTable();
                 });
             }
         }
@@ -128,19 +128,19 @@ function isEmptyObjectFn(obj) {
 
 //createTableFn();
 //example adding item
-
 /*
 var metadata = {
     name: "prova2.txt",
-    relPath: "/Deb/prova.txt",
+    relPath: "Debora/Files/prova2.txt",
     size: '55',
     extension: '.txt',
     lastModified: "05/04/2018"
 };
-
-
-setTimeout(addItemFn,5000, "Deb", "hhhhkkkk5555", metadata);
 */
-/*queryIdUser("Debora");
-setTimeout(queryIdUser, 6000, "Deb");
-setTimeout(queryIdUser, 9000, "Debora");*/
+
+//setTimeout(addItemFn,5000, "Deb", "aaaakkkk5555", metadata);
+/*
+getMetadataFromDynamoFn("Debora");
+setTimeout(getMetadataFromDynamoFn, 5000, "Deb");
+setTimeout(masterTable.printTable, 7000);
+*/

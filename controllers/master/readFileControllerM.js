@@ -42,9 +42,12 @@ function getAllMetadataFn(req, res) {
         dynamoTable.getMetadataFromDynamo(req.body.username);
         //TODO Non funziona
   /*      var matches = masterTable.getAllMetadataByUser(req.body.username);
-        var tree1 = createDirectoryTreeFn(matches, req.body.username);*/
-       // var tree1 = createDirectoryTreeFn(masterTable.getAllMetadataByUser(req.body.username), req.body.username);
-        res.send(tree1);
+        var tree1 = createDirectoryTreeFn(matches, req.body.username);
+        res.send(tree1);*/
+
+        // var tree1 = createDirectoryTreeFn(masterTable.getAllMetadataByUser(req.body.username), req.body.username);
+        res.send(200);
+
     }
     else
     {

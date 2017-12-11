@@ -74,8 +74,8 @@ function addChunkRefFn(chunkGuid, metadata, slaveIp, idUser)
         });
         masterTable.update(foundGuid);
     }
-
-    addSlaveOccupation(slaveIp);
+    if(slaveIp !== '')
+        addSlaveOccupation(slaveIp);
 }
 
 function addSlaveOccupation(slaveIp)
