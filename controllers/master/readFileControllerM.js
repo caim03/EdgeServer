@@ -40,15 +40,19 @@ function getAllMetadataFn(req, res) {
     console.log("Tree requested by " + req.body.username);
     var matchTables = masterTable.getAllMetadataByUser(req.body.username);
     if(matchTables.length ===0) {
-        dynamoTable.getMetadataFromDynamo(req.body.username);
-        //TODO Non funziona
-  /*      var matches = masterTable.getAllMetadataByUser(req.body.username);
-        var tree1 = createDirectoryTreeFn(matches, req.body.username);
-        res.send(tree1);*/
+        dynamoTable.getMetadataFromDynamo(req.body.username, function(result){
+            if(result) {
+                var matches = masterTable.getAllMetadataByUser(req.body.username);
+                var tree = createDirectoryTreeFn(matches, req.body.username);
+            }
+            else {
+                var tree = createDirectoryTreeFn(matchTables, req.body.username);
+            }
 
-        // var tree1 = createDirectoryTreeFn(masterTable.getAllMetadataByUser(req.body.username), req.body.username);
-        res.send(200);
-
+            res.status(200);
+            res.send(tree);
+            res.end()
+        });
     }
     else
     {
