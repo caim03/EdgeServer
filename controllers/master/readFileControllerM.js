@@ -1,6 +1,8 @@
 var request = require('request');
 var config = require('../../config/config');
 var masterTable = require('../../model/masterTableDb');
+var dynamoTable = require('../../model/master/dynamoTable');
+
 var pendingReq = require('../../model/slave/pendingRequests');
 var process = require('process');
 //var fse = require('fs-extra');
@@ -36,43 +38,36 @@ exports.getReadSlaves = getReadSlavesFn;
 function getAllMetadataFn(req, res) {
     console.log("Tree requested by " + req.body.username);
     var matchTables = masterTable.getAllMetadataByUser(req.body.username);
-  /*  if(matchTables.length ===0) {
-        var docClient = new AWS.DynamoDB.DocumentClient();
-
-        console.log("Chiedo a dynamo");
-        //TODO Query a Dynamo per prendere tutti gli item con idUser fornito da req
-        //Non funziona
-                    var params = {
-                        TableName: "MasterT",
-                        FilterExpression: "#id = :id",
-                        ExpressionAttributeNames:{
-                            "#id": "idUser"
-                        },
-                        ExpressionAttributeValues: {
-                            ":id":req.body.username
-                        }
-                    };
-                    docClient.query(params, function(err, data) {
-                        if (err) {
-                            console.log("Error", err);
-                        } else {
-                            console.log("Success", data.Items);
-                        }
-                    });
-                //TODO Fare i passaggi seguenti per ogni item trovato dalla query
-                //insert in masterTable addChunkRef(guid, metadata, [], idUser)
-                //getAllMetadataByUser(...)
-                //createDirectoryTree
-                //res.send(tree)
-                }
-                else
-                {*/
+    if(matchTables.length ===0) {
+        dynamoTable.getMetadataFromDynamo(req.body.username);
+        //TODO Non funziona
+  /*      var matches = masterTable.getAllMetadataByUser(req.body.username);
+        var tree1 = createDirectoryTreeFn(matches, req.body.username);*/
+       // var tree1 = createDirectoryTreeFn(masterTable.getAllMetadataByUser(req.body.username), req.body.username);
+        res.send(tree1);
+    }
+    else
+    {
         var tree = createDirectoryTreeFn(matchTables, req.body.username);
         res.status(200).send(tree);
         res.end();
-        //      }
-    //}
+    }
 }
+
+/*
+function prova1(func, arg1, arg2)
+{
+    if (func && typeof func === "function") {
+        return func(arg1, arg2);
+    }
+}
+
+function getFromDynamoAndSend(req, res, callback) {
+    dynamoTable.getMetadataFromDynamo(req.body.username);
+    if (callback && typeof callback === "function") {
+        var matches = masterTable.getAllMetadataByUser(req.body.username);
+    }
+}*/
 
 
 /**
@@ -182,6 +177,7 @@ function createDirectoryTreeFn(matchedMetadata, username) {
             }
         }
     });
+    console.log("/// "+tree);
     return tree;
 }
 

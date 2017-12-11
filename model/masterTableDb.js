@@ -48,9 +48,11 @@ function addChunkRefFn(chunkGuid, metadata, slaveIp, idUser)
         var slavesIp = [];
         var usersId = [];
 
-        slavesIp.push({
-            slaveIp : slaveIp
-        });
+        if(slaveIp !== '') {
+            slavesIp.push({
+                slaveIp: slaveIp
+            });
+        }
 
         usersId.push({
             userId: idUser
@@ -61,11 +63,15 @@ function addChunkRefFn(chunkGuid, metadata, slaveIp, idUser)
     }
     else
     {
-        //TODO Controllare anche che l'idUser corrisponda? Dipende se facciamo la condivisione dei file tra più utenti.
-        foundGuid.slavesIp.push({
-            slaveIp: slaveIp
+        if(slaveIp !== '')
+        {
+            foundGuid.slavesIp.push({
+                slaveIp: slaveIp
+            });
+        }
+        foundGuid.usersId.push({
+            userId: idUser
         });
-
         masterTable.update(foundGuid);
     }
 
@@ -111,10 +117,11 @@ function guidGeneratorFn() {
 
 function printTableFn()
 {
+    console.log("-----");
     masterTable.chain().data().forEach(function (table) {
         console.log(table)
     });
-
+    console.log("-----");
 
     console.log(masterTableOccupationFn());
 }
@@ -241,6 +248,7 @@ function getTableFn() {
 
 function getAllMetadataByUserFn(userId) {
 
+    console.log("-- username: "+userId);
     var matchedTables = [];
 
     masterTable.chain().data().forEach(function (table){

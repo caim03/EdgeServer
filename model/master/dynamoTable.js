@@ -2,6 +2,8 @@ var AWS = require("aws-sdk");
 
 exports.createTable = createTableFn;
 exports.addItem = addItemFn;
+exports.isEmptyObject = isEmptyObjectFn;
+exports.getMetadataFromDynamo = getMetadataFromDynamoFn;
 
 AWS.config.update({
     region: "us-east-2",
@@ -9,6 +11,7 @@ AWS.config.update({
 });
 
 var ddb = new AWS.DynamoDB();
+var masterTable = require('../../model/masterTableDb');
 
 function createTableFn()
 {
@@ -17,21 +20,21 @@ function createTableFn()
         TableName : 'MasterT',
         KeySchema: [
             {
-                AttributeName: 'guid',
+                AttributeName: 'idUser',
                 KeyType: "HASH" //Partition key
             },
             {
-                AttributeName: 'idUser',
+                AttributeName: 'guid',
                 KeyType: 'RANGE'
             }
         ],
         AttributeDefinitions: [
             {
-                AttributeName: 'guid',
+                AttributeName: 'idUser',
                 AttributeType: "S"
             },
             {
-                AttributeName: 'idUser',
+                AttributeName: 'guid',
                 AttributeType: "S"
             }
         ],
@@ -59,8 +62,8 @@ function addItemFn(idUser, guid, metadata)
     var params = {
         TableName: 'MasterT',
         Item: {
-            "idUser": idUser,
             "guid":  guid,
+            "idUser": idUser,
             "metadata": {
                 "name": metadata.name,
                 "relPath": metadata.relPath,
@@ -79,16 +82,65 @@ function addItemFn(idUser, guid, metadata)
     });
 }
 
+function getMetadataFromDynamoFn(idUser)
+{
+    var docClient = new AWS.DynamoDB.DocumentClient();
 
+    var params = {
+        TableName: "MasterT",
+        KeyConditionExpression: "#id = :idU",
+        ExpressionAttributeNames:{
+            "#id": "idUser"
+        },
+        ExpressionAttributeValues: {
+            ":idU": idUser
+        }
+    };
+    docClient.query(params, function(err, data) {
+        if (err) {
+            console.error("Unable to query. Error:", JSON.stringify(err, null, 2));
+        } else {
+            console.log("Query succeeded.");
+            if(isEmptyObjectFn(data.Items)) {
+                console.log("No match found");
+          //      masterTable.printTable();
+            }
+            else
+            {
+                data.Items.forEach(function(item) {
+                    console.log(" -", item.idUser + ": " + item.metadata.name+", "+item.metadata.relPath+", "+item.metadata.size+", "+item.metadata.extension+", "+item.metadata.lastModified);
+                    masterTable.addChunkRef(item.guid, item.metadata, '', item.idUser);
+                    masterTable.printTable();
+                });
+            }
+        }
+    });
+}
+
+function isEmptyObjectFn(obj) {
+    for (var key in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+            return false;
+        }
+    }
+    return true;
+}
 
 //createTableFn();
 //example adding item
-/*var metadata = {
-    name: "prova.txt",
+
+/*
+var metadata = {
+    name: "prova2.txt",
     relPath: "/Deb/prova.txt",
     size: '55',
     extension: '.txt',
     lastModified: "05/04/2018"
 };
 
-setTimeout(addItemFn,5000, "Debora", "hhhkkkk5555", metadata);*/
+
+setTimeout(addItemFn,5000, "Deb", "hhhhkkkk5555", metadata);
+*/
+/*queryIdUser("Debora");
+setTimeout(queryIdUser, 6000, "Deb");
+setTimeout(queryIdUser, 9000, "Debora");*/
