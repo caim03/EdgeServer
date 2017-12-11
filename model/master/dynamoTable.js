@@ -109,11 +109,11 @@ function getMetadataFromDynamoFn(idUser, callback)
             else
             {
                 data.Items.forEach(function(item) {
-                    console.log(" -", item.idUser + ": " + item.metadata.name+", "+item.metadata.relPath+", "+item.metadata.size+", "+item.metadata.extension+", "+item.metadata.lastModified);
+                    console.log("Found in dynamo: ", item.idUser + ": " + item.metadata.name+", "+item.metadata.relPath+", "+item.metadata.size+", "+item.metadata.extension+", "+item.metadata.lastModified);
                     masterTable.addChunkRef(item.guid, item.metadata, '', item.idUser);
-                    callback(true);
                //     masterTable.printTable();
                 });
+                callback(true);
             }
         }
     });

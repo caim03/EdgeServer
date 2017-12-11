@@ -267,7 +267,7 @@ function getTableFn() {
 
 function getAllMetadataByUserFn(userId) {
 
-    console.log("-- username: "+userId);
+ //   console.log("-- username: "+userId);
     var matchedTables = [];
 
     masterTable.chain().data().forEach(function (table){

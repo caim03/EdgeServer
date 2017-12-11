@@ -80,7 +80,6 @@ function subscribeFn(req, res) {
  */
 function subscribeToBalancerFn(proclamation) {
 
-    console.log("..."+proclamation);
     var type;
     var oldMaster;
     if (!proclamation) {

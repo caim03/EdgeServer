@@ -40,6 +40,7 @@ function getAllMetadataFn(req, res) {
     console.log("Tree requested by " + req.body.username);
     var matchTables = masterTable.getAllMetadataByUser(req.body.username);
     if(matchTables.length ===0) {
+        console.log("Asking to dynamo metadata for "+req.body.username);
         dynamoTable.getMetadataFromDynamo(req.body.username, function(result){
             if(result) {
                 var matches = masterTable.getAllMetadataByUser(req.body.username);
@@ -51,7 +52,7 @@ function getAllMetadataFn(req, res) {
 
             res.status(200);
             res.send(tree);
-            res.end()
+            res.end();
         });
     }
     else
@@ -185,7 +186,12 @@ function createDirectoryTreeFn(matchedMetadata, username) {
             }
         }
     });
-    console.log("/// "+tree);
+/*    var i;
+    for(i=0; i<tree.length; i++)
+    {
+        console.log(tree[i]);
+    }
+    console.log("/// "+tree);*/
     return tree;
 }
 
