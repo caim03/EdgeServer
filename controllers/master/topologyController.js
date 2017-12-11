@@ -80,6 +80,7 @@ function subscribeFn(req, res) {
  */
 function subscribeToBalancerFn(proclamation) {
 
+    console.log("..."+proclamation);
     var type;
     var oldMaster;
     if (!proclamation) {
@@ -100,6 +101,7 @@ function subscribeToBalancerFn(proclamation) {
         }
     };
 
+    console.log("url gateway: "+obj.url);
 
     request(obj, function (err, res) {
 
