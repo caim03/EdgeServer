@@ -43,13 +43,16 @@ function restoreGuidFn(req, res) {
     shell.mkdir('-p', path.dirname(metadata.relPath));
     // copyFile(sourceFileStream,"prova/" + metadata.relPath);
     //TODO controllo errore!
-    sourceFileStream.pipe(fs.createWriteStream(metadata.relPath));
+    sourceFileStream.pipe(fs.createWriteStream(metadata.relPath)).on('finish',function(){
+        console.log("Ho finito");
 
-    slaveTable.insertChunk(guid,metadata,userId);
+        slaveTable.insertChunk(guid,metadata,userId);
 
-    slaveTable.printTable();
+        slaveTable.printTable();
 
-    res.send({status : "ACK"});
+        res.send({status : "ACK"});
+    });
+
 
 
 

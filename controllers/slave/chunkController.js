@@ -19,7 +19,6 @@ exports.sendAckToMaster = sendAckToMasterFn;
 function readFileFn(req, res) {
     console.log("Reading file...");
     var metadata = req.body;
-
     fs.createReadStream(metadata.path).pipe(res);
 }
 

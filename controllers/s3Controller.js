@@ -50,6 +50,5 @@ function saveFileFn(filename, fileStream) {
 function retrieveFileFn(filename)
 {
     var file = s3fsImpl.createReadStream(filename);
-
     return file;
 }
