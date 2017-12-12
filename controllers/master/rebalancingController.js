@@ -86,7 +86,7 @@ function newMasterRebalancmentFn()
                         guid: guid,
                         idUser: chunk.userId,
                         destRelPath: chunk.metadata.relPath,
-                        my_file: fs.createReadStream(ip.getPublicIp()+'/'+chunk.userId + '/' + chunk.metadata.relPath)
+                        my_file: fs.createReadStream(chunk.metadata.relPath)
                     };
                     request.post({url:'http://'+server+':6601/api/chunk/newDistributedChunk', formData: formData}, function optionalCallback(err, res) {
                         if (err) {
