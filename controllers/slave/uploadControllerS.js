@@ -214,8 +214,8 @@ function saveChunkFn(req, res) {
 //            shell.mkdir('-p', path.dirname(fields[1][1] + '2/' + fields[2][1]));
 //            file.path = fields[1][1] + '2/' + fields[2][1];
 
-            shell.mkdir('-p', path.dirname(ip.getPublicIp()+'/'+fields[1][1] + '/' + fields[2][1]));
-            file.path = ip.getPublicIp()+'/'+fields[1][1] + '/' + fields[2][1];
+            shell.mkdir('-p', path.dirname(fields[2][1]));
+            file.path = fields[2][1];
             console.log("Saving file in "+file.path);
 
         })
