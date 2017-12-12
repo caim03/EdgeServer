@@ -11,16 +11,6 @@ var fs=require('fs');
 var path = require("path");
 var backupControllerM = require("./backupControllerM");
 
-var AWS = require("aws-sdk");
-
-AWS.config.update({
-    region: "us-east-2",
-    endpoint: "https://dynamodb.us-east-2.amazonaws.com"
-});
-
-var ddb = new AWS.DynamoDB();
-
-
 exports.getAllMetadata = getAllMetadataFn;
 exports.checkIfFound = checkIfFoundFn;
 exports.createDirectoryTree = createDirectoryTreeFn;
@@ -65,22 +55,6 @@ function getAllMetadataFn(req, res) {
         res.end();
     }
 }
-
-/*
-function prova1(func, arg1, arg2)
-{
-    if (func && typeof func === "function") {
-        return func(arg1, arg2);
-    }
-}
-
-function getFromDynamoAndSend(req, res, callback) {
-    dynamoTable.getMetadataFromDynamo(req.body.username);
-    if (callback && typeof callback === "function") {
-        var matches = masterTable.getAllMetadataByUser(req.body.username);
-    }
-}*/
-
 
 /**
  * // Questa funzione permette di verificare l'esistenza di un elemento (file) dentro un array (directory tree)
