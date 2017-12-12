@@ -1,6 +1,7 @@
 var request = require('request');
 var config = require('../../config/config');
 var masterTable = require('../../model/masterTableDb');
+var dynamoTable = require('../../model/master/dynamoTable');
 var pendingReq = require('../../model/slave/pendingRequests');
 var process = require('process');
 var ip = require('ip');
@@ -52,38 +53,42 @@ function deleteFileFn(req, res1) {
                if(slavesReturned.length=== config.replicationNumber)
                {
                    if(req.body.type !== "NOTIFY_DELETE"){
-                       notify = s3Controller.deleteFile(path, function(result) {
+                       dynamoTable.deleteMetadataFromDynamo(req.body.idUser, matchedTable.guid, function(result){
                            if(result) {
-                               masterTable.removeByGuid(matchedTable.guid);
+                               console.log("Removed "+req.body.idUser+" - "+matchedTable.guid+" in dynamo table.");
+                               notify = s3Controller.deleteFile(path, function(result) {
+                                   if(result) {
+                                       masterTable.removeByGuid(matchedTable.guid);
 
-                               var notify = {
-                                   url: 'http://' + config.balancerIp + ':' + config.balancerPort + config.balancerNotify,
-                                   method: 'POST',
-                                   json: {
-                                       type: "NOTIFY_DELETE",
-                                       path: path,
-                                       idUser: user
-                                   }
-                               };
-                               request(notify, function(err, res3) {
-                                   if(err) {
-                                       console.log(err);
+                                       var notify = {
+                                           url: 'http://' + config.balancerIp + ':' + config.balancerPort + config.balancerNotify,
+                                           method: 'POST',
+                                           json: {
+                                               type: "NOTIFY_DELETE",
+                                               path: path,
+                                               idUser: user
+                                           }
+                                       };
+                                       request(notify, function(err, res3) {
+                                           if(err) {
+                                               console.log(err);
+                                           }
+                                           else {
+                                               console.log("Notify successfully");
+                                               res3.end();
+                                           }
+                                       });
+
+                                       console.log(obj.json.chunkGuid+" removed in "+ip.slaveIp);
+                                       res1.send({type: 'DELETE_SUCCESS'});
                                    }
                                    else {
-                                       console.log("Notify successfully");
-                                       res3.end();
+                                       res1.send({type: 'DELETE_ABORTED'});
                                    }
                                });
-
-                               console.log(obj.json.chunkGuid+" removed in "+ip.slaveIp);
-                               res1.send({type: 'DELETE_SUCCESS'});
-                           }
-                           else {
-                               res1.send({type: 'DELETE_ABORTED'});
                            }
                        });
                    }
-
                    else {
                        masterTable.removeByGuid(matchedTable.guid);
                        console.log(obj.json.chunkGuid+" removed in "+ip.slaveIp);

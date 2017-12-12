@@ -45,7 +45,7 @@ function periodicBackupFn()
                 }
 
 
-            })
+            });
 
             masterTable.saveMasterTableOnDynamo();
 

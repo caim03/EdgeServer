@@ -3,9 +3,11 @@ exports.createTable = createTableFn;
 exports.addItem = addItemFn;
 exports.isEmptyObject = isEmptyObjectFn;
 exports.getMetadataFromDynamo = getMetadataFromDynamoFn;
+exports.deleteMetadataFromDynamo = deleteMetadataFromDynamoFn;
 
 var ddb = dynamoController.getDynamoDb();
 var masterTable = require('../../model/masterTableDb');
+
 
 function createTableFn()
 {
@@ -121,7 +123,28 @@ function isEmptyObjectFn(obj) {
     return true;
 }
 
+function deleteMetadataFromDynamoFn(idUser, guid, callback)
+{
+    var docClient = dynamoController.getDynamoDocumentClient();
+    var params = {
+        TableName: 'MasterT',
+        Key:{
+            "idUser": idUser,
+            "guid": guid
+        }
+    };
+    console.log("Deleting "+idUser+" - "+guid);
+    docClient.delete(params, function(err, data) {
+        if (err) {
+            console.error("Unable to delete item. Error JSON:", JSON.stringify(err, null, 2));
+        } else {
+            console.log("DeleteItem succeeded:", JSON.stringify(data, null, 2));
+                callback(true);
+        }
+    });
+}
 
+//deleteMetadataFromDynamo("Prova", "1be8b10b-9965-1767-5d7a-77380ac3e5a8");
 
 //createTableFn();
 //example adding item
