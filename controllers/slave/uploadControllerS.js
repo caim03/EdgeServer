@@ -171,7 +171,7 @@ function sendFileFn(req, res) {
                         guid: req.body.guid,
                         idUser: user.userId,
                         destRelPath: foundChunk.metadata.relPath,
-                        my_file: fs.createReadStream(ip.getPublicIp()+'/'+user.userId + '/' + foundChunk.metadata.relPath)
+                        my_file: fs.createReadStream(foundChunk.metadata.relPath)
                     };
                //     console.log(user.userId + '/' + foundChunk.metadata.relPath + ' --> path da cui prendere il file.');
                     request.post({url:'http://'+req.body.server+':6601/api/chunk/newDistributedChunk', formData: formData}, function optionalCallback(err, res) {
