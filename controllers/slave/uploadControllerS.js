@@ -161,7 +161,6 @@ function uploadFileFn(req, res1) {
 //If a slave crushed, its files must be distributed.
 function sendFileFn(req, res) {
     if(req.body.type === 'FILE_DISTRIBUTION') {
-        slaveTable.printTable();
             var foundChunk = slaveTable.getChunk(req.body.guid);
             if (foundChunk) {
                 req.body.usersId.forEach(function (user) {
@@ -178,7 +177,7 @@ function sendFileFn(req, res) {
                         if (err) {
                             return console.error('upload failed:', err);
                         }
-                        if(res.body.status === 'ACK')
+                        if(JSON.parse(res.body).status === "ACK")
                         {
                             console.log("File "+foundChunk.metadata.relPath+" saved in "+req.body.server);
                         }
@@ -188,6 +187,7 @@ function sendFileFn(req, res) {
             }
             else console.log("Chunk " + req.body.guid+" - "+ user + " NON trovato.");
     }
+    slaveTable.printTable();
     res.send({
         status: 'OK'
     });
@@ -227,10 +227,10 @@ function saveChunkFn(req, res) {
                 res.send({status: 'ACK'});
         });
         form.parse(req);
-        req.on('end', function() {
-            //    writeStream.end();
-                res.statusCode = 200;
-            //    res.end("file.txt");
-        });
+        // req.on('end', function() {
+        //     //    writeStream.end();
+        //         res.statusCode = 200;
+        //     //    res.end("file.txt");
+        // });
 
 }

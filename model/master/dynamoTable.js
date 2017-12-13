@@ -71,9 +71,10 @@ function addItemFn(idUser, guid, metadata)
     docClient.put(params, function(err, data) {
         if (err){
             console.log(err); // an error occurred
-        }else {
-            console.log(data); // successful response
         }
+        // else {
+        //     console.log(data); // successful response
+        // }
     });
 }
 
@@ -137,6 +138,7 @@ function deleteMetadataFromDynamoFn(idUser, guid, callback)
     docClient.delete(params, function(err, data) {
         if (err) {
             console.error("Unable to delete item. Error JSON:", JSON.stringify(err, null, 2));
+            callback(false);
         } else {
             console.log("DeleteItem succeeded:", JSON.stringify(data, null, 2));
                 callback(true);

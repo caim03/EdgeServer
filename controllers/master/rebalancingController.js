@@ -148,7 +148,7 @@ function crushedSlaveRebalancmentFn(slave)
                         {
                         console.log("SPEDISCO " + chunkguid + " A " + server + " LO SLAVE A CUI CHIEDO IL CHUNK è " + oldSlave);
 
-                        masterTable.addChunkRef(chunks.chunkGuid,chunks.metadata, server,chunks.usersId);    //add idClient
+                        masterTable.addChunkRef(chunks.chunkguid,chunks.metadata, server,chunks.usersId);    //add idClient
                         // Invio fisico del chunk! Master manda (ip nuovo slave,guid) al vecchio slave che a sua volta invierà il file
 
                         var obj = {
@@ -174,6 +174,9 @@ function crushedSlaveRebalancmentFn(slave)
             });
         if(!sended)
             console.log("NON HO TROVATO VALIDI SLAVES PER " + chunkguid);
+
+        masterTable.printTable();
+
     })
 }
 

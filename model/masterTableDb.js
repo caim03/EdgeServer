@@ -75,9 +75,12 @@ function addChunkRefFn(chunkGuid, metadata, slaveIp, idUser)
                 slaveIp: slaveIp
             });
         }
-        foundGuid.usersId.push({
-            userId: idUser
-        });
+
+
+        if(foundGuid.usersId.indexOf({usersId : idUser})!==-1)
+            foundGuid.usersId.push({
+                userId: idUser
+            });
         masterTable.update(foundGuid);
     }
     if(slaveIp !== '')
