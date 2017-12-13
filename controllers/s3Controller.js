@@ -21,7 +21,7 @@ function setS3ConnectionFn() {
             accessKeyId: s3Config.accessKeyID,
             secretAccessKey: s3Config.secretAccessKeyId
         });
-        s3fsImpl.create();
+        // s3fsImpl.create();
     }
     return s3fsImpl;
 }
