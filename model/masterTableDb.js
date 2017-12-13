@@ -379,9 +379,11 @@ function setCloudToGuidsFn(guids,cloud)
 function saveMasterTableOnDynamoFn()
 {
     masterTable.chain().data().forEach(function (table){
-        var users = table.usersId;
-        users.forEach(function (idUser){
-            dynamoTable.addItem(idUser.userId,table.chunkguid, table.metadataTable);
-        });
+        if(table.cloud === false) {
+            var users = table.usersId;
+            users.forEach(function (idUser) {
+                dynamoTable.addItem(idUser.userId, table.chunkguid, table.metadataTable);
+            });
+        }
     });
 }

@@ -17,7 +17,6 @@ exports.createDirectoryTree = createDirectoryTreeFn;
 exports.prettyJSONFn = prettyJSONFn;
 exports.getReadSlaves = getReadSlavesFn;
 
-
 /**
  * Questa funzione permette al master di accedere a tutti i metadati memorizzati nella tabella, effettuando la
  * ricerca in base all'utente che effettua la richiesta.
