@@ -45,5 +45,6 @@ function printTableFn() {
 function getChunkFn(chunkGuid) {
     var obj = {'chunkGuid': chunkGuid};
     var foundChunk= slaveTable.findOne(obj);
+    console.log("-------------------------------"+foundChunk);
     return foundChunk;
 }
