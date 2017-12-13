@@ -45,10 +45,12 @@ function newMasterRebalancmentFn()
             var receivedChunks = JSON.parse(res.getBody('utf8'));
             receivedChunks.forEach(function (chunk) {
 
-                masterTable.addChunkRef(chunk.chunkGuid,chunk.metadata, server.ip,chunk.userId);
+                masterTable.addChunkRef(chunk.chunkGuid,chunk.metadata, server.ip,chunk.userId, true);
             })
         }
     });
+
+    masterTable.printTable();
 
     //Per ogni elemento nella mia chunklist:
     //Creo la tabella di disponibilità ordinata della master table

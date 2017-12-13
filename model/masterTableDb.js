@@ -44,7 +44,7 @@ function removeByGuidFn(chunkGuid)
     else console.log("Guid not found");
 }
 
-function addChunkRefFn(chunkGuid, metadata, slaveIp, idUser)
+function addChunkRefFn(chunkGuid, metadata, slaveIp, idUser,cloud)
 {
     var foundGuid = masterTable.findOne({'chunkguid': chunkGuid});
 
@@ -64,7 +64,7 @@ function addChunkRefFn(chunkGuid, metadata, slaveIp, idUser)
         });
 
 
-        masterTable.insert({chunkguid: chunkGuid , metadataTable: metadata, slavesIp: slavesIp , usersId : usersId, cloud: false});
+        masterTable.insert({chunkguid: chunkGuid , metadataTable: metadata, slavesIp: slavesIp , usersId : usersId, cloud: cloud});
 
     }
     else

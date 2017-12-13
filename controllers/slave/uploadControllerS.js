@@ -187,7 +187,6 @@ function sendFileFn(req, res) {
             }
             else console.log("Chunk " + req.body.guid+" - "+ user + " NON trovato.");
     }
-    slaveTable.printTable();
     res.send({
         status: 'OK'
     });

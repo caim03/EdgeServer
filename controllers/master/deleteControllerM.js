@@ -33,6 +33,7 @@ function deleteFileFn(req, res1) {
 
     if(matchedTable.slavesIp.length === 0)
     {
+        console.log("STO QUA");
         if (req.body.type !== "NOTIFY_DELETE") {
             dynamoTable.deleteMetadataFromDynamo(req.body.idUser, matchedTable.guid, function (result) {
                 if (result) {

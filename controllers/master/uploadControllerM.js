@@ -125,7 +125,7 @@ function checkAndSaveMetadataFn(req, res) {
                 extension: foundMetaD.extension,
                 lastModified: foundMetaD.lastModified
             };
-            masterTable.addChunkRef(req.body.chunkGuid, metadata, req.body.slaveIp, req.body.userId);
+            masterTable.addChunkRef(req.body.chunkGuid, metadata, req.body.slaveIp, req.body.userId,false);
             console.log("Added "+req.body.chunkGuid+" in master table with metadata!\n");
 
  //           masterTable.printTable();
