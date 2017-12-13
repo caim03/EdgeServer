@@ -174,7 +174,7 @@ function sendFileFn(req, res) {
                         my_file: fs.createReadStream(foundChunk.metadata.relPath)
                     };
                //     console.log(user.userId + '/' + foundChunk.metadata.relPath + ' --> path da cui prendere il file.');
-                    request.post({url:'http://'+req.body.server+':6601/api/chunk/newDistributedChunk', formData: formData}, function optionalCallback(err, res) {
+                    request.post({url:'http://'+req.body.server+':6601/api/chunk/newDistributedChunk', formData: formData}, function(err, res) {
                         if (err) {
                             return console.error('upload failed:', err);
                         }
