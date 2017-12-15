@@ -11,6 +11,7 @@ var config = {
     balancerPort: 6602, // Porta di ascolto del load balancer
     balancerSubPath: '/api/lb/edge/subscribe', // Path di sottoscrizione del master al load balancer
     balancerNotify: '/api/lb/edge/notifyDelete', // Path per notificare la delete alle altre fog
+    balancerElection: '/api/lb/edge/election',
     ageingTime: 3, // Scadenza dei chunkServer quando non rispondono al messaggio di heartbeat
     heartbeatTime: 10000, // Frequenza di heartbeat
     waitHeartbeat: 20000, // Tempo scaduto il quale si assume il fallimento del master per l'inizio dell'elezione

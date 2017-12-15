@@ -71,7 +71,7 @@ function startElectionFn() {
         });
 
         if (not_master) {
-            return not_master;
+            return;
         }
 
         console.log("I'M THE NEW MASTER");
