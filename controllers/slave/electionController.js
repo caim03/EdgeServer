@@ -71,6 +71,7 @@ function startElectionFn() {
         });
 
         if (not_master) {
+            slaveTopologyController.waitHeartbeat();
             return;
         }
 
