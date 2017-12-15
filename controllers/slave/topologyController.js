@@ -20,6 +20,7 @@ exports.receiveHeartbeat = receiveHeartbeatFn;
 exports.waitHeartbeat = waitHeartbeatFn;
 
 var timer;
+var failCount = 0;
 
 /**
  * Questa funzione permette ad un chunk server di rilevare l'indirizzo ip del master all'interno della rete,
@@ -90,6 +91,7 @@ function subscribeToMasterFn() {
  * @return null
  */
 function receiveHeartbeatFn(req, res) {
+    failCount = 0;
     console.log(req.body);
     clearTimeout(timer);
     res.send({
@@ -107,22 +109,15 @@ function receiveHeartbeatFn(req, res) {
  * */
 function waitHeartbeatFn(){
     timer = setTimeout(function(){
-        var obj = {
-            url: 'http://' + config.balancerIp + ':' + config.balancerPort + config.balancerElection,
-            method: 'POST',
-            json: {
-                type: "ELECTION_STATE"
-            }
-        };
-        request(obj, function(err, res){
-            if (err){
-                console.log(err);
-            }
-            else{
+        if(election.startElection() === true ) {
+            failCount++;
+            if(failCount === 3){
                 chunkServers.popServer(chunkServers.getServerByMaxId());
+                failCount = 0;
             }
-        });
-        election.startElection();
+            clearTimeout(timer);
+            waitHeartbeatFn();
+        }
     }, config.waitHeartbeat);
 }
 
