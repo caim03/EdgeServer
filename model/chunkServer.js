@@ -9,7 +9,6 @@ exports.pushServer = pushServerFn;
 exports.popServer = popServerFn;
 exports.getChunk = getChunkFn;
 exports.setChunk = setChunkFn;
-exports.getServerByMaxId = getServerByMaxIdFn;
 
 function pushServerFn(server) {
     chunkServer.push(server);
@@ -17,16 +16,6 @@ function pushServerFn(server) {
 
 function popServerFn(server) {
     chunkServer.splice(chunkServer.indexOf(server), 1);
-}
-
-function getServerByMaxIdFn() {
-    var serverMax = chunkServer[0];
-    chunkServer.forEach(function(server){
-        if(server.id > serverMax.id) {
-            serverMax = server;
-        }
-    });
-    return serverMax;
 }
 
 function getChunkFn() {
