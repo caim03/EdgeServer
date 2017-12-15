@@ -107,10 +107,7 @@ function receiveHeartbeatFn(req, res) {
  * */
 function waitHeartbeatFn(){
     timer = setTimeout(function(){
-        if(election.startElection() === true) {
-            clearTimeout(timer);
-            waitHeartbeatFn();
-        }
+        election.startElection();
     }, config.waitHeartbeat);
 }
 

@@ -57,7 +57,7 @@ function startElectionFn() {
     console.log("START ELECTION");
 
     var myself;
-    var not_master = false;
+    var not_master;
 
     if (!serverInfo.getInfoId()) {
         console.log("CANNOT PARTICIPATE");
@@ -71,7 +71,8 @@ function startElectionFn() {
         });
 
         if (not_master) {
-            return not_master;
+            slaveTopologyController.waitHeartbeat();
+            return;
         }
 
         console.log("I'M THE NEW MASTER");
