@@ -20,6 +20,7 @@ exports.receiveHeartbeat = receiveHeartbeatFn;
 exports.waitHeartbeat = waitHeartbeatFn;
 
 var timer;
+var failCount = 0;
 
 /**
  * Questa funzione permette ad un chunk server di rilevare l'indirizzo ip del master all'interno della rete,
@@ -90,6 +91,7 @@ function subscribeToMasterFn() {
  * @return null
  */
 function receiveHeartbeatFn(req, res) {
+    failCount = 0;
     console.log(req.body);
     clearTimeout(timer);
     res.send({
@@ -108,6 +110,11 @@ function receiveHeartbeatFn(req, res) {
 function waitHeartbeatFn(){
     timer = setTimeout(function(){
         if(election.startElection() === true) {
+            failCount++;
+            if(failCount === 3){
+                chunkServers.popServer(chunkServers.getServerByMaxId());
+                failCount = 0;
+            }
             clearTimeout(timer);
             waitHeartbeatFn();
         }
