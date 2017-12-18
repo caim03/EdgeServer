@@ -28,14 +28,8 @@ function subscribeFn(req, res) {
     console.log("SUBSCRIBE");
     var serverObj = {};
     var found = false;
-    var len = chunkServer.getChunk().length;
 
-    if (len === 0) {
-        serverObj.id = 1;
-    }
-    else {
-        serverObj.id = (chunkServer.getChunk())[len - 1].id + 1;
-    }
+    serverObj.id = Date.now();
     serverObj.ip = (req.headers['x-forwarded-for'] || '').split(',')[0] || req.connection.remoteAddress;
     serverObj.freeSpace = req.body.freeSpace;
     serverObj.alive = true;
