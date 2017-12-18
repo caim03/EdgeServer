@@ -68,6 +68,7 @@ function addItemFn(idUser, guid, metadata)
             }
         }
     };
+    console.log(params);
     docClient.put(params, function(err, data) {
         if (err){
             console.log(err); // an error occurred
