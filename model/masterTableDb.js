@@ -385,6 +385,8 @@ function saveMasterTableOnDynamoFn()
         if(table.cloud === false) {
             var users = table.usersId;
             users.forEach(function (idUser) {
+
+                console.log(table);
                 dynamoTable.addItem(idUser.userId, table.chunkguid, table.metadataTable);
             });
         }
