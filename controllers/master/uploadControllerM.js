@@ -10,6 +10,8 @@ var readFileControllerM = require('./readFileControllerM');
 var pendingMetadata = require('../../model/master/pendingMetadata');
 var path = require("path");
 
+const uuidv4 = require('uuid/v4');
+
 
 exports.sendSlaveListAndGuid = sendSlaveListAndGuidFn;
 exports.guidGenerator = guidGeneratorFn;
@@ -36,7 +38,8 @@ function sendSlaveListAndGuidFn(req, res1) {
     if(req.body.type === "METADATA"){
 
         //Genera GUID
-        var guid = guidGeneratorFn();
+    //    var guid = guidGeneratorFn();
+        var guid = uuidv4();
         console.log("<-  Received metadata for file "+req.body.fileName);
 
         var slavesList = [];

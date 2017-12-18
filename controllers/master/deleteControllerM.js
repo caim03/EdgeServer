@@ -17,12 +17,8 @@ function deleteFileFn(req, res1) {
     var user = req.body.idUser;
     var notify = false;
 
-    console.log(req.body.idUser+" want to delete "+req.body.relPath);
-
-  /*  console.log("MMMMMMMMM\n");
-    masterTable.printTable();
-    console.log("MMMMMMMMM\n");
-*/
+    console.log(req.body.idUser+" wants to delete "+req.body.relPath);
+    
 
     var matchedTable = masterTable.getFileByUserAndRelPath(req.body.idUser, req.body.relPath);
 
