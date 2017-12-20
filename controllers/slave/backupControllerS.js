@@ -6,6 +6,7 @@ var path = require("path");
 var slaveTable = require('../../model/slave/slaveTable');
 var fs=require('fs');
 var s3Controller = require('../s3Controller');
+var topologyController = require('../slave/topologyController');
 
 function periodicBackupFn(req,res) {
 
@@ -35,6 +36,7 @@ function periodicBackupFn(req,res) {
 function restoreGuidFn(req, res) {
 
 
+    topologyController.receiveExtraHeartBeat();
     var guid = req.body.guid;
     var metadata = req.body.metadata;
     var userId = req.body.userId;
@@ -44,12 +46,7 @@ function restoreGuidFn(req, res) {
     // copyFile(sourceFileStream,"prova/" + metadata.relPath);
     //TODO controllo errore!
     sourceFileStream.pipe(fs.createWriteStream(metadata.relPath)).on('finish',function(){
-        console.log("Ho finito");
-
         slaveTable.insertChunk(guid,metadata,userId);
-
-        slaveTable.printTable();
-
         res.send({status : "ACK"});
     });
 

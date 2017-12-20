@@ -13,12 +13,13 @@ var info = require('../../model/serverInfo');
 var masterTopologyController = require('../master/topologyController');
 
 
+
 exports.findMaster = findMasterFn;
 exports.genTopology = genTopologyFn;
 exports.subscribeToMaster = subscribeToMasterFn;
 exports.receiveHeartbeat = receiveHeartbeatFn;
 exports.waitHeartbeat = waitHeartbeatFn;
-
+exports.receiveExtraHeartBeat = receiveExtraHeartbeatFn;
 var timer;
 
 /**
@@ -111,3 +112,7 @@ function waitHeartbeatFn(){
     }, config.waitHeartbeat);
 }
 
+function receiveExtraHeartbeatFn() {
+    clearTimeout(timer);
+    waitHeartbeatFn()
+}

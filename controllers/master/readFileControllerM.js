@@ -192,10 +192,6 @@ function getReadSlavesFn(req, res) {
     var slaves = allSlaveByGuid.slavesIp;
 
     // slaves = [];
-
-    console.log("SLAVE LIST");
-    console.log(slaves);
-
     //SE LA LISTA è VUOTA -> CERCARE in S3
     if(slaves.length === 0)
     {
