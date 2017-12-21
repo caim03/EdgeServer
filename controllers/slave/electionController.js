@@ -10,9 +10,6 @@ var serverInfo = require('../../model/serverInfo');
 var slaveTopologyController = require('../slave/topologyController');
 var rebalancingController = require('../master/rebalancingController');
 var app = require('../../app');
-var chunkList = require('../../model/chunkList');
-var slaveTable = require('../../model/slave/slaveTable');
-var masterTable = require('../../model/masterTable');
 
 exports.receiveProclamation = receiveProclamationFn;
 exports.startElection = startElectionFn;

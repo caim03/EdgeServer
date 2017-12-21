@@ -8,9 +8,6 @@ var fs = require('fs');
 /* Export delle funzionalità del chunkController */
 
 exports.readFile = readFileFn;
-exports.writeFile = writeFileFn;
-exports.deleteFile = deleteFileFn;
-exports.updateFile = updateFileFn;
 exports.getAllChunkData = getAllChunkDataFn;
 exports.sendAckToMaster = sendAckToMasterFn;
 

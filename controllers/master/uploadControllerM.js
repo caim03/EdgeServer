@@ -1,13 +1,8 @@
-var chunkServer = require('../../model/chunkServer');
 var masterTable = require('../../model/masterTableDb');
 var request = require('request');
 var config = require('../../config/config');
-var ip = require("ip");
-var chunkList = require('../../model/chunkList');
 var masterController = require('./masterController');
-var readFileControllerM = require('./readFileControllerM');
 var pendingMetadata = require('../../model/master/pendingMetadata');
-var path = require("path");
 
 const uuidv4 = require('uuid/v4');
 

@@ -1,17 +1,10 @@
 var request = require('request');
-var config = require('../../config/config');
 var master = require('../../model/masterServer');
-var serverInfo = require('../../model/serverInfo');
-var chunkList = require('../../model/chunkList');
 var pendingReq = require('../../model/slave/pendingRequests');
 var shell = require('shelljs');
 var formidable = require('formidable');
-var multiparty = require('multiparty');
-var util = require('util');
-var process = require('process');
 var ip = require('../../model/ip');
 var fs=require('fs');
-var mkdirp = require('mkdirp');
 var slaveTable = require('../../model/slave/slaveTable');
 var path = require("path");
 

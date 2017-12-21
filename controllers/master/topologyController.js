@@ -60,6 +60,7 @@ function subscribeFn(req, res) {
             })
         })
     }
+    res.send("ACK");
     console.log(chunkServer.getChunk());
 }
 
@@ -102,7 +103,7 @@ function subscribeToBalancerFn(proclamation) {
             console.log(err);
         }
         else if (res.body.status === "ACK") {
-            console.log("Subscribed to load balancer");
+            console.log("Subscribed to gateway");
         }
         else if (res.body.status === "MASTER_ALREADY_EXISTS") {
             console.log("Master already exists at " + res.body.masterIp);

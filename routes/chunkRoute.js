@@ -13,10 +13,6 @@ module.exports = function (app) {
 
     /* REST API */
 
-    app.post('/api/chunk/write', chunkController.writeFile);
-    app.delete('/api/chunk/delete', chunkController.deleteFile);
-    app.put('/api/chunk/update', chunkController.updateFile);
-
     app.post('/api/chunk/topology', topologyController.genTopology);
     app.post('/api/chunk/heartbeat', topologyController.receiveHeartbeat);
 

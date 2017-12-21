@@ -2,8 +2,6 @@ var chunkServer = require('../../model/chunkServer');
 var masterTable = require('../../model/masterTableDb');
 var request = require('request');
 var config = require('../../config/config');
-var chunkList = require('../../model/chunkList');
-var rebalancingController = require('./rebalancingController');
 
 
 

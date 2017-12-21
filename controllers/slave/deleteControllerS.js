@@ -1,7 +1,4 @@
-var util = require('util');
 var fs=require('fs');
-var chunkList = require('../../model/chunkList');
-var mkdirp = require('mkdirp');
 var slaveTable = require('../../model/slave/slaveTable');
 
 exports.removeChunk = removeChunkFn;
