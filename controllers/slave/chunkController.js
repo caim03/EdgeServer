@@ -39,7 +39,11 @@ function getAllChunkDataFn(req, res){
     res.send(slaveTable.getAllChunk());
 }
 
-
+/**
+ * Questa funzione ritorna un messaggio di ack al master a seguito della ricezione di un guid
+ * @param req
+ * @param res
+ */
 function sendAckToMasterFn(req, res)
 {
 

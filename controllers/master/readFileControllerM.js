@@ -1,8 +1,6 @@
-var request = require('request');
 var config = require('../../config/config');
 var masterTable = require('../../model/masterTableDb');
 var dynamoTable = require('../../model/master/dynamoTable');
-var process = require('process');
 var fs=require('fs');
 var path = require("path");
 var backupControllerM = require("./backupControllerM");

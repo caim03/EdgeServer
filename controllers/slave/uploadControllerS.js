@@ -195,13 +195,6 @@ function saveChunkFn(req, res) {
             files.push([field, file]);
         })
         .on('fileBegin', function (name, file) {
-            /*   if (!fs.existsSync(fields[1][1]))
-                   fs.mkdirSync(fields[1][1]);*/
-
-
-
-//            shell.mkdir('-p', path.dirname(fields[1][1] + '2/' + fields[2][1]));
-//            file.path = fields[1][1] + '2/' + fields[2][1];
 
             shell.mkdir('-p', path.dirname(fields[2][1]));
             file.path = fields[2][1];
@@ -210,16 +203,8 @@ function saveChunkFn(req, res) {
         })
         .on('end', function () {
                 console.log('-> upload done!'+'\n');
-
-                //                    res.writeHead(200, {'content-type': 'text/plain'});
-                //         res.statusCode = 200;
                 res.send({status: 'ACK'});
         });
         form.parse(req);
-        // req.on('end', function() {
-        //     //    writeStream.end();
-        //         res.statusCode = 200;
-        //     //    res.end("file.txt");
-        // });
 
 }

@@ -4,7 +4,6 @@ var request = require('request');
 var config = require('../../config/config');
 var ip = require("ip");
 var chunkList = require('../../model/chunkList');
-var syncRequest = require('sync-request');
 var masterController = require('./masterController');
 var readFileControllerM = require('./readFileControllerM');
 var pendingMetadata = require('../../model/master/pendingMetadata');
