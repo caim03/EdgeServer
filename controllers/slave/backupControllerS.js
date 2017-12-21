@@ -6,6 +6,7 @@ var path = require("path");
 var slaveTable = require('../../model/slave/slaveTable');
 var fs=require('fs');
 var s3Controller = require('../s3Controller');
+var topologyController = require('../slave/topologyController');
 
 /**
  * Questa funzione permette di salvare periodicamente i file di ogni slave su S3.
@@ -41,20 +42,16 @@ function periodicBackupFn(req,res) {
  */
 function restoreGuidFn(req, res) {
 
+
+    topologyController.receiveExtraHeartBeat();
     var guid = req.body.guid;
     var metadata = req.body.metadata;
     var userId = req.body.userId;
     //Preleva il fileStream da S3 e lo salva in locale
     var sourceFileStream = s3Controller.retrieveFile(metadata.relPath);
     shell.mkdir('-p', path.dirname(metadata.relPath));
-    //TODO controllo errore!
     sourceFileStream.pipe(fs.createWriteStream(metadata.relPath)).on('finish',function(){
-        console.log("Ho finito");
-
         slaveTable.insertChunk(guid,metadata,userId);
-
-        slaveTable.printTable();
-
         res.send({status : "ACK"});
     });
 }

@@ -16,7 +16,7 @@ var config = {
     waitHeartbeat: 20000, // Tempo scaduto il quale si assume il fallimento del master per l'inizio dell'elezione
     randomGuidTime: 15000,   //Tempo scaduto il quale viene simulato l'arrivo di un nuovo guid per il chunk al master.
     backupPeriodicTime: 30000, // Frequenza di backup su S3
-    replicationNumber:2 // Numero di replice per file
+    replicationNumber:3 // Numero di replice per file
 };
 
 module.exports = config;
