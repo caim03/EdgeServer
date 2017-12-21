@@ -6,7 +6,9 @@ exports.setDynamoAccess = setDynamoAccessFn;
 exports.getDynamoDocumentClient = getDynamoDocumentClientFn;
 exports.getDynamoDb = getDynamoDbFn;
 
-
+/**
+ * Questa funzione permette di configurare l'accesso a DynamoDB, ottenendo le informazioni dal file di configurazione
+ */
 function setDynamoAccessFn() {
     AWS.config = new AWS.Config();
     AWS.config.accessKeyId = dynamoConfiguration.accessKeyID;
@@ -16,11 +18,19 @@ function setDynamoAccessFn() {
 
 }
 
+/**
+ * Questa funzione permette effettuare una richiesta a Dynamo per l'accesso agli utenti
+ * @return DocumentClient
+ */
 function getDynamoDocumentClientFn()
 {
     return new AWS.DynamoDB.DocumentClient();
 }
 
+/**
+ * Questa funzione permette di ottenere l'intero database di DynamoDB
+ * @return DynamoDB
+ */
 function getDynamoDbFn(){
 
     return new AWS.DynamoDB();

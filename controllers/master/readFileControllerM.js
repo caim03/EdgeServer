@@ -2,11 +2,7 @@ var request = require('request');
 var config = require('../../config/config');
 var masterTable = require('../../model/masterTableDb');
 var dynamoTable = require('../../model/master/dynamoTable');
-
-var pendingReq = require('../../model/slave/pendingRequests');
 var process = require('process');
-//var fse = require('fs-extra');
-var ip = require('ip');
 var fs=require('fs');
 var path = require("path");
 var backupControllerM = require("./backupControllerM");
@@ -85,8 +81,7 @@ function checkIfFoundFn(name, arr) {
  * @return tree
  */
 function createDirectoryTreeFn(matchedMetadata, username) {
-    var tree = [];//[{name: 'Files', folder: true, children:[{name:'provaFile', folder: true, children: []}]}];
-//    console.log("Tree dim: "+tree.length);
+    var tree = [];
     var parsedPath = {};
     var i,j;
     var foundPos;
@@ -110,10 +105,8 @@ function createDirectoryTreeFn(matchedMetadata, username) {
             foundPos = checkIfFoundFn(arr[i], current);
             if(foundPos !== -1)
             {
-//                console.log("Ho trovato "+arr[i]);
                 if(i===(arr.length-1))
                 {
-//                    console.log(arr[i]+" è l'ultima cartella.");
                     current[foundPos].children.push({folder: false,
                         name: table.metadata.name,
                         size: table.metadata.size,
@@ -124,12 +117,10 @@ function createDirectoryTreeFn(matchedMetadata, username) {
                     });
                 }
                 else{
-//                    console.log(arr[i]+" NON è l'ultima cartella.");
                     current = current[foundPos].children;
                 }
             }
             else{
-//                console.log("Non ho trovato "+arr[i]);
                 var folderPath = arr[0];
                 if(i>0)
                 {
@@ -140,7 +131,6 @@ function createDirectoryTreeFn(matchedMetadata, username) {
                 }
                 if(i===(arr.length-1))
                 {
-//                    console.log(arr[i]+" è l'ultima cartella prima del file.");
                     current.push({
                             folder: true,
                             path: folderPath,
@@ -156,19 +146,13 @@ function createDirectoryTreeFn(matchedMetadata, username) {
                         });
                 }
                 else{
-//                    console.log(arr[i]+" NON è l'ultima cartella prima del file.");
                     current.push({folder: true, path: folderPath, name:arr[i], children: []});
                     current = current[current.length-1].children;
                 }
             }
         }
     });
-/*    var i;
-    for(i=0; i<tree.length; i++)
-    {
-        console.log(tree[i]);
-    }
-    console.log("/// "+tree);*/
+
     return tree;
 }
 
@@ -183,20 +167,14 @@ function prettyJSONFn(obj) {
 }
 
 function getReadSlavesFn(req, res) {
-    var metadata = req.body;
-
-    console.log(req.body);
 
     var allSlaveByGuid = masterTable.getAllSlavesByGuid(req.body.guid);
 
     var slaves = allSlaveByGuid.slavesIp;
 
-    // slaves = [];
-
     console.log("SLAVE LIST");
     console.log(slaves);
 
-    //SE LA LISTA è VUOTA -> CERCARE in S3
     if(slaves.length === 0)
     {
 

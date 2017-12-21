@@ -82,8 +82,6 @@ function buildSlavesListFn() {
         }
     });
 
-    //Si gira comunque tutta la tabella quando in realtà sarebbe corretto fermare il ciclo una volta completata la slaveList
-    //ma, non si può uscire bruscamente da un forEach, e con il for sembra non funzionare.
     if(numberOfSlaves>0)
         ipOccupation.forEach(function (table) {
            if(numberOfSlaves>0) {

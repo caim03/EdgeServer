@@ -25,13 +25,10 @@ exports.addChunkGuidInTable = addChunkGuidInTableFn;
  *      2) Aggiorno mano mano la tabella master
  *      3) Infine distribuisco i miei chunks a chi ha il carico minore
  *
- *      4) TODO NB LOCKARE STO PROCESSO + BUFFERIZZARE (Load Balancer?) le richieste fino a ribilanciamento completato
- *
  *  @return null
  */
 function newMasterRebalancmentFn()
 {
-    // console.log("STARTING REBALANCMENT");
     masterTable.cleanTable();
     chunkServer.getChunk().forEach(function (server) {
         if(server.ip !== ip.getPublicIp()) {
@@ -52,11 +49,8 @@ function newMasterRebalancmentFn()
 
     masterTable.printTable();
 
-    //Per ogni elemento nella mia chunklist:
-    //Creo la tabella di disponibilità ordinata della master table
-    //Invio il chunk al primo della tabella che non abbia gia quel chunk
     var sended = false;
-    var slaveServers = masterController.buildSlaveList(); //TODO Tabella fissata prima del ribilanciamento - si potrebbe aggiornarla mano mano ad ogni invio, ma ovviamente operazione + costosa
+    var slaveServers = masterController.buildSlaveList();
     slaveTable.getAllChunk().forEach(function (chunk) {
         sended = false;
         var guid = chunk.chunkGuid;
@@ -64,25 +58,7 @@ function newMasterRebalancmentFn()
             if(!sended)
                 if(!masterTable.checkGuid(server,guid)) {
                     console.log("SPEDISCO " + guid + " A " + server);
-                    // non servono più
-                    // var obj = {
-                    //     url: 'http://' + server + ':' + config.port + '/api/chunk/sendToSlave' ,
-                    //     method: 'POST',
-                    //     json: {
-                    //         type: "CHUNK",
-                    //         guid: guid,
-                    //         ipServer: server
-                    //     }
-                    // };
-                    // request(obj, function (err, res) {
-                    //     if (err) {
-                    //         console.log(err);
-                    //         return;
-                    //     }
-
-                    // })
                     masterTable.addChunkRef(guid,chunk.metadata, server,chunk.userId);
-                    //TODO X DEB Invio fisico del chunk! guid - chunk.metadata - server - chunk.userId
 
                     var formData = {
                         guid: guid,
@@ -109,8 +85,6 @@ function newMasterRebalancmentFn()
             console.log("NON HO TROVATO VALIDI SLAVES PER " + guid);
     });
     chunkList.cleanList();
-    // console.log("REBALANCMENT COMPLETED");
-
 }
 
 /**
@@ -124,15 +98,10 @@ function newMasterRebalancmentFn()
  */
 function crushedSlaveRebalancmentFn(slave)
 {
-    //Per ogni elemento nella chunklist di quello slave:
-    //Creo la tabella di disponibilità ordinata della master table
-    //Invio il chunk al primo della tabella che non abbia gia quel chunk
-
-
     var chunkGuids = masterTable.getAllChunksBySlave(slave.ip);
 
     masterTable.removeFromOccupationTable(slave.ip, chunkGuids);
-    var slaveServers = masterController.buildSlaveList();//TODO Tabella fissata prima del ribilanciamento - si potrebbe aggiornarla mano mano ad ogni invio, ma ovviamente operazione + costosa
+    var slaveServers = masterController.buildSlaveList();
     var sended = false;
     chunkGuids.forEach(function (chunks) {
 
@@ -150,8 +119,7 @@ function crushedSlaveRebalancmentFn(slave)
                         {
                         console.log("SPEDISCO " + chunkguid + " A " + server + " LO SLAVE A CUI CHIEDO IL CHUNK è " + oldSlave);
 
-                        masterTable.addChunkRef(chunks.chunkguid,chunks.metadata, server,chunks.usersId);    //add idClient
-                        // Invio fisico del chunk! Master manda (ip nuovo slave,guid) al vecchio slave che a sua volta invierà il file
+                        masterTable.addChunkRef(chunks.chunkguid,chunks.metadata, server,chunks.usersId);
 
                         var obj = {
                             url: 'http://' + oldSlave + ':6601/api/chunk/fileDistributionReq',
@@ -182,7 +150,7 @@ function crushedSlaveRebalancmentFn(slave)
     })
 }
 
-//Aggiunge in tabella il chank guid e l'ip dello slave che lo possiede.
+
 /**
  * Questa funzione aggiunge nella tabella il chunk guid e l'ip dello slave che lo possiede.
  *
@@ -192,6 +160,6 @@ function crushedSlaveRebalancmentFn(slave)
  */
 function addChunkGuidInTableFn(slaveIp, chunkGuid)
 {
-    masterTable.addChunkRef(chunkGuid, slaveIp);    //add idClient
+    masterTable.addChunkRef(chunkGuid, slaveIp);
     masterTable.printTable();
 }

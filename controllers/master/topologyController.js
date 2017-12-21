@@ -118,7 +118,6 @@ function subscribeToBalancerFn(proclamation) {
 }
 
 
-
 /**
  * Questa funzione permette al master di capire, mediante l'invio di messaggi temporizzati, detti heartbeat,
  * quali chunk server sono ancora in esecuzione.
@@ -128,7 +127,6 @@ function subscribeToBalancerFn(proclamation) {
  * @return null
  */
 function heartbeatMessageFn() {
-    /* setInterval(callback, timeout, [args...]) chiama la funzione di callback ogni timeout millisecondi */
     hbIntervalId = setInterval(function () {
         chunkServer.getChunk().forEach(function (server) {
             var obj = {

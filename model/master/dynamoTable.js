@@ -8,7 +8,9 @@ exports.deleteMetadataFromDynamo = deleteMetadataFromDynamoFn;
 var ddb = dynamoController.getDynamoDb();
 var masterTable = require('../../model/masterTableDb');
 
-
+/**
+ * Questa funzione permette di creare la masterTable su DynamoDB
+ */
 function createTableFn()
 {
     console.log("I'm creating table MasterT");
@@ -50,6 +52,12 @@ function createTableFn()
     });
 }
 
+/**
+ * Questa funzione permette di inserire un oggetto su DynamoDB
+ * @param idUser
+ * @param guid
+ * @param metadata
+ */
 function addItemFn(idUser, guid, metadata)
 {
     var docClient = dynamoController.getDynamoDocumentClient();
@@ -78,6 +86,11 @@ function addItemFn(idUser, guid, metadata)
     });
 }
 
+/**
+ * Questa funzione permette di ottenere i metadatti salavati su DynamoDB
+ * @param idUser
+ * @param callback
+ */
 function getMetadataFromDynamoFn(idUser, callback)
 {
     var docClient = dynamoController.getDynamoDocumentClient();
@@ -100,14 +113,12 @@ function getMetadataFromDynamoFn(idUser, callback)
             if(isEmptyObjectFn(data.Items)) {
                 console.log("No match found");
                 callback(false);
-          //      masterTable.printTable();
             }
             else
             {
                 data.Items.forEach(function(item) {
                     console.log("Found in dynamo: ", item.idUser + ": " + item.metadata.name+", "+item.metadata.relPath+", "+item.metadata.size+", "+item.metadata.extension+", "+item.metadata.lastModified);
                     masterTable.addChunkRef(item.guid, item.metadata, '', item.idUser);
-               //     masterTable.printTable();
                 });
                 callback(true);
             }
@@ -115,6 +126,11 @@ function getMetadataFromDynamoFn(idUser, callback)
     });
 }
 
+/**
+ * Questa funzione permette di verificare se un oggetto è vuoto
+ * @param obj
+ * @return {boolean}
+ */
 function isEmptyObjectFn(obj) {
     for (var key in obj) {
         if (Object.prototype.hasOwnProperty.call(obj, key)) {
@@ -124,6 +140,12 @@ function isEmptyObjectFn(obj) {
     return true;
 }
 
+/**
+ * Questa funzione permette di eliminare dei metadati su DynamoDB
+ * @param idUser
+ * @param guid
+ * @param callback
+ */
 function deleteMetadataFromDynamoFn(idUser, guid, callback)
 {
     var docClient = dynamoController.getDynamoDocumentClient();
@@ -145,24 +167,3 @@ function deleteMetadataFromDynamoFn(idUser, guid, callback)
         }
     });
 }
-
-//deleteMetadataFromDynamo("Prova", "1be8b10b-9965-1767-5d7a-77380ac3e5a8");
-
-//createTableFn();
-//example adding item
-/*
-var metadata = {
-    name: "prova2.txt",
-    relPath: "Debora/Files/prova2.txt",
-    size: '55',
-    extension: '.txt',
-    lastModified: "05/04/2018"
-};
-*/
-
-//setTimeout(addItemFn,5000, "Deb", "aaaakkkk5555", metadata);
-/*
-getMetadataFromDynamoFn("Debora");
-setTimeout(getMetadataFromDynamoFn, 5000, "Deb");
-setTimeout(masterTable.printTable, 7000);
-*/

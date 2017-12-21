@@ -2,7 +2,6 @@ var request = require('request');
 var config = require('../../config/config');
 var masterTable = require('../../model/masterTableDb');
 var dynamoTable = require('../../model/master/dynamoTable');
-var pendingReq = require('../../model/slave/pendingRequests');
 var process = require('process');
 var ip = require('ip');
 var fs=require('fs');
@@ -10,6 +9,13 @@ var path = require("path");
 var s3Controller = require('../s3Controller');
 
 exports.deleteFile = deleteFileFn;
+
+/**
+ * Questa funzione permette al master di gestire la cancellazione di un file. In particolare ordina a tutti gli
+ * slave che possiedono quel file di eliminarlo e invia una richiesta di cancellazione anche ad S3.
+ * @param req
+ * @param res1
+ */
 
 function deleteFileFn(req, res1) {
 
@@ -73,7 +79,6 @@ function deleteFileFn(req, res1) {
     }
     else {
         matchedTable.slavesIp.forEach(function (ip) {
-            //   console.log("^^^^^^^^"+ip.slaveIp);
             var obj = {
                 url: 'http://' + ip.slaveIp + ':6601/api/chunk/removeChunk',
                 method: 'POST',

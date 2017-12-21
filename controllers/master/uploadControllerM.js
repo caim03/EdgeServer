@@ -37,8 +37,6 @@ function sendSlaveListAndGuidFn(req, res1) {
 
     if(req.body.type === "METADATA"){
 
-        //Genera GUID
-    //    var guid = guidGeneratorFn();
         var guid = uuidv4();
         console.log("<-  Received metadata for file "+req.body.fileName);
 
@@ -46,17 +44,14 @@ function sendSlaveListAndGuidFn(req, res1) {
 
         console.log("Generated GUID: "+guid);
 
-        //save metadata
         pendingMetadata.addFileMetadata(guid, req.body.fileName, req.body.destRelPath, req.body.extension, req.body.sizeFile, req.body.idUser, req.body.lastModified);
 
-        //genera slaveList
         var slaveServers = masterController.buildSlaveList();
         console.log("Slaves list:");
         slaveServers.forEach(function (server) {
             console.log(server);
         });
 
-        //Master sends (GUID, IdClient) to slaves
         var idUser = req.body.idUser;
         slaveServers.forEach(function (server) {
             var objToSlave = {
@@ -74,27 +69,17 @@ function sendSlaveListAndGuidFn(req, res1) {
                     console.log(err);
                 }
 
-                /*  res.setTimeout(5000, function() {
-                    console.log('timed out');
-                    res.abort();
-                }); */
-
                 if(!err && res2.statusCode === 200)
                 {
                     console.log("<-  Received ACK from "+server);
                     console.log("->  Authorizing the client "+idUser+" to contact the server "+server);
 
-                    // slavesList.push(res2.body.ipSlave);
                     slavesList.push(server);
                     if(slavesList.length=== config.replicationNumber)
                     {
-                        // console.log("Lista slaves: ---------------");
-                        // slavesList.forEach(function (t) { console.log(t) });
                         var objGuidSlaves = {
-                            type: "UPINFO",     //info the customer needs from master to update a file
+                            type: "UPINFO",
                             guid: guid,
-                        //  origPath: req.body.origAbsPath,
-                        //  destPath: req.body.destRelPath,
                             ipSlaves: slavesList
                         };
                         res1.send(objGuidSlaves);
@@ -130,20 +115,9 @@ function checkAndSaveMetadataFn(req, res) {
             };
             masterTable.addChunkRef(req.body.chunkGuid, metadata, req.body.slaveIp, req.body.userId,false);
             console.log("Added "+req.body.chunkGuid+" in master table with metadata!\n");
-
- //           masterTable.printTable();
-            // TODO PER CHRISTIAN -> ESEMPIO DI COME RICHIAMARE LA FUNZIONE PER RESTITUIRE TUTTO L'ALBERO DEI FILE. MANCA SOLO LA POST AL CLIENT QUANDO ARRIVA RICHIESTA DALLO STESSO, DA RICHIAMARE IN UN ALTRO PUNTO DEL CODICE, QUI E' SOLO DI ESEMPIO.
-     //        var tree = readFileControllerM.getAllMetadata('Debora');
-     //        readFileControllerM.prettyJSONFn(tree);
-
-
-
-            // pendingMetadata.removeMetaD(req.body.chunkGuid, req.body.userId)
         }
 
         else console.log("Error adding metadata file to table.");
-        //    console.log("TABELLA.....");
-        //    masterTable.printTable();
         res.send({status: 'OK',metadata : metadata});
     }
 }

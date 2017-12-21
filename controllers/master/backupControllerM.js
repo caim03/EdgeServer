@@ -11,6 +11,11 @@ exports.stopPeriodicBackup = stopPeriodicBackupFn;
 
 var buIntervalId;
 
+/**
+ * Questa funzione permette al master di iniziare una nuova sessione di backup dei file su un bucket S3.
+ *
+ * @return slaveServers
+ */
 function periodicBackupFn()
 {
     buIntervalId = setInterval(function () {
@@ -53,43 +58,46 @@ function periodicBackupFn()
 
  }
 
-    function restoreGuidFromS3Fn(guid, metadata, userId)
-    {
 
-        //genera slaveList
-        var slaveServers = masterController.buildSlaveList();
-        console.log("Slaves list:");
-        slaveServers.forEach(function (server) {
-            console.log(server);
-        });
+/**
+ * Questa funzione permette di ricostruire il guid di un file da S3
+ *
+ * @param guid
+ * @param metadata
+ * @param userId
+ * @return slaveServers
+ */
+function restoreGuidFromS3Fn(guid, metadata, userId)
+{
+    //genera slaveList
+    var slaveServers = masterController.buildSlaveList();
+    slaveServers.forEach(function (server) {
 
-        slaveServers.forEach(function (server) {
-
-            var obj = {
-                url: 'http://' + server + ':6601/api/chunk/restoreGuid',
-                method: 'POST',
-                json: {
-                    type: "RESTORE",
-                    guid: guid,
-                    metadata: metadata,
-                    userId: userId
-                }
-            };
-
-
-            var res = syncRequest(obj.method, obj.url, {json: obj.json});
-
-            if(JSON.parse(res.getBody('utf8')).status !== "ACK")
-                console.log("ERROR");
-
-        });
-
-        return slaveServers;
-
-    }
+        var obj = {
+            url: 'http://' + server + ':6601/api/chunk/restoreGuid',
+            method: 'POST',
+            json: {
+                type: "RESTORE",
+                guid: guid,
+                metadata: metadata,
+                userId: userId
+            }
+        };
 
 
-    function stopPeriodicBackupFn()
-    {
-        clearInterval(buIntervalId);
-    }
+        var res = syncRequest(obj.method, obj.url, {json: obj.json});
+
+        if(JSON.parse(res.getBody('utf8')).status !== "ACK")
+            console.log("ERROR");
+    });
+
+    return slaveServers;
+}
+
+/**
+ * Questa funzione permette di resettare il timer per il backup periodico
+ */
+function stopPeriodicBackupFn()
+{
+    clearInterval(buIntervalId);
+}

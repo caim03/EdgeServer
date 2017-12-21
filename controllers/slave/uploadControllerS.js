@@ -1,10 +1,7 @@
 var request = require('request');
-var syncRequest = require('sync-request');
 var config = require('../../config/config');
 var master = require('../../model/masterServer');
-var chunkServers = require('../../model/chunkServer');
 var serverInfo = require('../../model/serverInfo');
-var masterController = require('../master/masterController');
 var chunkList = require('../../model/chunkList');
 var pendingReq = require('../../model/slave/pendingRequests');
 var shell = require('shelljs');
@@ -12,14 +9,10 @@ var formidable = require('formidable');
 var multiparty = require('multiparty');
 var util = require('util');
 var process = require('process');
-
 var ip = require('../../model/ip');
-
 var fs=require('fs');
-var chunkList = require('../../model/chunkList');
 var mkdirp = require('mkdirp');
 var slaveTable = require('../../model/slave/slaveTable');
-const Writable = require('stream');
 var path = require("path");
 
 exports.savePendingRequest = savePendingRequest;
@@ -29,7 +22,8 @@ exports.sendFile = sendFileFn;
 exports.saveChunk = saveChunkFn;
 
 /**
- * A slave receives (guid, ipClient) authorization from master and saves temporally the pending request.
+ * Questa funzione permette ad uno slave di ricevere l'autorizzazione dal master per salvare temporaneamente
+ * la richiesta pendente.
  *
  * @param req
  * @param res
@@ -47,7 +41,7 @@ function savePendingRequest(req, res) {
 }
 
 /**
- *The slave checks if the request from the client was previously authorized by the master.
+ * Questa funzione permette ad uno slave di verificare l'autorizzazione di un client
  * @param req
  * @param res
  */
@@ -70,7 +64,7 @@ function checkIfPendingFn(req, res) {
 }
 
 /**
- * The slave saves the file received by the client.
+ * Questa funzione permette ad uno slave di salvare un file ricevuto dal client
  *
  * @param req
  * @param res1
@@ -96,7 +90,6 @@ function uploadFileFn(req, res1) {
             file.path = fields[2][1];
 
             pendingReq.removeReq(fields[0][1], fields[1][1]);
-            //INVIO GUID-USER AL MASTER DA CONFRONTARE NELLA PENDING METADATA TABLE.
             console.log("->  Sending ("+fields[0][1]+" - "+fields[1][1]+") to master.");
 
             var objFileSaved = {
@@ -151,28 +144,25 @@ function uploadFileFn(req, res1) {
            console.log('-> upload done!'+'\n');
        });
        form.parse(req);
-
-    // chunkList.pushChunk(chunkMetaData);
-
-  //  console.log("Chunk list: ");
-  //  console.log(chunkList.getChunkList());
 }
 
-//If a slave crushed, its files must be distributed.
+/**
+ * Questa funzione permette ad uno slave di re-distribuire i propri file, in base al grado di replicazione, in caso
+ * di fallimento da parte di un altro slave
+ * @param req
+ * @param res
+ */
 function sendFileFn(req, res) {
     if(req.body.type === 'FILE_DISTRIBUTION') {
             var foundChunk = slaveTable.getChunk(req.body.guid);
             if (foundChunk) {
                 req.body.usersId.forEach(function (user) {
-                    //TODO Invio file per ogni utente oppure invio file con array di utenti e salvo nello slave nuovo per tutti gli utenti.
-                //    console.log("Chunk " + req.body.guid + " - " + user + " trovato nello slave");
                     var formData = {
                         guid: req.body.guid,
                         idUser: user.userId,
                         destRelPath: foundChunk.metadata.relPath,
                         my_file: fs.createReadStream(foundChunk.metadata.relPath)
                     };
-               //     console.log(user.userId + '/' + foundChunk.metadata.relPath + ' --> path da cui prendere il file.');
                     request.post({url:'http://'+req.body.server+':6601/api/chunk/newDistributedChunk', formData: formData}, function(err, res) {
                         if (err) {
                             return console.error('upload failed:', err);

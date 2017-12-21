@@ -9,8 +9,6 @@ var serverInfo = require('../../model/serverInfo');
 var master = require('../../model/masterServer');
 var request = require('request');
 var election = require('../slave/electionController');
-var info = require('../../model/serverInfo');
-var masterTopologyController = require('../master/topologyController');
 
 
 exports.findMaster = findMasterFn;
@@ -74,7 +72,7 @@ function subscribeToMasterFn() {
 
     request(obj, function (err, res) {
         if (err) {
-            // console.log(err);
+            console.log(err);
         }
         else {
             console.log(res.body);

@@ -5,7 +5,6 @@ var loki = require('lokijs');
 
 var lokiDb = new loki();
 
-//var userTable = lokiDb.addCollection('userTable');
 var masterTable = lokiDb.addCollection('masterTable');
 var metadataTable = lokiDb.addCollection('metadataTable');
 var chunkServer = require('../model/chunkServer');
@@ -274,13 +273,9 @@ function getTableFn() {
 
 function getAllMetadataByUserFn(userId) {
 
- //   console.log("-- username: "+userId);
     var matchedTables = [];
 
     masterTable.chain().data().forEach(function (table){
-
-//        console.log("FOR EACH: ***********");
-//        console.log(table);
 
         var users = table.usersId;
         users.forEach(function (idUser){
